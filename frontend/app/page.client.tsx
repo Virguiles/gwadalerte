@@ -72,48 +72,16 @@ function getAlertLevel(libQual: string): { label: string } {
   return alertLevels[libQual] || { label: 'Inconnu' };
 }
 
-export default function Home() {
-  // Fonction pour charger depuis le cache (utilisée pour l'initialisation lazy)
-  const loadFromCache = (): { data: AirData; timestamp: number } | null => {
-    if (typeof window === 'undefined') return null; // SSR
-    try {
-      const CACHE_KEY = 'gwada_air_quality_cache';
-      const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
-      const cachedData = localStorage.getItem(CACHE_KEY);
-      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: AirData; initialLastUpdate: number | null }) {
+  // Vérification si on est côté client (pour éviter les erreurs SSR)
+  const mounted = typeof window !== 'undefined';
 
-      if (cachedData && cachedTimestamp) {
-        const timestamp = parseInt(cachedTimestamp, 10);
-        return {
-          data: JSON.parse(cachedData),
-          timestamp,
-        };
-      }
-    } catch (error) {
-      console.error('Erreur lors de la lecture du cache:', error);
-    }
-    return null;
-  };
-
-  // État pour savoir si le composant est monté côté client (pour éviter l'hydratation mismatch)
-  const [mounted, setMounted] = useState(false);
-
-  // Initialisation lazy depuis le cache pour éviter les appels setState dans useEffect
-  // La fonction d'initialisation n'est appelée qu'une seule fois lors du premier rendu
-  const [airData, setAirData] = useState<AirData>(() => {
-    const cached = loadFromCache();
-    return cached?.data || {};
-  });
+  // Initialisation avec les données serveur, puis mise à jour côté client si nécessaire
+  const [airData, setAirData] = useState<AirData>(initialAirData);
   const [tooltip, setTooltip] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
-    const cached = loadFromCache();
-    return cached ? new Date(cached.timestamp) : null;
-  });
-
-  // Marquer le composant comme monté après l'hydratation
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(
+    initialLastUpdate ? new Date(initialLastUpdate) : null
+  );
 
   // Fonction pour vérifier si deux dates sont le même jour
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -135,7 +103,7 @@ export default function Home() {
     }).format(date);
   };
 
-  // Vérifier et faire un appel API seulement si nécessaire (une fois par jour)
+  // Charger les données depuis le cache localStorage si nécessaire
   useEffect(() => {
     // Ne rien faire côté serveur
     if (typeof window === 'undefined') return;
@@ -154,6 +122,46 @@ export default function Home() {
         console.error('Erreur lors de la sauvegarde du cache:', error);
       }
     };
+
+    // Fonction pour charger depuis le cache localStorage
+    const loadFromLocalCache = (): { data: AirData; timestamp: number } | null => {
+      try {
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+
+        if (cachedData && cachedTimestamp) {
+          const timestamp = parseInt(cachedTimestamp, 10);
+          return {
+            data: JSON.parse(cachedData),
+            timestamp,
+          };
+        }
+      } catch (error) {
+        console.error('Erreur lors de la lecture du cache local:', error);
+      }
+      return null;
+    };
+
+    // Vérifier si les données serveur sont suffisantes ou si on doit utiliser le cache local
+    const shouldUseLocalCache = (): boolean => {
+      // Si on a des données serveur valides, vérifier si le cache local est plus récent
+      if (initialLastUpdate) {
+        const localCache = loadFromLocalCache();
+        if (localCache && localCache.timestamp > initialLastUpdate) {
+          return true; // Le cache local est plus récent
+        }
+      }
+      return false;
+    };
+
+    // Utiliser le cache local si plus récent
+    if (shouldUseLocalCache()) {
+      const localCache = loadFromLocalCache();
+      if (localCache) {
+        setAirData(localCache.data);
+        setLastUpdate(new Date(localCache.timestamp));
+      }
+    }
 
     // Vérifier si un appel API est nécessaire
     const shouldFetch = (): boolean => {
@@ -185,10 +193,10 @@ export default function Home() {
         })
         .catch((error) => {
           console.error('Erreur lors de la récupération des données:', error);
-          // Si l'appel API échoue, on garde les données du cache si elles existent
+          // Si l'appel API échoue, on garde les données actuelles
         });
     }
-  }, []); // Se lance une seule fois après le montage
+  }, [initialLastUpdate]); // Dépend de initialLastUpdate
 
   // Définition des niveaux de qualité d'air pour la légende (selon les standards ATMO de Gwad'Air)
   const qualityLevels = [
@@ -281,7 +289,7 @@ export default function Home() {
 
             {/* Informations supplémentaires */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              {mounted && lastUpdate && (
+              {lastUpdate && (
                 <div className="mb-3">
                   <p className="text-xs text-gray-600 mb-1">
                     <strong className="text-gray-700">Dernière mise à jour :</strong>
@@ -391,3 +399,5 @@ export default function Home() {
     </main>
   );
 }
+
+export default HomeClient;

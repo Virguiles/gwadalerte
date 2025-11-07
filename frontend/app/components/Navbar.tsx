@@ -45,6 +45,16 @@ export default function Navbar() {
             >
               Tours d&apos;Eau
             </Link>
+            <Link
+              href="/meteo"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                isActive('/meteo')
+                  ? 'bg-white text-blue-700 shadow-md'
+                  : 'text-white hover:bg-blue-800 hover:text-blue-100'
+              }`}
+            >
+              Météo
+            </Link>
           </div>
         </div>
       </div>

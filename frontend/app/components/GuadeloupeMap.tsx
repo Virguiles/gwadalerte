@@ -48,9 +48,31 @@ const GuadeloupeMap = ({ data, onCommuneHover, onCommuneLeave }: MapProps) => {
     onCommuneLeave();
   };
 
+  // Fonction pour normaliser les couleurs en format hex
+  const normalizeColor = (color: string | undefined): string => {
+    if (!color) return '#b9b9b9';
+
+    // Si c'est déjà en format hex, retourner tel quel
+    if (color.startsWith('#')) {
+      return color;
+    }
+
+    // Si c'est en format rgb, convertir en hex
+    const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (rgbMatch) {
+      const r = parseInt(rgbMatch[1], 10).toString(16).padStart(2, '0');
+      const g = parseInt(rgbMatch[2], 10).toString(16).padStart(2, '0');
+      const b = parseInt(rgbMatch[3], 10).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+    }
+
+    return color;
+  };
+
   const getFillColor = (communeId: string) => {
     const code = communeId.split(' ')[0];
-    return data[code] ? data[code].coul_qual : '#b9b9b9';
+    const color = data[code]?.coul_qual;
+    return normalizeColor(color);
   }
 
   return (
