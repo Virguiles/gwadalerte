@@ -72,6 +72,25 @@ function getAlertLevel(libQual: string): { label: string } {
   return alertLevels[libQual] || { label: 'Inconnu' };
 }
 
+// Fonction pour convertir un code de qualité en libellé et couleur (selon l'API Gwad'Air)
+function getQualityFromCode(code: number | undefined): { label: string; color: string } {
+  const qualityMap: Record<number, { label: string; color: string }> = {
+    1: { label: 'Bon', color: '#50F0E6' },
+    2: { label: 'Moyen', color: '#50CCAA' },
+    3: { label: 'Dégradé', color: '#FFC800' },
+    4: { label: 'Mauvais', color: '#FF0000' },
+    5: { label: 'Très Mauvais', color: '#8F3F97' },
+    6: { label: 'Extrêmement Mauvais', color: '#7E0023' },
+    0: { label: 'Absent', color: '#b9b9b9' },
+  };
+
+  if (code === undefined || code === null) {
+    return { label: 'N/A', color: '#b9b9b9' };
+  }
+
+  return qualityMap[code] || { label: 'Inconnu', color: '#b9b9b9' };
+}
+
 export default function Home() {
   // Fonction pour charger depuis le cache (utilisée pour l'initialisation lazy)
   const loadFromCache = (): { data: AirData; timestamp: number } | null => {
@@ -96,7 +115,8 @@ export default function Home() {
   };
 
   // État pour savoir si le composant est monté côté client (pour éviter l'hydratation mismatch)
-  const [mounted, setMounted] = useState(false);
+  // Initialisation paresseuse pour éviter les appels setState dans useEffect
+  const [mounted] = useState(() => typeof window !== 'undefined');
 
   // Initialisation lazy depuis le cache pour éviter les appels setState dans useEffect
   // La fonction d'initialisation n'est appelée qu'une seule fois lors du premier rendu
@@ -109,11 +129,6 @@ export default function Home() {
     const cached = loadFromCache();
     return cached ? new Date(cached.timestamp) : null;
   });
-
-  // Marquer le composant comme monté après l'hydratation
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Fonction pour vérifier si deux dates sont le même jour
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -165,17 +180,29 @@ export default function Home() {
 
         const timestamp = parseInt(cachedTimestamp, 10);
         const lastUpdateDate = new Date(timestamp);
-        const today = new Date();
+        const now = new Date();
 
-        // Faire un appel seulement si la dernière mise à jour n'est pas d'aujourd'hui
-        return !isSameDay(lastUpdateDate, today);
+        // Calculer la différence en millisecondes
+        const diffMs = now.getTime() - lastUpdateDate.getTime();
+        const diffMinutes = diffMs / (1000 * 60);
+
+        // Faire un appel si :
+        // - La dernière mise à jour n'est pas d'aujourd'hui
+        // - OU si le cache a plus de 3 minutes (pour correspondre au TTL du backend)
+        if (!isSameDay(lastUpdateDate, now) || diffMinutes > 3) {
+          console.log(`[Cache] Cache expiré (âge: ${Math.round(diffMinutes)} minutes), rafraîchissement nécessaire`);
+          return true;
+        }
+
+        console.log(`[Cache] Utilisation du cache local (âge: ${Math.round(diffMinutes)} minutes)`);
+        return false;
       } catch (error) {
         console.error('Erreur lors de la vérification du cache:', error);
         return true; // En cas d'erreur, on fait un appel
       }
     };
 
-    // Faire un appel API seulement si nécessaire (une fois par jour)
+    // Faire un appel API seulement si nécessaire (toutes les 3 minutes ou si pas d'aujourd'hui)
     if (shouldFetch()) {
       fetch('http://127.0.0.1:8000/api/air-quality')
         .then((res) => res.json())
@@ -369,6 +396,79 @@ export default function Home() {
                   </span>
                 </div>
               </div>
+
+              {/* Informations sur les polluants */}
+              {(tooltip.data.code_no2 !== undefined ||
+                tooltip.data.code_so2 !== undefined ||
+                tooltip.data.code_o3 !== undefined ||
+                tooltip.data.code_pm10 !== undefined ||
+                tooltip.data.code_pm25 !== undefined) && (
+                <>
+                  <div className="border-t border-gray-200"></div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                      Détails par polluant
+                    </p>
+                    <div className="space-y-1.5">
+                      {tooltip.data.code_no2 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">NO₂</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_no2).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_no2).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_so2 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">SO₂</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_so2).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_so2).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_o3 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">O₃</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_o3).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_o3).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_pm10 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">PM10</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm10).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_pm10).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_pm25 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">PM2.5</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm25).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_pm25).label}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Recommandations */}
               {getRecommendations(tooltip.data.lib_qual) && (

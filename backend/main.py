@@ -16,12 +16,13 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-GWADAIR_API_URL = "https://data-gwadair.opendata.arcgis.com/datasets/5deeac7ff3ae46dea837d149f7cf34f6_0.geojson"
+# URL de la vraie API en temps réel (utilisée par le site officiel gwadair.fr)
+GWADAIR_API_BASE_URL = "https://services8.arcgis.com/7RrxpwWeFIQ8JGGp/arcgis/rest/services/ind_guadeloupe_1/FeatureServer/0/query"
 
 # Cache simple en mémoire avec TTL (Time To Live)
 cache_data = None
 cache_timestamp = 0
-CACHE_TTL = 300  # Cache valide pendant 5 minutes (300 secondes)
+CACHE_TTL = 180  # Cache valide pendant 3 minutes (180 secondes) - réduit pour avoir des données plus fraîches
 
 @app.get("/api/air-quality")
 async def get_air_quality():
@@ -31,24 +32,95 @@ async def get_air_quality():
 
     # Vérifier si le cache est encore valide
     if cache_data is not None and (current_time - cache_timestamp) < CACHE_TTL:
+        print(f"[Cache] Utilisation du cache (âge: {int(current_time - cache_timestamp)}s)")
         return cache_data
 
-    # Si le cache est expiré ou n'existe pas, faire un nouvel appel API
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(GWADAIR_API_URL)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        data = response.json()
+    print(f"[API] Appel à l'API Gwad'Air...")
 
-        formatted_data = {
-            feature["properties"]["code_zone"]: feature["properties"]
-            for feature in data["features"]
+    # Si le cache est expiré ou n'existe pas, faire un nouvel appel API
+    try:
+        from datetime import datetime, timedelta
+
+        # Obtenir la date d'aujourd'hui et demain au format YYYY-MM-DD
+        today = datetime.now().strftime('%Y-%m-%d')
+        tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+
+        # Construire la requête pour obtenir les données d'aujourd'hui
+        params = {
+            'where': f"date_ech >= '{today}' AND date_ech <= '{tomorrow}'",
+            'outFields': '*',
+            'returnGeometry': 'false',
+            'outSR': '4326',
+            'f': 'json'
         }
 
-        # Mettre à jour le cache
-        cache_data = formatted_data
-        cache_timestamp = current_time
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+            response = await client.get(GWADAIR_API_BASE_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
 
-        return formatted_data
+            # Transformer les données ArcGIS en format attendu par le frontend
+            formatted_data = {}
+            communes_count = 0
+            max_date = None
+
+            for feature in data.get("features", []):
+                attrs = feature.get("attributes", {})
+                code_zone = attrs.get("code_zone")
+
+                if not code_zone:
+                    continue
+
+                # Convertir les timestamps UNIX en dates
+                date_ech_timestamp = attrs.get("date_ech")
+                date_dif_timestamp = attrs.get("date_dif")
+
+                if date_ech_timestamp:
+                    date_ech = datetime.fromtimestamp(date_ech_timestamp / 1000)
+                    attrs["date_ech"] = date_ech.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+                    if max_date is None or date_ech > max_date:
+                        max_date = date_ech
+
+                if date_dif_timestamp:
+                    date_dif = datetime.fromtimestamp(date_dif_timestamp / 1000)
+                    attrs["date_dif"] = date_dif.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+                # Ajouter la commune (en écrasant si déjà présente, car on ne prend que les données d'aujourd'hui)
+                formatted_data[code_zone] = attrs
+                communes_count += 1
+
+            # Mettre à jour le cache
+            cache_data = formatted_data
+            cache_timestamp = current_time
+
+            print(f"[API] Données récupérées: {communes_count} communes")
+            if max_date:
+                print(f"[API] Date la plus récente: {max_date.strftime('%Y-%m-%d %H:%M:%S')}")
+
+            return formatted_data
+
+    except httpx.TimeoutException:
+        print("[Error] Timeout lors de l'appel à l'API Gwad'Air")
+        # Retourner le cache si disponible même s'il est expiré
+        if cache_data is not None:
+            print("[Fallback] Utilisation du cache expiré en cas de timeout")
+            return cache_data
+        raise
+    except httpx.HTTPStatusError as e:
+        print(f"[Error] Erreur HTTP lors de l'appel à l'API: {e.response.status_code}")
+        # Retourner le cache si disponible même s'il est expiré
+        if cache_data is not None:
+            print("[Fallback] Utilisation du cache expiré en cas d'erreur HTTP")
+            return cache_data
+        raise
+    except Exception as e:
+        print(f"[Error] Erreur lors de l'appel à l'API: {str(e)}")
+        # Retourner le cache si disponible même s'il est expiré
+        if cache_data is not None:
+            print("[Fallback] Utilisation du cache expiré en cas d'erreur")
+            return cache_data
+        raise
 
 # Fonction pour charger les données de tours d'eau (pour ne pas le lire à chaque requête)
 def load_water_cuts_data():

@@ -5,6 +5,14 @@ export type CommuneData = {
   lib_qual: string;
   coul_qual: string;
   code_zone?: string;
+  code_qual?: number;
+  code_no2?: number;
+  code_so2?: number;
+  code_o3?: number;
+  code_pm10?: number;
+  code_pm25?: number;
+  date_ech?: string;
+  date_dif?: string;
   [key: string]: unknown; // Pour les autres propriétés
 };
 

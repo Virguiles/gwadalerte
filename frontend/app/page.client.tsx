@@ -72,16 +72,64 @@ function getAlertLevel(libQual: string): { label: string } {
   return alertLevels[libQual] || { label: 'Inconnu' };
 }
 
-function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: AirData; initialLastUpdate: number | null }) {
-  // Vérification si on est côté client (pour éviter les erreurs SSR)
-  const mounted = typeof window !== 'undefined';
+// Fonction pour convertir un code de qualité en libellé et couleur (selon l'API Gwad'Air)
+function getQualityFromCode(code: number | undefined): { label: string; color: string } {
+  const qualityMap: Record<number, { label: string; color: string }> = {
+    1: { label: 'Bon', color: '#50F0E6' },
+    2: { label: 'Moyen', color: '#50CCAA' },
+    3: { label: 'Dégradé', color: '#FFC800' },
+    4: { label: 'Mauvais', color: '#FF0000' },
+    5: { label: 'Très Mauvais', color: '#8F3F97' },
+    6: { label: 'Extrêmement Mauvais', color: '#7E0023' },
+    0: { label: 'Absent', color: '#b9b9b9' },
+  };
 
-  // Initialisation avec les données serveur, puis mise à jour côté client si nécessaire
-  const [airData, setAirData] = useState<AirData>(initialAirData);
+  if (code === undefined || code === null) {
+    return { label: 'N/A', color: '#b9b9b9' };
+  }
+
+  return qualityMap[code] || { label: 'Inconnu', color: '#b9b9b9' };
+}
+
+function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: AirData; initialLastUpdate: number | null }) {
+  // Fonction pour charger depuis le cache localStorage (utilisée pour l'initialisation)
+  const loadFromLocalCache = (): { data: AirData; timestamp: number } | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const CACHE_KEY = 'gwada_air_quality_cache';
+      const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+
+      if (cachedData && cachedTimestamp) {
+        const timestamp = parseInt(cachedTimestamp, 10);
+        // Vérifier si le cache local est plus récent que les données serveur
+        if (!initialLastUpdate || timestamp > initialLastUpdate) {
+          return {
+            data: JSON.parse(cachedData),
+            timestamp,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la lecture du cache local:', error);
+    }
+    return null;
+  };
+
+  // Initialisation avec les données serveur ou le cache local si plus récent
+  const [airData, setAirData] = useState<AirData>(() => {
+    const localCache = loadFromLocalCache();
+    return localCache ? localCache.data : initialAirData;
+  });
   const [tooltip, setTooltip] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(
-    initialLastUpdate ? new Date(initialLastUpdate) : null
-  );
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
+    const localCache = loadFromLocalCache();
+    if (localCache) {
+      return new Date(localCache.timestamp);
+    }
+    return initialLastUpdate ? new Date(initialLastUpdate) : null;
+  });
 
   // Fonction pour vérifier si deux dates sont le même jour
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -123,45 +171,6 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
       }
     };
 
-    // Fonction pour charger depuis le cache localStorage
-    const loadFromLocalCache = (): { data: AirData; timestamp: number } | null => {
-      try {
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-
-        if (cachedData && cachedTimestamp) {
-          const timestamp = parseInt(cachedTimestamp, 10);
-          return {
-            data: JSON.parse(cachedData),
-            timestamp,
-          };
-        }
-      } catch (error) {
-        console.error('Erreur lors de la lecture du cache local:', error);
-      }
-      return null;
-    };
-
-    // Vérifier si les données serveur sont suffisantes ou si on doit utiliser le cache local
-    const shouldUseLocalCache = (): boolean => {
-      // Si on a des données serveur valides, vérifier si le cache local est plus récent
-      if (initialLastUpdate) {
-        const localCache = loadFromLocalCache();
-        if (localCache && localCache.timestamp > initialLastUpdate) {
-          return true; // Le cache local est plus récent
-        }
-      }
-      return false;
-    };
-
-    // Utiliser le cache local si plus récent
-    if (shouldUseLocalCache()) {
-      const localCache = loadFromLocalCache();
-      if (localCache) {
-        setAirData(localCache.data);
-        setLastUpdate(new Date(localCache.timestamp));
-      }
-    }
 
     // Vérifier si un appel API est nécessaire
     const shouldFetch = (): boolean => {
@@ -173,17 +182,29 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
 
         const timestamp = parseInt(cachedTimestamp, 10);
         const lastUpdateDate = new Date(timestamp);
-        const today = new Date();
+        const now = new Date();
 
-        // Faire un appel seulement si la dernière mise à jour n'est pas d'aujourd'hui
-        return !isSameDay(lastUpdateDate, today);
+        // Calculer la différence en millisecondes
+        const diffMs = now.getTime() - lastUpdateDate.getTime();
+        const diffMinutes = diffMs / (1000 * 60);
+
+        // Faire un appel si :
+        // - La dernière mise à jour n'est pas d'aujourd'hui
+        // - OU si le cache a plus de 3 minutes (pour correspondre au TTL du backend)
+        if (!isSameDay(lastUpdateDate, now) || diffMinutes > 3) {
+          console.log(`[Cache] Cache expiré (âge: ${Math.round(diffMinutes)} minutes), rafraîchissement nécessaire`);
+          return true;
+        }
+
+        console.log(`[Cache] Utilisation du cache local (âge: ${Math.round(diffMinutes)} minutes)`);
+        return false;
       } catch (error) {
         console.error('Erreur lors de la vérification du cache:', error);
         return true; // En cas d'erreur, on fait un appel
       }
     };
 
-    // Faire un appel API seulement si nécessaire (une fois par jour)
+    // Faire un appel API seulement si nécessaire (toutes les 3 minutes ou si pas d'aujourd'hui)
     if (shouldFetch()) {
       fetch('http://127.0.0.1:8000/api/air-quality')
         .then((res) => res.json())
@@ -377,6 +398,79 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
                   </span>
                 </div>
               </div>
+
+              {/* Informations sur les polluants */}
+              {(tooltip.data.code_no2 !== undefined ||
+                tooltip.data.code_so2 !== undefined ||
+                tooltip.data.code_o3 !== undefined ||
+                tooltip.data.code_pm10 !== undefined ||
+                tooltip.data.code_pm25 !== undefined) && (
+                <>
+                  <div className="border-t border-gray-200"></div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                      Détails par polluant
+                    </p>
+                    <div className="space-y-1.5">
+                      {tooltip.data.code_no2 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">NO₂</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_no2).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_no2).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_so2 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">SO₂</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_so2).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_so2).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_o3 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">O₃</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_o3).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_o3).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_pm10 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">PM10</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm10).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_pm10).label}
+                          </span>
+                        </div>
+                      )}
+                      {tooltip.data.code_pm25 !== undefined && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">PM2.5</span>
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm25).color }}
+                          >
+                            {getQualityFromCode(tooltip.data.code_pm25).label}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Recommandations */}
               {getRecommendations(tooltip.data.lib_qual) && (
