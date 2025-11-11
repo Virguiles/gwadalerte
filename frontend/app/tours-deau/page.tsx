@@ -154,7 +154,7 @@ export default function WaterMapPage() {
         {/* En-tête */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-3 text-gray-800">Tours d&apos;eau en Guadeloupe</h1>
-          <p className="text-base text-gray-600 mb-2">Planning du 3 au 9 Novembre 2025</p>
+          <p className="text-base text-gray-600 mb-2">Planning du 10 au 16 Novembre 2025</p>
           <p className="text-sm text-gray-500">Source: SMGEAG</p>
         </div>
 
@@ -270,7 +270,7 @@ export default function WaterMapPage() {
               className="px-5 py-2 text-xs text-gray-600"
               style={{ backgroundColor: colors.light }}
             >
-              Source: SMGEAG • Planning du 3 au 9 Novembre 2025
+              Source: SMGEAG • Planning du 10 au 16 Novembre 2025
             </div>
           </div>
         );

@@ -30,9 +30,10 @@ type MapProps = {
   data: AirData;
   onCommuneHover: (info: HoverInfo) => void;
   onCommuneLeave: () => void;
+  backgroundColor?: string; // Couleur de fond optionnelle (pour vigilance globale)
 };
 
-const GuadeloupeMap = ({ data, onCommuneHover, onCommuneLeave }: MapProps) => {
+const GuadeloupeMap = ({ data, onCommuneHover, onCommuneLeave, backgroundColor }: MapProps) => {
   const handleMouseEnter = (e: React.MouseEvent<SVGElement>) => {
     const communeId = e.currentTarget.id;
     if (!communeId) return;
@@ -80,14 +81,16 @@ const GuadeloupeMap = ({ data, onCommuneHover, onCommuneLeave }: MapProps) => {
   const getFillColor = (communeId: string) => {
     const code = communeId.split(' ')[0];
     const color = data[code]?.coul_qual;
-    return normalizeColor(color);
+    const normalized = normalizeColor(color);
+    // S'assurer que la couleur est toujours en format hex pour éviter les différences d'hydratation
+    return normalized;
   }
 
   return (
     <svg
       viewBox="0 0 86008 74361"
       className="w-full h-auto max-w-full"
-      style={{ minHeight: '500px', maxHeight: '100%' }}
+      style={{ minHeight: '500px', maxHeight: '100%', backgroundColor: 'white' }}
       preserveAspectRatio="xMidYMid meet"
     >
       <g

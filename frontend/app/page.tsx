@@ -115,20 +115,14 @@ export default function Home() {
   };
 
   // État pour savoir si le composant est monté côté client (pour éviter l'hydratation mismatch)
-  // Initialisation paresseuse pour éviter les appels setState dans useEffect
-  const [mounted] = useState(() => typeof window !== 'undefined');
+  // Initialisé à false pour que le rendu serveur et client soit identique
+  const [mounted, setMounted] = useState(false);
 
-  // Initialisation lazy depuis le cache pour éviter les appels setState dans useEffect
-  // La fonction d'initialisation n'est appelée qu'une seule fois lors du premier rendu
-  const [airData, setAirData] = useState<AirData>(() => {
-    const cached = loadFromCache();
-    return cached?.data || {};
-  });
+  // Initialisation avec données vides pour que le rendu serveur et client soit identique
+  // Les données seront chargées depuis le cache dans useEffect après l'hydratation
+  const [airData, setAirData] = useState<AirData>({});
   const [tooltip, setTooltip] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
-    const cached = loadFromCache();
-    return cached ? new Date(cached.timestamp) : null;
-  });
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // Fonction pour vérifier si deux dates sont le même jour
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -149,6 +143,18 @@ export default function Home() {
       minute: '2-digit',
     }).format(date);
   };
+
+  // Marquer le composant comme monté et charger les données du cache après l'hydratation
+  useEffect(() => {
+    setMounted(true);
+
+    // Charger les données du cache après l'hydratation
+    const cached = loadFromCache();
+    if (cached) {
+      setAirData(cached.data);
+      setLastUpdate(new Date(cached.timestamp));
+    }
+  }, []);
 
   // Vérifier et faire un appel API seulement si nécessaire (une fois par jour)
   useEffect(() => {
