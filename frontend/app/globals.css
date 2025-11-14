@@ -25,13 +25,26 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Styles pour les communes de la carte */
 .commune-path {
-  /* Effet de transition doux pour la couleur et l'opacité */
-  transition: fill 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  cursor: pointer;
 }
 
-.commune-path:hover {
-  /* Légère transparence au survol */
-  opacity: 0.7;
-  cursor: pointer;
+/* Styles pour la scrollbar du tooltip météo */
+.tooltip-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tooltip-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.tooltip-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.tooltip-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }

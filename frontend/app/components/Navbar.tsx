@@ -26,9 +26,9 @@ export default function Navbar() {
           {/* Liens de navigation */}
           <div className="flex space-x-1">
             <Link
-              href="/"
+              href="/qualite-air"
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                isActive('/')
+                isActive('/qualite-air')
                   ? 'bg-white text-blue-700 shadow-md'
                   : 'text-white hover:bg-blue-800 hover:text-blue-100'
               }`}

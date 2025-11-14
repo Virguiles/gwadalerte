@@ -287,8 +287,20 @@ async def get_weather():
             response.raise_for_status()
             data = response.json()
 
-            # Calculer le point de rosée (approximation)
+            # Vérifier que les données sont valides (température dans une plage raisonnable pour la Guadeloupe)
             temp = data["main"]["temp"]
+            # Vérifier si la température est None, NaN, ou dans une plage invalide
+            # Note: On accepte 0°C car c'est techniquement valide, mais on vérifie la cohérence avec d'autres données
+            if temp is None or (isinstance(temp, float) and (temp != temp or temp < -50 or temp > 60)):
+                # Données invalides, traiter comme une erreur
+                raise ValueError(f"Température invalide: {temp}°C pour {info['name']}")
+
+            # Vérifier aussi la cohérence: si température est 0 mais que d'autres champs sont absents/invalides, c'est suspect
+            if temp == 0 and (not data.get("main", {}).get("humidity") or data["main"].get("humidity", 0) == 0):
+                # Probablement des données invalides si température est 0 ET humidité est absente/0
+                raise ValueError(f"Données suspectes (temp=0, humidité manquante) pour {info['name']}")
+
+            # Calculer le point de rosée (approximation)
             humidity = data["main"]["humidity"]
             dew_point = temp - ((100 - humidity) / 5)
 
@@ -304,7 +316,7 @@ async def get_weather():
                 "pressure": data["main"]["pressure"],
                 "wind_speed": round(data["wind"]["speed"] * 3.6, 1),  # Convertir m/s en km/h
                 "wind_deg": data["wind"].get("deg", 0),
-                "wind_gust": round(data["wind"].get("gust", 0) * 3.6, 1) if data["wind"].get("gust") else None,
+                "wind_gust": round(data["wind"]["gust"] * 3.6, 1) if "gust" in data.get("wind", {}) else None,
                 "weather_main": data["weather"][0]["main"],
                 "weather_description": data["weather"][0]["description"],
                 "weather_icon": data["weather"][0]["icon"],
@@ -314,8 +326,8 @@ async def get_weather():
                 "sunrise": datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M"),
                 "sunset": datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M"),
                 "timezone": data.get("timezone", 0),
-                "rain_1h": data.get("rain", {}).get("1h", 0) if "rain" in data else 0,
-                "rain_3h": data.get("rain", {}).get("3h", 0) if "rain" in data else 0,
+                "rain_1h": data.get("rain", {}).get("1h") if "rain" in data and data.get("rain", {}).get("1h") is not None else None,
+                "rain_3h": data.get("rain", {}).get("3h") if "rain" in data and data.get("rain", {}).get("3h") is not None else None,
             }
 
             # Ajouter l'indice UV si disponible (nécessite un appel séparé à onecall)
@@ -358,8 +370,8 @@ async def get_weather():
                 "sunrise": None,
                 "sunset": None,
                 "timezone": None,
-                "rain_1h": 0,
-                "rain_3h": 0,
+                "rain_1h": None,
+                "rain_3h": None,
                 "uv_index": None,
             })
 

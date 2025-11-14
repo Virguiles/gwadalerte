@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 // On RÉUTILISE nos composants et types !
 import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
 
@@ -72,9 +72,54 @@ function getCommuneColors(communeName: string) {
   return generateColorFromName(communeName);
 }
 
+// Type pour les filtres de date
+type DateFilter = 'today' | 'tomorrow' | 'week';
+
+// Fonction pour parser les jours de la semaine depuis le texte
+function parseDaysFromHoraires(horaires: string): number[] {
+  const days: number[] = [];
+  const lowerHoraires = horaires.toLowerCase();
+
+  if (lowerHoraires.includes('tous les jours')) {
+    return [0, 1, 2, 3, 4, 5, 6]; // Tous les jours
+  }
+
+  // Map des jours français vers les numéros (0 = dimanche)
+  const dayMap: { [key: string]: number } = {
+    'dimanche': 0,
+    'lundi': 1,
+    'mardi': 2,
+    'mercredi': 3,
+    'jeudi': 4,
+    'vendredi': 5,
+    'samedi': 6
+  };
+
+  Object.entries(dayMap).forEach(([dayName, dayNumber]) => {
+    if (lowerHoraires.includes(dayName)) {
+      days.push(dayNumber);
+    }
+  });
+
+  return days;
+}
+
+// Fonction pour vérifier si une commune a des coupures pour un jour donné
+function hasCutsOnDay(communeData: WaterCutData, targetDate: Date): boolean {
+  const targetDay = targetDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+
+  return communeData.details.some(detail => {
+    const days = parseDaysFromHoraires(detail.horaires);
+    return days.includes(targetDay);
+  });
+}
+
 export default function WaterMapPage() {
   const [waterData, setWaterData] = useState<WaterDataMap>({});
   const [tooltip, setTooltip] = useState<HoverInfo | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
 
   // 1. Récupérer les données de notre NOUVELLE API
   useEffect(() => {
@@ -87,15 +132,118 @@ export default function WaterMapPage() {
       .catch(console.error);
   }, []);
 
+  // Calculer la date cible selon le filtre
+  const getTargetDate = (): Date => {
+    const today = new Date();
+    if (dateFilter === 'tomorrow') {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow;
+    }
+    return today;
+  };
+
   // 2. Logique de couleur (différente de la qualité de l'air)
   const getCommuneColor = (code_zone: string): string => {
     const commune = waterData[code_zone];
-    if (commune && commune.details.length > 0) {
-      const colors = getCommuneColors(commune.commune);
-      return colors.primary;
+    if (!commune || commune.details.length === 0) {
+      return '#B9B9B9'; // Gris (par défaut pour communes non concernées)
     }
-    return '#B9B9B9'; // Gris (par défaut pour communes non concernées)
+
+    // Si on filtre par jour, vérifier si la commune est concernée
+    if (dateFilter !== 'week') {
+      const targetDate = getTargetDate();
+      if (!hasCutsOnDay(commune, targetDate)) {
+        return '#B9B9B9'; // Gris si pas de coupure ce jour-là
+      }
+    }
+
+    const colors = getCommuneColors(commune.commune);
+    return colors.primary;
   };
+
+  // Fonction pour calculer la position optimale du tooltip
+  const calculateTooltipPosition = useCallback((mouseX: number, mouseY: number) => {
+    if (typeof window === 'undefined') return { left: mouseX, top: mouseY };
+
+    // Calculer la largeur du tooltip en fonction de la taille de l'écran (responsive)
+    let tooltipWidth = 384; // Par défaut (md et plus, w-96 = 384px)
+    if (window.innerWidth < 640) {
+      tooltipWidth = 320; // Petit écran
+    } else if (window.innerWidth < 768) {
+      tooltipWidth = 350; // Écran moyen
+    }
+
+    const tooltipHeight = 500; // Estimation de la hauteur approximative (avec scroll si nécessaire)
+    const margin = 20; // Marge de sécurité par rapport aux bords
+    const offset = 15; // Décalage par rapport au curseur
+
+    let left = mouseX + offset;
+    let top = mouseY + offset;
+
+    // Vérifier si le tooltip dépasse à droite
+    if (left + tooltipWidth + margin > window.innerWidth) {
+      left = mouseX - tooltipWidth - offset; // Placer à gauche du curseur
+    }
+
+    // Vérifier si le tooltip dépasse toujours (cas extrême gauche)
+    if (left < margin) {
+      left = margin;
+    }
+
+    // Vérifier si le tooltip dépasse en bas
+    if (top + tooltipHeight + margin > window.innerHeight) {
+      top = mouseY - tooltipHeight - offset; // Placer au-dessus du curseur
+    }
+
+    // Vérifier si le tooltip dépasse toujours (cas extrême haut)
+    if (top < margin) {
+      top = margin;
+    }
+
+    // S'assurer que le tooltip ne dépasse pas à droite même après ajustement
+    if (left + tooltipWidth > window.innerWidth - margin) {
+      left = window.innerWidth - tooltipWidth - margin;
+    }
+
+    return { left, top };
+  }, []);
+
+  // Effet pour mettre à jour la position du tooltip quand il change
+  useEffect(() => {
+    if (tooltip) {
+      // Utiliser requestAnimationFrame pour s'assurer que le DOM est mis à jour
+      requestAnimationFrame(() => {
+        const position = calculateTooltipPosition(tooltip.x, tooltip.y);
+        setTooltipPosition(position);
+      });
+    }
+  }, [tooltip, calculateTooltipPosition]);
+
+  // Effet pour recalculer la position après le rendu initial avec les dimensions réelles
+  useEffect(() => {
+    if (tooltip && tooltipRef.current) {
+      // Attendre que le tooltip soit rendu pour obtenir ses dimensions réelles
+      const timeoutId = setTimeout(() => {
+        const position = calculateTooltipPosition(tooltip.x, tooltip.y);
+        setTooltipPosition(position);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [tooltip, calculateTooltipPosition]);
+
+  // Effet pour recalculer la position lors du redimensionnement de la fenêtre
+  useEffect(() => {
+    const handleResize = () => {
+      if (tooltip) {
+        const position = calculateTooltipPosition(tooltip.x, tooltip.y);
+        setTooltipPosition(position);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [tooltip, calculateTooltipPosition]);
 
   // 3. Logique d'infobulle (différente)
   const handleCommuneHover = (info: HoverInfo) => {
@@ -120,18 +268,28 @@ export default function WaterMapPage() {
 
   // On transforme nos données d'eau au format attendu par la carte
   // La carte a besoin de 'coul_qual' pour la couleur
-  // Utiliser useMemo pour recalculer quand waterData change
+  // Utiliser useMemo pour recalculer quand waterData ou dateFilter change
   const mapDataForComponent = useMemo(() => {
+    const targetDate = getTargetDate();
+
     const result = Object.keys(waterData).reduce((acc, code) => {
       const commune = waterData[code];
       if (commune) {
         // Calculer la couleur directement ici
         let coul_qual = '#B9B9B9'; // Gris par défaut
+
         if (commune.details.length > 0) {
-          const colors = getCommuneColors(commune.commune);
-          coul_qual = colors.primary;
-          // Debug: vérifier les couleurs
-          console.log(`Commune: ${commune.commune}, Code: ${code}, Couleur: ${coul_qual}`);
+          // Si on filtre par jour, vérifier si la commune est concernée
+          if (dateFilter !== 'week') {
+            if (hasCutsOnDay(commune, targetDate)) {
+              const colors = getCommuneColors(commune.commune);
+              coul_qual = colors.primary;
+            }
+          } else {
+            // Vue semaine : afficher toutes les communes avec coupures
+            const colors = getCommuneColors(commune.commune);
+            coul_qual = colors.primary;
+          }
         }
 
         acc[code] = {
@@ -143,10 +301,23 @@ export default function WaterMapPage() {
       }
       return acc;
     }, {} as AirData);
-    console.log('mapDataForComponent:', result);
     return result;
-  }, [waterData]);
+  }, [waterData, dateFilter]);
 
+
+  // Fonction pour obtenir le label de date
+  const getDateLabel = (): string => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+
+    if (dateFilter === 'today') {
+      return new Date().toLocaleDateString('fr-FR', options);
+    } else if (dateFilter === 'tomorrow') {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow.toLocaleDateString('fr-FR', options);
+    }
+    return 'Planning du 10 au 16 Novembre 2025';
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gray-50">
@@ -154,15 +325,75 @@ export default function WaterMapPage() {
         {/* En-tête */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-3 text-gray-800">Tours d&apos;eau en Guadeloupe</h1>
-          <p className="text-base text-gray-600 mb-2">Planning du 10 au 16 Novembre 2025</p>
+          <p className="text-base text-gray-600 mb-2">{getDateLabel()}</p>
           <p className="text-sm text-gray-500">Source: SMGEAG</p>
+        </div>
+
+        {/* Onglets de filtrage */}
+        <div className="flex flex-col items-center mb-6 gap-3">
+          <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm">
+            <button
+              onClick={() => setDateFilter('today')}
+              className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all ${
+                dateFilter === 'today'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Aujourd&apos;hui
+            </button>
+            <button
+              onClick={() => setDateFilter('tomorrow')}
+              className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all ${
+                dateFilter === 'tomorrow'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Demain
+            </button>
+            <button
+              onClick={() => setDateFilter('week')}
+              className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all ${
+                dateFilter === 'week'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Semaine
+            </button>
+          </div>
+
+          {/* Compteur de communes concernées */}
+          {(() => {
+            const targetDate = getTargetDate();
+            const affectedCommunes = Object.values(waterData).filter(commune => {
+              if (!commune.details || commune.details.length === 0) return false;
+              if (dateFilter === 'week') return true;
+              return hasCutsOnDay(commune, targetDate);
+            }).length;
+
+            return affectedCommunes > 0 ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                <p className="text-sm text-blue-800">
+                  <span className="font-bold">{affectedCommunes}</span> commune{affectedCommunes > 1 ? 's' : ''} concernée{affectedCommunes > 1 ? 's' : ''}
+                  {dateFilter !== 'week' && ` ${dateFilter === 'today' ? "aujourd'hui" : 'demain'}`}
+                </p>
+              </div>
+            ) : null;
+          })()}
         </div>
 
         {/* Carte avec meilleure visibilité */}
         <div className="w-full bg-white shadow-xl rounded-xl overflow-hidden border-2 border-gray-200 flex flex-col" style={{ height: '700px' }}>
           <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex-shrink-0">
             <p className="text-sm text-gray-700 font-medium">
-              💧 <span className="font-semibold">Chaque commune concernée par des tours d&apos;eau a sa propre couleur</span> - Survolez une commune pour voir les détails du planning
+              💧 <span className="font-semibold">
+                {dateFilter === 'week'
+                  ? 'Chaque commune concernée par des tours d\'eau a sa propre couleur'
+                  : `Les communes en couleur ont des coupures d'eau ${dateFilter === 'today' ? 'aujourd\'hui' : 'demain'}`
+                }
+              </span> - Survolez une commune pour voir les détails
             </p>
           </div>
           <div className="w-full flex justify-center items-center p-6 bg-white flex-1 min-h-0">
@@ -181,13 +412,25 @@ export default function WaterMapPage() {
         const communeData = tooltip.data as unknown as WaterCutData;
         const colors = getCommuneColors(communeData.commune);
 
+        // Filtrer les détails selon le jour sélectionné
+        const filteredDetails = dateFilter !== 'week'
+          ? communeData.details.filter(detail => {
+              const days = parseDaysFromHoraires(detail.horaires);
+              const targetDay = getTargetDate().getDay();
+              return days.includes(targetDay);
+            })
+          : communeData.details;
+
         return (
           <div
-            className="absolute bg-white rounded-xl shadow-2xl pointer-events-none transition-all w-96 border-2 overflow-hidden z-50"
+            ref={tooltipRef}
+            className="fixed bg-white rounded-xl shadow-2xl pointer-events-auto transition-all w-[320px] sm:w-[350px] md:w-96 border-2 overflow-hidden z-50"
             style={{
-              left: tooltip.x + 15,
-              top: tooltip.y + 15,
+              left: `${tooltipPosition.left}px`,
+              top: `${tooltipPosition.top}px`,
               borderColor: colors.border,
+              maxHeight: 'calc(100vh - 40px)', // Limiter la hauteur pour éviter de dépasser l'écran
+              overflowY: 'auto', // Ajouter un scroll si nécessaire
             }}
           >
             {/* En-tête avec couleur de la commune */}
@@ -203,7 +446,7 @@ export default function WaterMapPage() {
 
             {/* Corps du tooltip */}
             <div className="p-5">
-              {((communeData.details?.length ?? 0) > 0) ? (
+              {(filteredDetails.length > 0) ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div
@@ -211,12 +454,13 @@ export default function WaterMapPage() {
                       style={{ backgroundColor: colors.primary }}
                     />
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {communeData.details.length} secteur{communeData.details.length > 1 ? 's' : ''}
+                      {filteredDetails.length} secteur{filteredDetails.length > 1 ? 's' : ''}
+                      {dateFilter !== 'week' && ' concerné' + (filteredDetails.length > 1 ? 's' : '')}
                     </span>
                   </div>
 
                   <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {communeData.details.map((d: WaterCutDetail, index: number) => (
+                    {filteredDetails.map((d: WaterCutDetail, index: number) => (
                       <div
                         key={`${d.secteur}-${index}`}
                         className="border-l-4 pl-4 pb-4 last:pb-0"
@@ -259,7 +503,10 @@ export default function WaterMapPage() {
                 <div className="text-center py-4">
                   <div className="text-4xl mb-2">🚫</div>
                   <p className="text-sm text-gray-600">
-                    Aucun tour d&apos;eau programmé pour cette commune dans ce planning.
+                    {dateFilter === 'week'
+                      ? "Aucun tour d'eau programmé pour cette commune dans ce planning."
+                      : `Aucun tour d'eau programmé pour cette commune ${dateFilter === 'today' ? "aujourd'hui" : "demain"}.`
+                    }
                   </p>
                 </div>
               )}

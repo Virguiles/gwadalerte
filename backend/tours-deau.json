@@ -61,7 +61,7 @@
     "commune": "GOYAVE",
     "details": [
       {
-        "secteur": "Tous secteurs (Nesty, le Bourg, Monplaisir, Sainte Claire...)",
+        "secteur": "Tous secteurs (Nesty, le Bourg Goyave, Monplaisir, Christophe Ouest, l'Aiguille, Morne Rouge, Sainte Claire)",
         "horaires": "Mardi / jeudi / samedi de 20H à 7H"
       }
     ]
@@ -83,11 +83,11 @@
     "commune": "CAPESTERRE-BELLE-EAU",
     "details": [
       {
-        "secteur": "Secteur 1 (Le Bourg, Geta, Brest, Cité des Sources...)",
+        "secteur": "Secteur 1 (Le Bourg, Geta, Brest, Cité des Sources, Les Flambyants)",
         "horaires": "Mardi / jeudi / samedi de 20H à 7H"
       },
       {
-        "secteur": "Secteur 2 & 3 (Bananier, Trou aux chiens, Morne cinq jours...)",
+        "secteur": "Secteur 2 & 3 (Bananier, Trou aux chiens, Trou aux chats, Morne cinq jours, Haute Plaine, Monplaisir)",
         "horaires": "Mardi / jeudi / samedi de 20H à 7H"
       }
     ]
@@ -118,7 +118,7 @@
     "commune": "TROIS-RIVIÈRES",
     "details": [
       {
-        "secteur": "Secteurs (Bord de mer, Poterie, Robin, Carbet...)",
+        "secteur": "Secteurs (Bord de mer, Poterie, Robin)",
         "horaires": "Mardi / Jeudi / samedi de 20H à 7H (Secteurs 2&3)"
       },
       {
@@ -130,7 +130,7 @@
         "horaires": "Mardi / Jeudi / Samedi de 18h à 8h"
       },
       {
-        "secteur": "Secteur 6 (Bellemont, Rue Général Lacroix)",
+        "secteur": "Secteur 6 (Bellemont, Rue Général Lacroix, Bourg)",
         "horaires": "Tous les jours de 18h à 7h"
       }
     ]

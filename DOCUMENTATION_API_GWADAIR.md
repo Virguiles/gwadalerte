@@ -96,11 +96,11 @@ GET https://services8.arcgis.com/7RrxpwWeFIQ8JGGp/arcgis/rest/services/ind_guade
 |------|---------|---------|-------------|
 | 1 | Bon | #50F0E6 | Qualité de l'air bonne |
 | 2 | Moyen | #50CCAA | Qualité de l'air acceptable |
-| 3 | Dégradé | #FFC800 | Qualité de l'air dégradée |
-| 4 | Mauvais | #FF0000 | Qualité de l'air mauvaise |
-| 5 | Très mauvais | #8F3F97 | Qualité de l'air très mauvaise |
-| 6 | Extrêmement mauvais | #7E0023 | Qualité de l'air extrêmement mauvaise |
-| - | Absent | - | Données absentes |
+| 3 | Dégradé | #F0E641 | Qualité de l'air dégradée |
+| 4 | Mauvais | #FF5050 | Qualité de l'air mauvaise |
+| 5 | Très mauvais | #960032 | Qualité de l'air très mauvaise |
+| 6 | Extrêmement mauvais | #803399 | Qualité de l'air extrêmement mauvaise |
+| 0 | Absent | #DDDDDD | Données absentes |
 
 ## ⚠️ Points importants
 
