@@ -1,101 +1,79 @@
 'use client'; // Indispensable pour utiliser les hooks
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import GuadeloupeMap, { AirData, HoverInfo } from '../components/GuadeloupeMap';
+import { CommuneSelector } from '../components/shared/CommuneSelector';
+import { AirSidebar } from './components/AirSidebar';
+import {
+  Wind,
+  Info,
+  AlertTriangle,
+  Activity,
+  Car,
+  Factory,
+  Sun,
+  CloudFog,
+  ShieldCheck,
+  AlertOctagon,
+  Leaf,
+  HelpCircle,
+  MapPin,
+  Sparkles,
+  ArrowRight
+} from 'lucide-react';
 
-// Fonctions utilitaires pour les informations sur la qualité de l'air (selon les standards ATMO de Gwad'Air)
+// --- FONCTIONS UTILITAIRES & CONSTANTES ---
+
+// Descriptions optimisées pour l'utilisateur et le SEO
 function getQualityDescription(libQual: string): string {
   const descriptions: Record<string, string> = {
-    'Bon': 'La qualité de l\'air est bonne. Les concentrations de polluants sont faibles et généralement sans danger pour la santé.',
-    'Moyen': 'La qualité de l\'air est acceptable. Les personnes sensibles peuvent ressentir des effets légers.',
-    'Dégradé': 'La qualité de l\'air est dégradée. Les personnes sensibles peuvent ressentir des effets sur leur santé.',
-    'Mauvais': 'La qualité de l\'air est mauvaise. Toute la population peut ressentir des effets sur la santé.',
-    'Très Mauvais': 'La qualité de l\'air est très mauvaise. Des effets graves sur la santé sont possibles pour toute la population.',
-    'Extrêmement Mauvais': 'La qualité de l\'air est extrêmement mauvaise. Des effets très graves sur la santé sont possibles pour toute la population.',
-    // Support des anciens libellés pour compatibilité
-    'Très bon': 'La qualité de l\'air est excellente. Les concentrations de polluants sont très faibles et ne présentent aucun risque pour la santé.',
-    'Médiocre': 'La qualité de l\'air est préoccupante. Les personnes sensibles peuvent ressentir des effets sur leur santé.',
-    'Très mauvais': 'La qualité de l\'air est très mauvaise. Des effets graves sur la santé sont possibles pour toute la population.',
+    'Bon': 'Qualité de l\'air idéale. Profitez-en pour aérer et bouger !',
+    'Moyen': 'Qualité acceptable. Aucun risque pour la majorité de la population.',
+    'Dégradé': 'Qualité moyenne. Les personnes sensibles peuvent ressentir une gêne.',
+    'Mauvais': 'Air pollué. Risques accrus pour les personnes fragiles.',
+    'Très Mauvais': 'Forte pollution. Effets possibles sur la santé de tous.',
+    'Extrêmement Mauvais': 'Situation critique. Risques sanitaires importants pour toute la population.',
+    // Compatibilité
+    'Très bon': 'Qualité de l\'air excellente.',
+    'Médiocre': 'Qualité de l\'air préoccupante.',
+    'Très mauvais': 'Forte pollution.',
   };
-
-  return descriptions[libQual] || '';
-}
-
-function getQualityPercentage(libQual: string): number {
-  const percentages: Record<string, number> = {
-    'Bon': 100,
-    'Moyen': 83,
-    'Dégradé': 66,
-    'Mauvais': 50,
-    'Très Mauvais': 33,
-    'Extrêmement Mauvais': 16,
-    // Support des anciens libellés pour compatibilité
-    'Très bon': 100,
-    'Médiocre': 50,
-    'Très mauvais': 16,
-  };
-
-  return percentages[libQual] || 0;
+  return descriptions[libQual] || 'Données indisponibles.';
 }
 
 function getRecommendations(libQual: string): string {
   const recommendations: Record<string, string> = {
-    'Bon': 'Activités normales en plein air autorisées pour tous.',
-    'Moyen': 'Les personnes sensibles devraient limiter les efforts prolongés en extérieur.',
-    'Dégradé': 'Les personnes sensibles devraient éviter les activités en extérieur. Les autres peuvent continuer normalement.',
-    'Mauvais': 'Tout le monde devrait limiter les activités en extérieur. Les personnes sensibles doivent éviter les sorties.',
-    'Très Mauvais': 'Évitez toutes les activités en extérieur. Restez à l\'intérieur avec les fenêtres fermées.',
-    'Extrêmement Mauvais': 'Évitez absolument toutes les activités en extérieur. Restez à l\'intérieur avec les fenêtres fermées.',
-    // Support des anciens libellés pour compatibilité
-    'Très bon': 'Conditions idéales pour toutes les activités en plein air.',
-    'Médiocre': 'Les personnes sensibles devraient éviter les activités en extérieur. Les autres peuvent continuer normalement.',
-    'Très mauvais': 'Évitez toutes les activités en extérieur. Restez à l\'intérieur avec les fenêtres fermées.',
+    'Bon': 'Idéal pour toutes les activités de plein air.',
+    'Moyen': 'Activités habituelles. Aérez votre logement.',
+    'Dégradé': 'Envisagez de réduire les efforts intenses si vous êtes sensible (asthme, allergies).',
+    'Mauvais': 'Limitez les activités physiques intenses en extérieur. Privilégiez les sorties courtes.',
+    'Très Mauvais': 'Évitez le sport en extérieur. Consultez un médecin en cas de symptômes.',
+    'Extrêmement Mauvais': 'Restez à l\'intérieur, fenêtres fermées. Évitez tout effort physique.',
+    // Compatibilité
+    'Très bon': 'Profitez de l\'extérieur !',
+    'Médiocre': 'Limitez les efforts si vous êtes sensible.',
+    'Très mauvais': 'Évitez le sport en extérieur.',
   };
-
   return recommendations[libQual] || '';
 }
 
-function getAlertLevel(libQual: string): { label: string } {
-  const alertLevels: Record<string, { label: string }> = {
-    'Bon': { label: 'Aucun risque' },
-    'Moyen': { label: 'Faible risque' },
-    'Dégradé': { label: 'Attention' },
-    'Mauvais': { label: 'Modéré' },
-    'Très Mauvais': { label: 'Élevé' },
-    'Extrêmement Mauvais': { label: 'Critique' },
-    // Support des anciens libellés pour compatibilité
-    'Très bon': { label: 'Aucun risque' },
-    'Médiocre': { label: 'Modéré' },
-    'Très mauvais': { label: 'Critique' },
+// Niveaux de vigilance simplifiés pour l'UI
+function getVigilanceLevel(libQual: string) {
+  const levels: Record<string, { label: string, icon: any, colorClass: string }> = {
+    'Bon': { label: 'Aucun risque', icon: ShieldCheck, colorClass: 'text-emerald-600 bg-emerald-50' },
+    'Moyen': { label: 'Faible', icon: Leaf, colorClass: 'text-teal-600 bg-teal-50' },
+    'Dégradé': { label: 'Vigilance', icon: Info, colorClass: 'text-yellow-600 bg-yellow-50' },
+    'Mauvais': { label: 'Alerte', icon: AlertTriangle, colorClass: 'text-orange-600 bg-orange-50' },
+    'Très Mauvais': { label: 'Danger', icon: AlertOctagon, colorClass: 'text-red-600 bg-red-50' },
+    'Extrêmement Mauvais': { label: 'Crise', icon: Activity, colorClass: 'text-purple-600 bg-purple-50' },
   };
-
-  return alertLevels[libQual] || { label: 'Inconnu' };
-}
-
-// Fonction pour convertir un code de qualité en libellé et couleur (selon l'API Gwad'Air)
-// Utilise les couleurs exactes renvoyées par l'API Gwad'Air
-function getQualityFromCode(code: number | undefined): { label: string; color: string } {
-  const qualityMap: Record<number, { label: string; color: string }> = {
-    1: { label: 'Bon', color: '#50F0E6' },
-    2: { label: 'Moyen', color: '#50CCAA' },
-    3: { label: 'Dégradé', color: '#F0E641' }, // Couleur exacte de l'API
-    4: { label: 'Mauvais', color: '#FF5050' }, // Couleur exacte de l'API
-    5: { label: 'Très Mauvais', color: '#960032' }, // Couleur exacte de l'API
-    6: { label: 'Extrêmement Mauvais', color: '#803399' }, // Couleur exacte du site gwadair.fr
-    0: { label: 'Absent', color: '#DDDDDD' }, // Couleur exacte de l'API pour "Absent"
-  };
-
-  if (code === undefined || code === null) {
-    return { label: 'N/A', color: '#b9b9b9' };
-  }
-
-  return qualityMap[code] || { label: 'Inconnu', color: '#b9b9b9' };
+  return levels[libQual] || { label: 'Inconnu', icon: HelpCircle, colorClass: 'text-gray-600 bg-gray-50' };
 }
 
 export default function QualiteAir() {
-  // Fonction pour charger depuis le cache (utilisée pour l'initialisation lazy)
+  // --- GESTION DU CACHE ET DE L'ÉTAT ---
   const loadFromCache = (): { data: AirData; timestamp: number } | null => {
-    if (typeof window === 'undefined') return null; // SSR
+    if (typeof window === 'undefined') return null;
     try {
       const CACHE_KEY = 'gwada_air_quality_cache';
       const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
@@ -104,29 +82,20 @@ export default function QualiteAir() {
 
       if (cachedData && cachedTimestamp) {
         const timestamp = parseInt(cachedTimestamp, 10);
-        return {
-          data: JSON.parse(cachedData),
-          timestamp,
-        };
+        return { data: JSON.parse(cachedData), timestamp };
       }
     } catch (error) {
-      console.error('Erreur lors de la lecture du cache:', error);
+      console.error('Erreur lecture cache:', error);
     }
     return null;
   };
 
-  // État pour savoir si le composant est monté côté client (pour éviter l'hydratation mismatch)
-  // Initialisé à false pour que le rendu serveur et client soit identique
   const [mounted, setMounted] = useState(false);
-
-  // Initialisation avec données vides pour que le rendu serveur et client soit identique
-  // Les données seront chargées depuis le cache dans useEffect après l'hydratation
   const [airData, setAirData] = useState<AirData>({});
-  const [tooltip, setTooltip] = useState<HoverInfo | null>(null);
+  const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [selectedCommune, setSelectedCommune] = useState<string>(''); // Code zone de la commune sélectionnée
+  const [selectedCommune, setSelectedCommune] = useState<string>('');
 
-  // Fonction pour vérifier si deux dates sont le même jour
   const isSameDay = (date1: Date, date2: Date): boolean => {
     return (
       date1.getFullYear() === date2.getFullYear() &&
@@ -135,22 +104,40 @@ export default function QualiteAir() {
     );
   };
 
-  // Fonction pour formater la date et l'heure
   const formatDateTime = (date: Date): string => {
     return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     }).format(date);
   };
 
-  // Marquer le composant comme monté et charger les données du cache après l'hydratation
+  const airEntries = useMemo(() => Object.values(airData || {}), [airData]);
+  const totalCommunes = airEntries.length;
+  const favorableLabels = useMemo(() => ['bon', 'moyen', 'très bon'], []);
+  const alertLabels = useMemo(
+    () => ['dégradé', 'mauvais', 'très mauvais', 'extrêmement mauvais', 'médiocre'],
+    []
+  );
+  const favorableCommunes = useMemo(
+    () =>
+      airEntries.filter((data) => {
+        const label = data?.lib_qual?.toLowerCase() || '';
+        return favorableLabels.includes(label);
+      }).length,
+    [airEntries, favorableLabels]
+  );
+  const alertCommunes = useMemo(
+    () =>
+      airEntries.filter((data) => {
+        const label = data?.lib_qual?.toLowerCase() || '';
+        return alertLabels.includes(label);
+      }).length,
+    [airEntries, alertLabels]
+  );
+  const formattedLastUpdate = lastUpdate ? formatDateTime(lastUpdate) : 'Actualisation en cours…';
+
   useEffect(() => {
     setMounted(true);
-
-    // Charger les données du cache après l'hydratation
     const cached = loadFromCache();
     if (cached) {
       setAirData(cached.data);
@@ -158,15 +145,11 @@ export default function QualiteAir() {
     }
   }, []);
 
-  // Vérifier et faire un appel API seulement si nécessaire (une fois par jour)
   useEffect(() => {
-    // Ne rien faire côté serveur
     if (typeof window === 'undefined') return;
-
     const CACHE_KEY = 'gwada_air_quality_cache';
     const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
 
-    // Fonction pour sauvegarder dans le cache
     const saveToCache = (data: AirData) => {
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
@@ -174,89 +157,58 @@ export default function QualiteAir() {
         localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
         setLastUpdate(new Date(timestamp));
       } catch (error) {
-        console.error('Erreur lors de la sauvegarde du cache:', error);
+        console.error('Erreur sauvegarde cache:', error);
       }
     };
 
-    // Vérifier si un appel API est nécessaire
     const shouldFetch = (): boolean => {
       try {
         const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-        if (!cachedTimestamp) {
-          return true; // Pas de cache, on doit faire un appel
-        }
-
+        if (!cachedTimestamp) return true;
         const timestamp = parseInt(cachedTimestamp, 10);
         const lastUpdateDate = new Date(timestamp);
         const now = new Date();
+        const diffMinutes = (now.getTime() - lastUpdateDate.getTime()) / (1000 * 60);
 
-        // Calculer la différence en millisecondes
-        const diffMs = now.getTime() - lastUpdateDate.getTime();
-        const diffMinutes = diffMs / (1000 * 60);
-
-        // Faire un appel si :
-        // - La dernière mise à jour n'est pas d'aujourd'hui
-        // - OU si le cache a plus de 3 minutes (pour correspondre au TTL du backend)
         if (!isSameDay(lastUpdateDate, now) || diffMinutes > 3) {
-          console.log(`[Cache] Cache expiré (âge: ${Math.round(diffMinutes)} minutes), rafraîchissement nécessaire`);
+          console.log(`[Cache] Expiré (${Math.round(diffMinutes)} min), refresh...`);
           return true;
         }
-
-        console.log(`[Cache] Utilisation du cache local (âge: ${Math.round(diffMinutes)} minutes)`);
+        console.log(`[Cache] Valide (${Math.round(diffMinutes)} min).`);
         return false;
       } catch (error) {
-        console.error('Erreur lors de la vérification du cache:', error);
-        return true; // En cas d'erreur, on fait un appel
+        return true;
       }
     };
 
-    // Faire un appel API seulement si nécessaire (toutes les 3 minutes ou si pas d'aujourd'hui)
     if (shouldFetch()) {
       fetch('http://127.0.0.1:8000/api/air-quality')
         .then((res) => res.json())
         .then((data) => {
           setAirData(data);
-          saveToCache(data); // Sauvegarder dans le cache
+          saveToCache(data);
         })
-        .catch((error) => {
-          console.error('Erreur lors de la récupération des données:', error);
-          // Si l'appel API échoue, on garde les données du cache si elles existent
-        });
+        .catch((error) => console.error('Erreur API:', error));
     }
-  }, []); // Se lance une seule fois après le montage
+  }, []);
 
-  // Définition des niveaux de qualité d'air pour la légende (selon les standards ATMO de Gwad'Air)
-  // Ces couleurs par défaut correspondent aux couleurs exactes renvoyées par l'API Gwad'Air
-  // Elles ne sont utilisées que si les données de l'API ne sont pas encore chargées
   const defaultQualityLevels = [
     { label: 'Bon', color: '#50F0E6' },
     { label: 'Moyen', color: '#50CCAA' },
-    { label: 'Dégradé', color: '#F0E641' }, // Couleur exacte de l'API (différente de #FFC800)
-    { label: 'Mauvais', color: '#FF5050' }, // Couleur exacte de l'API (différente de #FF0000)
-    { label: 'Très Mauvais', color: '#960032' }, // Couleur exacte de l'API (différente de #8F3F97)
-    { label: 'Extrêmement Mauvais', color: '#803399' }, // Couleur exacte du site gwadair.fr
+    { label: 'Dégradé', color: '#F0E641' },
+    { label: 'Mauvais', color: '#FF5050' },
+    { label: 'Très Mauvais', color: '#960032' },
+    { label: 'Extrêmement Mauvais', color: '#803399' },
   ];
 
-  // Extraire les couleurs réelles depuis les données de l'API
   const getQualityLevelsFromAPI = () => {
-    // Créer un Map pour stocker les couleurs par label (insensible à la casse pour éviter les doublons)
     const colorMap = new Map<string, string>();
-
-    // Parcourir toutes les données de l'API pour extraire les couleurs
     Object.values(airData).forEach((data) => {
       if (data.lib_qual && data.coul_qual) {
-        // Normaliser le label (insensible à la casse) pour la correspondance
-        const normalizedLabel = data.lib_qual.trim();
-        // Utiliser la couleur de l'API si elle n'est pas déjà définie
-        if (!colorMap.has(normalizedLabel)) {
-          colorMap.set(normalizedLabel, data.coul_qual);
-        }
+        colorMap.set(data.lib_qual.trim(), data.coul_qual);
       }
     });
-
-    // Construire la liste des niveaux avec les couleurs de l'API
     return defaultQualityLevels.map((level) => {
-      // Chercher la couleur dans le Map en comparant de manière insensible à la casse
       let apiColor: string | undefined;
       for (const [apiLabel, apiColorValue] of colorMap.entries()) {
         if (apiLabel.toLowerCase() === level.label.toLowerCase()) {
@@ -264,433 +216,347 @@ export default function QualiteAir() {
           break;
         }
       }
-
-      return {
-        label: level.label,
-        color: apiColor || level.color, // Utiliser la couleur de l'API si disponible, sinon la couleur par défaut
-      };
+      return { label: level.label, color: apiColor || level.color };
     });
   };
 
-  // Obtenir les niveaux de qualité avec les couleurs de l'API
   const qualityLevels = getQualityLevelsFromAPI();
 
-  // Fonction pour obtenir la couleur d'un niveau depuis les données réelles de l'API
   const getLevelColor = (label: string): string => {
-    // D'abord chercher dans les données de l'API (comparaison insensible à la casse)
     const found = Object.values(airData).find((data) =>
       data.lib_qual && data.lib_qual.toLowerCase() === label.toLowerCase()
     );
-    if (found?.coul_qual) {
-      return found.coul_qual;
-    }
-    // Sinon utiliser la couleur par défaut
-    return defaultQualityLevels.find((level) => level.label.toLowerCase() === label.toLowerCase())?.color || '#b9b9b9';
+    return found?.coul_qual || defaultQualityLevels.find((l) => l.label.toLowerCase() === label.toLowerCase())?.color || '#b9b9b9';
   };
 
-  // Fonction pour calculer la position optimale du tooltip
-  const calculateTooltipPosition = (mouseX: number, mouseY: number) => {
-    if (typeof window === 'undefined') return { x: mouseX, y: mouseY };
+  const communesForSelector = useMemo(() => {
+    const communes: { [code: string]: string } = {};
+    Object.entries(airData).forEach(([code, data]) => {
+      communes[code] = data.lib_zone;
+    });
+    return communes;
+  }, [airData]);
 
-    // Calculer la largeur du tooltip en fonction de la taille de l'écran (responsive)
-    let tooltipWidth = 320; // Par défaut (md et plus)
-    if (window.innerWidth < 640) {
-      tooltipWidth = 280; // Petit écran
-    } else if (window.innerWidth < 768) {
-      tooltipWidth = 300; // Écran moyen
+  // Gestion du survol (Hover)
+  const handleCommuneHover = useCallback((info: HoverInfo) => {
+    setHoveredInfo(info);
+  }, []);
+
+  const handleCommuneLeave = useCallback(() => {
+    setHoveredInfo(null);
+  }, []);
+
+  // Gestion du clic
+  const handleCommuneClick = useCallback((code: string) => {
+    setSelectedCommune(prev => prev === code ? '' : code);
+  }, []);
+
+  // Données pour la Sidebar
+  const sidebarData = useMemo(() => {
+    const code = selectedCommune;
+    if (code && airData[code]) {
+        return airData[code];
     }
-
-    const tooltipHeight = 450; // Estimation de la hauteur approximative (avec scroll si nécessaire)
-    const margin = 20; // Marge de sécurité par rapport aux bords
-    const offset = 15; // Décalage par rapport au curseur
-
-    let x = mouseX + offset;
-    let y = mouseY + offset;
-
-    // Vérifier si le tooltip dépasse à droite
-    if (x + tooltipWidth + margin > window.innerWidth) {
-      x = mouseX - tooltipWidth - offset; // Placer à gauche du curseur
-    }
-
-    // Vérifier si le tooltip dépasse toujours (cas extrême gauche)
-    if (x < margin) {
-      x = margin;
-    }
-
-    // Vérifier si le tooltip dépasse en bas
-    if (y + tooltipHeight + margin > window.innerHeight) {
-      y = mouseY - tooltipHeight - offset; // Placer au-dessus du curseur
-    }
-
-    // Vérifier si le tooltip dépasse toujours (cas extrême haut)
-    if (y < margin) {
-      y = margin;
-    }
-
-    // S'assurer que le tooltip ne dépasse pas à droite même après ajustement
-    if (x + tooltipWidth > window.innerWidth - margin) {
-      x = window.innerWidth - tooltipWidth - margin;
-    }
-
-    return { x, y };
-  };
-
-  // Effet pour afficher automatiquement le tooltip quand une commune est sélectionnée
-  useEffect(() => {
-    if (selectedCommune && airData[selectedCommune]) {
-      const communeData = airData[selectedCommune];
-      // Positionner le tooltip au centre de l'écran (ou à un endroit fixe)
-      const centerX = window.innerWidth / 2 - 160;
-      const centerY = 150;
-      const position = calculateTooltipPosition(centerX, centerY);
-
-      setTooltip({
-        x: position.x,
-        y: position.y,
-        data: {
-          ...communeData,
-          code_zone: selectedCommune,
-        },
-      });
-    } else if (!selectedCommune) {
-      // Si on désélectionne, on enlève le tooltip
-      setTooltip(null);
-    }
+    return null;
   }, [selectedCommune, airData]);
 
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gray-50">
+    <main className="flex min-h-screen flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
       <div className="w-full max-w-7xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-3 text-gray-800">Qualité de l&apos;Air en Guadeloupe</h1>
+        {/* En-tête */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-4 text-slate-800 dark:text-white tracking-tight">
+            Qualité de l&apos;Air en <span className="text-teal-600 dark:text-teal-400">Guadeloupe</span>
+          </h1>
+          <p className="text-lg text-slate-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Consultez en temps réel l&apos;indice ATMO et les prévisions de qualité de l&apos;air pour votre commune. Données certifiées par Gwad&apos;Air.
+          </p>
         </div>
+
+        {/* Statistiques clés */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          {[
+            {
+              title: 'Communes suivies',
+              value: totalCommunes || '—',
+              description: 'Zones couvertes aujourd’hui',
+              icon: MapPin,
+              accent: 'from-teal-50 to-white',
+              text: 'text-teal-700'
+            },
+            {
+              title: 'Air respirable',
+              value: favorableCommunes || '—',
+              description: 'Indice Bon à Moyen',
+              icon: Sparkles,
+              accent: 'from-emerald-50 to-white',
+              text: 'text-emerald-700'
+            },
+            {
+              title: 'Communes en alerte',
+              value: alertCommunes || '—',
+              description: formattedLastUpdate,
+              icon: AlertTriangle,
+              accent: 'from-orange-50 to-white',
+              text: 'text-orange-700'
+            }
+          ].map(({ title, value, description, icon: Icon, accent, text }) => (
+            <article
+              key={title}
+              className={`flex flex-col gap-3 rounded-3xl border border-slate-100 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-lg hover:border-teal-200 dark:hover:border-teal-600`}
+            >
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${accent} flex items-center justify-center`}>
+                <Icon className={`w-6 h-6 ${text}`} />
+              </div>
+              <p className="text-sm font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wide">{title}</p>
+              <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{value}</span>
+              <p className="text-sm text-slate-500 dark:text-gray-400">{description}</p>
+            </article>
+          ))}
+        </section>
+
+        {/* Cartes d'information inspirées de l'accueil */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {[
+            {
+              title: 'Carte ATMO en direct',
+              description: 'Couverture intégrale de l’archipel avec précision par commune.',
+              icon: Wind,
+              badge: 'Live',
+              accent: 'text-teal-600',
+              border: 'hover:border-teal-200',
+            },
+            {
+              title: 'Conseils santé',
+              description: 'Recommandations personnalisées selon votre niveau de vigilance.',
+              icon: ShieldCheck,
+              badge: 'Prévention',
+              accent: 'text-emerald-600',
+              border: 'hover:border-emerald-200',
+            },
+            {
+              title: 'Comparatif polluants',
+              description: 'Comprenez l’impact local des PM10, NO₂, O₃ et SO₂.',
+              icon: Activity,
+              badge: 'Analyse',
+              accent: 'text-blue-600',
+              border: 'hover:border-blue-200',
+            },
+          ].map(({ title, description, icon: Icon, badge, accent, border }) => (
+            <article
+              key={title}
+              className={`group relative bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 dark:border-gray-700 ${border} overflow-hidden flex flex-col`}
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity duration-500">
+                <Icon className={`w-32 h-32 ${accent} transform rotate-6 translate-x-8 -translate-y-8`} />
+              </div>
+              <div className="relative z-10 flex flex-col gap-4">
+                <div className="w-fit px-3 py-1 text-xs font-semibold rounded-full bg-slate-50 dark:bg-gray-700 text-slate-500 dark:text-gray-400 shadow-sm border border-slate-100 dark:border-gray-600">
+                  {badge}
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  {title}
+                  <ArrowRight className={`w-5 h-5 text-slate-300 dark:text-gray-600 group-hover:text-slate-500 dark:group-hover:text-gray-400 transition`} />
+                </h3>
+                <p className="text-slate-600 dark:text-gray-300 leading-relaxed flex-1">{description}</p>
+              </div>
+            </article>
+          ))}
+        </section>
 
         {/* Sélecteur de commune */}
-        <div className="w-full max-w-md mx-auto mb-6">
-          <label htmlFor="commune-select" className="block text-sm font-medium text-gray-700 mb-2">
-            Sélectionner une commune
-          </label>
-          <select
-            id="commune-select"
-            value={selectedCommune}
-            onChange={(e) => setSelectedCommune(e.target.value)}
-            className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer hover:border-gray-400 text-gray-900 font-medium"
-          >
-            <option value="">-- Choisir une commune --</option>
-            {Object.entries(airData)
-              .sort(([, a], [, b]) => a.lib_zone.localeCompare(b.lib_zone))
-              .map(([code, data]) => (
-                <option key={code} value={code}>
-                  {data.lib_zone}
-                </option>
-              ))}
-          </select>
-        </div>
+        <CommuneSelector
+          selectedCommune={selectedCommune}
+          onSelectCommune={setSelectedCommune}
+          communes={communesForSelector}
+          title="Sélectionner une commune"
+        />
 
-        <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+        <div className="flex flex-col lg:flex-row gap-8 w-full items-start mb-12">
           {/* Carte */}
-          <div className="flex-1 w-full bg-white shadow-xl rounded-xl overflow-hidden border-2 border-gray-200 flex flex-col" style={{ height: '700px' }}>
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex-shrink-0">
-              <p className="text-sm text-gray-700 font-medium">
-                🌬️ <span className="font-semibold">Les couleurs indiquent la qualité de l&apos;air par zone</span> - Survolez une commune ou sélectionnez-la dans le menu déroulant
-              </p>
-              <p className="text-xs text-gray-500 mt-1">Source: Gwad&apos;Air</p>
+          <div className="flex-1 w-full bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden border border-slate-100 dark:border-gray-700 flex flex-col relative group" style={{ height: '700px' }}>
+            <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 text-xs font-medium text-slate-600 dark:text-gray-300 flex items-center gap-2">
+              <Wind className="w-4 h-4 text-teal-500 dark:text-teal-400" />
+              Carte interactive
             </div>
-            <div className="w-full flex justify-center items-center p-6 bg-white flex-1 min-h-0">
+            <div className="w-full flex justify-center items-center p-6 bg-white dark:bg-gray-800 flex-1 min-h-0 relative">
               <GuadeloupeMap
                 data={airData}
                 selectedCommune={selectedCommune}
-                onCommuneHover={(hoverInfo) => {
-                  // Calculer la position optimale du tooltip lors du hover
-                  // S'assurer que le tooltip s'affiche immédiatement
-                  const position = calculateTooltipPosition(hoverInfo.x, hoverInfo.y);
-                  setTooltip({
-                    ...hoverInfo,
-                    x: position.x,
-                    y: position.y,
-                  });
-                }}
-                onCommuneLeave={() => {
-                  // Le délai de masquage est géré dans GuadeloupeMap
-                  // Ici, on gère seulement la logique de réaffichage si une commune est sélectionnée
-                  if (selectedCommune && airData[selectedCommune]) {
-                    const communeData = airData[selectedCommune];
-                    const centerX = window.innerWidth / 2 - 160;
-                    const centerY = 150;
-                    const position = calculateTooltipPosition(centerX, centerY);
-
-                    setTooltip({
-                      x: position.x,
-                      y: position.y,
-                      data: {
-                        ...communeData,
-                        code_zone: selectedCommune,
-                      },
-                    });
-                  } else {
-                    // Masquer le tooltip seulement si aucune commune n'est sélectionnée
-                    // Le délai est déjà géré dans GuadeloupeMap
-                    setTooltip(null);
-                  }
-                }}
+                onCommuneHover={handleCommuneHover}
+                onCommuneLeave={handleCommuneLeave}
+                onCommuneClick={handleCommuneClick}
               />
             </div>
-          </div>
-
-          {/* Légende simplifiée */}
-          <div className="w-full lg:w-64 bg-white rounded-lg shadow-lg p-4 lg:sticky lg:top-6">
-            <h2 className="text-lg font-bold mb-3 text-gray-800">Légende</h2>
-            <div className="space-y-2">
-              {qualityLevels.map((level) => {
-                // level.color contient déjà la couleur de l'API (ou la couleur par défaut si pas encore chargée)
-                return (
-                  <div
-                    key={level.label}
-                    className="flex items-center gap-3"
-                  >
-                    {/* Indicateur de couleur */}
-                    <div
-                      className="w-8 h-8 rounded border-2 flex-shrink-0"
-                      style={{
-                        backgroundColor: level.color,
-                        borderColor: level.color + '80'
-                      }}
-                    >
-                    </div>
-                    {/* Label */}
-                    <span
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      {level.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Informations supplémentaires */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              {mounted && lastUpdate && (
-                <div className="mb-2">
-                  <p className="text-xs text-gray-600 mb-1">
-                    <strong className="text-gray-700">Dernière mise à jour :</strong>
-                  </p>
-                  <p className="text-xs text-gray-500 font-medium">
-                    {formatDateTime(lastUpdate)}
-                  </p>
+            {/* Tooltip Flottant simple au survol */}
+            {hoveredInfo && (
+                <div
+                className="fixed pointer-events-none z-50 bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
+                style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
+                >
+                {hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
                 </div>
-              )}
-              <p className="text-xs text-gray-500 leading-relaxed">
-                <strong className="text-gray-700">Source :</strong> Gwad&apos;Air
-              </p>
-            </div>
+            )}
           </div>
+
+          {/* Sidebar Latérale */}
+          <AirSidebar
+            data={sidebarData}
+            lastUpdate={lastUpdate}
+            formatDateTime={formatDateTime}
+          />
         </div>
 
-        {/* Section détaillée des niveaux d'alerte sous la carte */}
-        <div className="w-full mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-2 text-gray-800">Niveaux d&apos;alerte - Détails</h2>
-          <p className="text-sm text-gray-600 mb-6">Informations détaillées sur chaque niveau de qualité de l&apos;air</p>
+        {/* --- NOUVELLE SECTION: Comprendre l'indice --- */}
+        <div className="w-full mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-slate-100 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-slate-100 dark:border-gray-700 bg-gradient-to-r from-teal-50/50 to-white dark:from-teal-900/20 dark:to-gray-800">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+              <Activity className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+              Comprendre l&apos;indice ATMO
+            </h2>
+            <p className="text-slate-600 dark:text-gray-300 mt-2">
+              L&apos;échelle de qualité de l&apos;air et les recommandations sanitaires associées pour la Guadeloupe.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-6">
             {qualityLevels.map((level) => {
               const actualColor = getLevelColor(level.label);
-              const alertLevel = getAlertLevel(level.label);
+              const vigilance = getVigilanceLevel(level.label);
+              const Icon = vigilance.icon;
+
               return (
                 <div
                   key={level.label}
-                  className="border rounded-lg p-4 hover:shadow-md transition-all"
-                  style={{ borderColor: actualColor + '40' }}
+                  className="flex flex-col h-full bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-all duration-300 group"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    {/* Indicateur de couleur */}
+                  {/* Header Card */}
+                  <div className="p-4 flex items-center gap-4 border-b border-slate-50 dark:border-gray-700" style={{ borderTop: `4px solid ${actualColor}` }}>
                     <div
-                      className="w-12 h-12 rounded-lg border-2 flex-shrink-0"
-                      style={{
-                        backgroundColor: actualColor,
-                        borderColor: actualColor + '80'
-                      }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-sm"
+                      style={{ backgroundColor: actualColor }}
                     >
+                      <Icon className="w-6 h-6" />
                     </div>
-                    {/* Label et niveau d'alerte */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className="font-bold text-base"
-                          style={{ color: actualColor }}
-                        >
-                          {level.label}
-                        </span>
-                      </div>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">
-                        {alertLevel.label}
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-800 dark:text-white">{level.label}</h3>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${vigilance.colorClass}`}>
+                        {vigilance.label}
                       </span>
                     </div>
                   </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                    {getQualityDescription(level.label)}
-                  </p>
+                  {/* Content Card */}
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <p className="text-sm text-slate-600 dark:text-gray-300 mb-4 leading-relaxed">
+                      {getQualityDescription(level.label)}
+                    </p>
 
-                  {/* Recommandations */}
-                  {getRecommendations(level.label) && (
-                    <div className="bg-blue-50 rounded-lg p-2.5 mt-3">
-                      <p className="text-xs font-semibold text-blue-900 mb-1">
-                        💡 Recommandations
-                      </p>
-                      <p className="text-xs text-blue-800 leading-relaxed">
-                        {getRecommendations(level.label)}
-                      </p>
-                    </div>
-                  )}
+                    {getRecommendations(level.label) && (
+                      <div className="bg-slate-50 dark:bg-gray-700 rounded-lg p-3 mt-auto">
+                        <div className="flex items-start gap-2">
+                          <Info className="w-4 h-4 text-slate-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-slate-700 dark:text-gray-300 font-medium italic">
+                            &ldquo;{getRecommendations(level.label)}&rdquo;
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* 2. L'infobulle (Tooltip) */}
-        {tooltip && (
-          <div
-            className="fixed bg-white border-2 rounded-xl shadow-2xl pointer-events-auto transition-all z-50 w-[280px] sm:w-[300px] md:w-[320px]"
-            style={{
-              left: `${tooltip.x}px`,
-              top: `${tooltip.y}px`,
-              borderColor: tooltip.data.coul_qual,
-              boxShadow: `0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 1px ${tooltip.data.coul_qual}20`,
-              maxHeight: 'calc(100vh - 40px)', // Limiter la hauteur pour éviter de dépasser l'écran
-              overflowY: 'auto', // Ajouter un scroll si nécessaire
-            }}
-          >
-            {/* En-tête avec couleur de fond */}
-            <div
-              className="px-4 py-3 rounded-t-xl text-white font-bold text-lg flex items-center justify-between"
-              style={{ backgroundColor: tooltip.data.coul_qual }}
-            >
-              <span>{tooltip.data.lib_zone}</span>
-              <button
-                onClick={() => {
-                  setSelectedCommune('');
-                  setTooltip(null);
-                }}
-                className="ml-2 text-white hover:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded p-1"
-                aria-label="Fermer"
-                title="Fermer et revenir à la carte"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+        {/* --- NOUVELLE SECTION: Guide des polluants --- */}
+        <div className="w-full mt-10 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-slate-100 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-slate-100 dark:border-gray-700 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-900/20 dark:to-gray-800">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+              <CloudFog className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              Guide des polluants surveillés
+            </h2>
+            <p className="text-slate-600 dark:text-gray-300 mt-2">
+              Comprendre l&apos;origine et les effets des principaux polluants atmosphériques en Guadeloupe.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-gray-700">
+            {/* PM10 & PM2.5 */}
+            <div className="p-6 group hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition-colors">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center mb-4 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
+                <Wind className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Particules Fines <span className="text-sm font-normal text-slate-500 dark:text-gray-400">(PM10, PM2.5)</span></h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Origine</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Brumes de sable (Sahara), combustion, trafic routier.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Impact Santé</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Pénètrent profondément dans les poumons. Irritation, asthme, gêne respiratoire.</p>
+                </div>
+              </div>
             </div>
 
-            {/* Corps du tooltip */}
-            <div className="px-4 py-4 space-y-3">
-              {/* Qualité de l'air - principale */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                    Qualité de l&apos;air
-                  </span>
-
-                </div>
-
-                {/* Description de la qualité */}
-                {getQualityDescription(tooltip.data.lib_qual) && (
-                  <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                    {getQualityDescription(tooltip.data.lib_qual)}
-                  </p>
-                )}
+            {/* NO2 */}
+            <div className="p-6 group hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition-colors">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mb-4 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
+                <Car className="w-6 h-6" />
               </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Dioxyde d&apos;azote <span className="text-sm font-normal text-slate-500 dark:text-gray-400">(NO₂)</span></h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Origine</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Principalement le trafic routier (moteurs diesel) et centrales électriques.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Impact Santé</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Irrite les bronches. Augmente la sensibilité aux infections microbiennes.</p>
+                </div>
+              </div>
+            </div>
 
+            {/* O3 */}
+            <div className="p-6 group hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition-colors">
+              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-2xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform">
+                <Sun className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Ozone <span className="text-sm font-normal text-slate-500 dark:text-gray-400">(O₃)</span></h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Origine</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Polluant secondaire formé par réaction chimique sous le soleil intense.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Impact Santé</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Toux, irritations oculaires, diminution de la capacité respiratoire à l&apos;effort.</p>
+                </div>
+              </div>
+            </div>
 
-
-              {/* Informations sur les polluants */}
-              {(tooltip.data.code_no2 !== undefined ||
-                tooltip.data.code_so2 !== undefined ||
-                tooltip.data.code_o3 !== undefined ||
-                tooltip.data.code_pm10 !== undefined ||
-                tooltip.data.code_pm25 !== undefined) && (
-                <>
-                  <div className="border-t border-gray-200"></div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                      Détails par polluant
-                    </p>
-                    <div className="space-y-1.5">
-                      {tooltip.data.code_no2 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">NO₂</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_no2).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_no2).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_so2 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">SO₂</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_so2).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_so2).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_o3 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">O₃</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_o3).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_o3).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_pm10 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">PM10</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm10).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_pm10).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_pm25 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">PM2.5</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm25).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_pm25).label}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
-
-
+            {/* SO2 */}
+            <div className="p-6 group hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition-colors">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                <Factory className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">Dioxyde de Soufre <span className="text-sm font-normal text-slate-500 dark:text-gray-400">(SO₂)</span></h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Origine</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Activités industrielles, raffineries, volcanisme naturel.</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wide mb-1">Impact Santé</p>
+                  <p className="text-sm text-slate-600 dark:text-gray-300">Irritation immédiate des muqueuses, de la peau et des voies respiratoires.</p>
+                </div>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+
       </div>
     </main>
   );

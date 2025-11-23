@@ -366,9 +366,9 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
                 </div>
 
                 {/* Description de la qualité */}
-                {getQualityDescription(tooltip.data.lib_qual) && (
+                {getQualityDescription(tooltip.data.lib_qual || '') && (
                   <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                    {getQualityDescription(tooltip.data.lib_qual)}
+                    {getQualityDescription(tooltip.data.lib_qual || '')}
                   </p>
                 )}
               </div>
@@ -391,13 +391,13 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
-                        width: getQualityPercentage(tooltip.data.lib_qual) + '%',
+                        width: getQualityPercentage(tooltip.data.lib_qual || '') + '%',
                         backgroundColor: tooltip.data.coul_qual,
                       }}
                     ></div>
                   </div>
                   <span className="text-xs text-gray-600 font-medium">
-                    {getQualityPercentage(tooltip.data.lib_qual)}%
+                    {getQualityPercentage(tooltip.data.lib_qual || '')}%
                   </span>
                 </div>
               </div>
@@ -408,75 +408,75 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
                 tooltip.data.code_o3 !== undefined ||
                 tooltip.data.code_pm10 !== undefined ||
                 tooltip.data.code_pm25 !== undefined) && (
-                <>
-                  <div className="border-t border-gray-200"></div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                      Détails par polluant
-                    </p>
-                    <div className="space-y-1.5">
-                      {tooltip.data.code_no2 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">NO₂</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_no2).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_no2).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_so2 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">SO₂</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_so2).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_so2).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_o3 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">O₃</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_o3).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_o3).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_pm10 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">PM10</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm10).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_pm10).label}
-                          </span>
-                        </div>
-                      )}
-                      {tooltip.data.code_pm25 !== undefined && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">PM2.5</span>
-                          <span
-                            className="px-2 py-0.5 rounded text-xs font-medium text-white"
-                            style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm25).color }}
-                          >
-                            {getQualityFromCode(tooltip.data.code_pm25).label}
-                          </span>
-                        </div>
-                      )}
+                  <>
+                    <div className="border-t border-gray-200"></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                        Détails par polluant
+                      </p>
+                      <div className="space-y-1.5">
+                        {tooltip.data.code_no2 !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">NO₂</span>
+                            <span
+                              className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                              style={{ backgroundColor: getQualityFromCode(tooltip.data.code_no2 as number | undefined).color }}
+                            >
+                              {getQualityFromCode(tooltip.data.code_no2 as number | undefined).label}
+                            </span>
+                          </div>
+                        )}
+                        {tooltip.data.code_so2 !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">SO₂</span>
+                            <span
+                              className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                              style={{ backgroundColor: getQualityFromCode(tooltip.data.code_so2 as number | undefined).color }}
+                            >
+                              {getQualityFromCode(tooltip.data.code_so2 as number | undefined).label}
+                            </span>
+                          </div>
+                        )}
+                        {tooltip.data.code_o3 !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">O₃</span>
+                            <span
+                              className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                              style={{ backgroundColor: getQualityFromCode(tooltip.data.code_o3 as number | undefined).color }}
+                            >
+                              {getQualityFromCode(tooltip.data.code_o3 as number | undefined).label}
+                            </span>
+                          </div>
+                        )}
+                        {tooltip.data.code_pm10 !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">PM10</span>
+                            <span
+                              className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                              style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm10 as number | undefined).color }}
+                            >
+                              {getQualityFromCode(tooltip.data.code_pm10 as number | undefined).label}
+                            </span>
+                          </div>
+                        )}
+                        {tooltip.data.code_pm25 !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-600">PM2.5</span>
+                            <span
+                              className="px-2 py-0.5 rounded text-xs font-medium text-white"
+                              style={{ backgroundColor: getQualityFromCode(tooltip.data.code_pm25 as number | undefined).color }}
+                            >
+                              {getQualityFromCode(tooltip.data.code_pm25 as number | undefined).label}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
 
               {/* Recommandations */}
-              {getRecommendations(tooltip.data.lib_qual) && (
+              {getRecommendations(tooltip.data.lib_qual || '') && (
                 <>
                   <div className="border-t border-gray-200"></div>
                   <div className="bg-blue-50 rounded-lg p-2.5">
@@ -484,7 +484,7 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
                       💡 Recommandations
                     </p>
                     <p className="text-xs text-blue-800 leading-relaxed">
-                      {getRecommendations(tooltip.data.lib_qual)}
+                      {getRecommendations(tooltip.data.lib_qual || '')}
                     </p>
                   </div>
                 </>
