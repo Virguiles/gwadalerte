@@ -36,11 +36,11 @@ export default function Home() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-slate-900 dark:text-white leading-tight">
-            Gwad'<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-400">Alerte</span>
+            Gwad&apos;<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-400">Alerte</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-light mb-10">
-            Le tableau de bord citoyen pour surveiller l'eau, l'air et la météo en Guadeloupe.
+            Le tableau de bord citoyen pour surveiller l&apos;eau, l&apos;air et la météo en Guadeloupe.
           </p>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function Home() {
                 </div>
 
                 <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors flex items-center gap-3">
-                  Qualité de l'Air
+                  Qualité de l&apos;Air
                   <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-teal-500 dark:text-teal-400" />
                 </h3>
 
@@ -110,14 +110,14 @@ export default function Home() {
                     </div>
                   ) : (
                     <p>
-                      Carte interactive de l'indice ATMO, détails des polluants et recommandations sanitaires.
+                      Carte interactive de l&apos;indice ATMO, détails des polluants et recommandations sanitaires.
                     </p>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-400 font-semibold bg-teal-50 dark:bg-teal-900/30 w-fit px-4 py-2 rounded-full border border-teal-100 dark:border-teal-800/50">
                   <Activity className="w-4 h-4" />
-                  <span>Données Gwad'Air</span>
+                  <span>Données Gwad&apos;Air</span>
                 </div>
               </div>
             </Link>
@@ -137,12 +137,12 @@ export default function Home() {
                 </div>
 
                 <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white group-hover:text-cyan-700 dark:group-hover:text-cyan-400 transition-colors flex items-center gap-3">
-                  Tours d'Eau
+                  Tours d&apos;Eau
                   <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-cyan-500 dark:text-cyan-400" />
                 </h3>
 
                 <p className="text-slate-600 dark:text-gray-300 leading-relaxed mb-8 flex-1">
-                  Calendrier des coupures d'eau, planning SMGEAG et zones impactées en temps réel.
+                  Calendrier des coupures d&apos;eau, planning SMGEAG et zones impactées en temps réel.
                 </p>
 
                 <div className="flex items-center gap-2 text-sm text-cyan-700 dark:text-cyan-400 font-semibold bg-cyan-50 dark:bg-cyan-900/30 w-fit px-4 py-2 rounded-full border border-cyan-100 dark:border-cyan-800/50">
@@ -184,26 +184,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <footer className="w-full bg-white dark:bg-gray-900 border-t border-slate-100 dark:border-gray-800 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-center md:text-left">
-            <p className="text-slate-900 dark:text-white font-semibold text-lg mb-1">Gwad'Alerte</p>
-            <p className="text-slate-500 dark:text-gray-400 text-sm">
-              Un projet citoyen pour la transparence environnementale en Guadeloupe.
-            </p>
-          </div>
-
-          <div className="text-center md:text-right">
-            <p className="text-slate-400 dark:text-gray-500 text-sm mb-2">
-              Données agrégées depuis Gwad'Air, Météo-France et les services publics.
-            </p>
-            <p className="text-slate-300 dark:text-gray-600 text-xs">
-              © {new Date().getFullYear()} Gwad'Alerte. Tous droits réservés.
-            </p>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }

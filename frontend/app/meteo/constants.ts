@@ -1,5 +1,12 @@
 import { VigilanceLevelInfo } from './types';
 
+// Extension de l'interface pour inclure les caractéristiques
+// Note: Il faudrait idéalement mettre à jour types.ts, mais on peut le faire ici ou caster
+interface ExtendedVigilanceLevelInfo extends VigilanceLevelInfo {
+  characteristics?: string[];
+}
+
+
 export const VIGILANCE_LEVEL_DETAILS: Record<number, VigilanceLevelInfo> = {
   [-1]: {
     level: -1,
@@ -33,7 +40,7 @@ export const VIGILANCE_LEVEL_DETAILS: Record<number, VigilanceLevelInfo> = {
     label: 'Jaune',
     color: '#f0d53c',
     description: 'Soyez attentifs',
-    advice: 'Restez attentif aux évolutions et préparez-vous à adapter vos activités si nécessaire.',
+    advice: 'Informez-vous de la situation météorologique et soyez particulièrement prudents si vous pratiquez des sports à risque en extérieur, si vos activités de plein air sont situées dans une zone exposée, ou si vous devez circuler dans des zones inondables (franchissement de gués ou de passages bas encaissés). En cas d\'orage : évitez l\'utilisation des téléphones et des appareils électriques. Ne vous abritez pas dans une zone boisée, tout près de pylônes ou poteaux.',
     icon: '🟡',
     highlight: 'rgba(240, 213, 60, 0.18)',
   },
@@ -54,8 +61,63 @@ export const VIGILANCE_LEVEL_DETAILS: Record<number, VigilanceLevelInfo> = {
     advice: 'Restez en sécurité, tenez-vous informé en permanence et appliquez les consignes officielles.',
     icon: '🔴',
     highlight: 'rgba(255, 0, 0, 0.18)',
+    characteristics: [
+      'Phénomènes dangereux d\'intensité exceptionnelle',
+      'Menace directe pour la sécurité des personnes et des biens',
+      'Sorties fortement déconseillées'
+    ]
   },
+  5: {
+    level: 5,
+    label: 'Violet',
+    color: '#A020F0',
+    description: 'Confinement',
+    advice: 'Danger imminent. Restez à l\'abri et ne sortez sous aucun prétexte. Écoutez les médias.',
+    icon: '🟣',
+    highlight: 'rgba(160, 32, 240, 0.18)',
+    characteristics: [
+      'Cyclone tropical intense représentant un danger imminent',
+      'Effets majeurs attendus dans les 3 à 6 heures',
+      'Interdiction totale de circuler',
+      'Confinement strict obligatoire'
+    ]
+  },
+  6: {
+    level: 6,
+    label: 'Gris',
+    color: '#808080',
+    description: 'Phase de sauvegarde',
+    advice: 'Restez prudents. Dangers subsistants (inondations, fils à terre). Limitez les déplacements.',
+    icon: '⚪',
+    highlight: 'rgba(128, 128, 128, 0.18)',
+    characteristics: [
+      'Menace cyclonique écartée mais dangers persistants',
+      'Risques d\'inondations, éboulements, fils électriques à terre',
+      'Équipes de secours et de déblaiement à l\'œuvre',
+      'Retour progressif à la normale'
+    ]
+  }
 };
+
+// Add characteristics to other levels
+VIGILANCE_LEVEL_DETAILS[-1].characteristics = ['Données non disponibles'];
+VIGILANCE_LEVEL_DETAILS[0].characteristics = ['Situation météorologique normale', 'Pas de vigilance particulière'];
+VIGILANCE_LEVEL_DETAILS[1].characteristics = ['Situation météorologique normale', 'Pas de vigilance particulière'];
+VIGILANCE_LEVEL_DETAILS[2].characteristics = [
+  'Phénomènes habituels dans la région mais occasionnellement dangereux',
+  'Vents violents possibles',
+  'Fortes pluies et orages prévus',
+  'Risques de vagues-submersion sur le littoral',
+  'Perturbation locale des activités possible',
+  'Zones à risque : montagne, cours d\'eau, mer, zones inondables'
+];
+VIGILANCE_LEVEL_DETAILS[3].characteristics = [
+  'Phénomènes dangereux prévus',
+  'Conséquences possibles sur la vie collective',
+  'Perturbations de la circulation et des réseaux',
+  'Tenez-vous au courant de l\'évolution de la situation'
+];
+
 
 export const DEFAULT_VIGILANCE_INFO = VIGILANCE_LEVEL_DETAILS[1];
 

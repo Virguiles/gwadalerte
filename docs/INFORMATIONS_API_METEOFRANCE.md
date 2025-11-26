@@ -257,11 +257,13 @@ https://public-api.meteofrance.fr/public/
 ## 🔑 Authentification
 
 Votre site utilise déjà l'authentification OAuth 2.0 :
-- **Client ID** : `REDACTED_METEOFRANCE_CLIENT_ID`
-- **Client Secret** : `REDACTED_METEOFRANCE_SECRET`
+- **Client ID** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_ID`
+- **Client Secret** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_SECRET`
 - **Token endpoint** : `https://portail-api.meteofrance.fr/token`
 
 Le token est déjà généré automatiquement dans `get_meteofrance_token()`.
+
+⚠️ **Important** : Les clés API doivent être configurées dans un fichier `.env` dans le dossier `backend/`. Voir `VIGILANCE_METEOFRANCE.md` pour plus de détails.
 
 ---
 

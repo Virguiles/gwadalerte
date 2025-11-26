@@ -1,13 +1,19 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
 // import { WaterTooltip, TooltipAnchor } from './components/WaterTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterDataMap, DateFilter } from './types';
 import { getCommuneColors, hasCutsOnDay, getTargetDate } from './utils';
-import { Droplets, MapPin, CalendarDays, AlertTriangle, Sparkles, ArrowRight } from 'lucide-react';
+import { CalendarDays, Droplets } from 'lucide-react';
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 export default function WaterMapPage() {
   const [waterData, setWaterData] = useState<WaterDataMap>({});
@@ -102,6 +108,12 @@ export default function WaterMapPage() {
     return 'Planning de la semaine';
   };
 
+  const DATE_TABS: { id: DateFilter; label: string; icon: React.ReactNode }[] = [
+    { id: 'today', label: "Aujourd'hui", icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+    { id: 'tomorrow', label: 'Demain', icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+    { id: 'week', label: 'Semaine', icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+  ];
+
   const communesForSelector = useMemo(() => {
     const communes: { [code: string]: string } = {};
     Object.entries(waterData).forEach(([code, data]) => {
@@ -115,9 +127,9 @@ export default function WaterMapPage() {
   const archipelInfo = useMemo(() => {
     const targetDate = getTargetDate(dateFilter);
     const affectedCommunes = waterEntries.filter(commune => {
-        if (!commune.details || commune.details.length === 0) return false;
-        if (dateFilter === 'week') return true;
-        return hasCutsOnDay(commune, targetDate);
+      if (!commune.details || commune.details.length === 0) return false;
+      if (dateFilter === 'week') return true;
+      return hasCutsOnDay(commune, targetDate);
     }).length;
     return { affectedCommunes };
   }, [waterEntries, dateFilter]);
@@ -130,192 +142,118 @@ export default function WaterMapPage() {
   const sidebarData = useMemo(() => {
     const code = selectedCommune;
     if (code && waterData[code]) {
-        return waterData[code];
+      return waterData[code];
     }
     return null;
   }, [selectedCommune, waterData]);
 
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-b from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+    <main className="flex min-h-screen flex-col items-center justify-start pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-slate-950 dark:via-blue-950 dark:to-cyan-950 transition-colors duration-300">
       <div className="w-full max-w-7xl space-y-8">
         {/* En-tête */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-3 text-gray-800 dark:text-white">Tours d&apos;eau en Guadeloupe</h1>
-          <p className="text-base text-gray-600 dark:text-gray-300 mb-2">{getDateLabel()}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Source: SMGEAG</p>
-        </div>
-
-        {/* Statistiques clés */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              title: 'Communes suivies',
-              value: waterEntries.length || '—',
-              description: 'Zones couvertes',
-              icon: MapPin,
-              accent: 'from-cyan-50 to-white',
-              text: 'text-cyan-700'
-            },
-            {
-              title: 'Communes impactées',
-              value: archipelInfo.affectedCommunes || '—',
-              description: dateFilter === 'week' ? 'Période hebdo' : 'Filtre du jour',
-              icon: AlertTriangle,
-              accent: 'from-amber-50 to-white',
-              text: 'text-amber-700'
-            },
-            {
-              title: 'Coupures enregistrées',
-              value: totalCuts || '—',
-              description: 'Segments déclarés',
-              icon: Droplets,
-              accent: 'from-blue-50 to-white',
-              text: 'text-blue-700'
-            },
-            {
-              title: 'Période suivie',
-              value: dateFilter === 'today' ? "Aujourd'hui" : dateFilter === 'tomorrow' ? 'Demain' : 'Semaine',
-              description: 'Mise à jour continue',
-              icon: CalendarDays,
-              accent: 'from-slate-50 to-white',
-              text: 'text-slate-700'
-            }
-          ].map(({ title, value, description, icon: Icon, accent, text }) => (
-            <article
-              key={title}
-              className="flex flex-col gap-3 rounded-3xl border border-gray-100 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-600"
-            >
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${accent} flex items-center justify-center`}>
-                <Icon className={`w-6 h-6 ${text}`} />
-              </div>
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{title}</p>
-              <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{value}</span>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
-            </article>
-          ))}
-        </section>
-
-        <CommuneSelector
-          selectedCommune={selectedCommune}
-          onSelectCommune={setSelectedCommune}
-          communes={communesForSelector}
-          title="Sélectionner une commune"
-        />
-
-        {/* Onglets de filtrage */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-1 shadow-sm">
-            {(['today', 'tomorrow', 'week'] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setDateFilter(filter)}
-                className={`px-6 py-2.5 text-sm font-semibold rounded-md transition-all ${
-                  dateFilter === filter
-                    ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-sm'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                {filter === 'today' ? "Aujourd'hui" : filter === 'tomorrow' ? "Demain" : "Semaine"}
-              </button>
-            ))}
+        <header className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center gap-3 mb-2">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 dark:from-blue-400 dark:via-cyan-400 dark:to-sky-400 bg-clip-text text-transparent">
+              Tours d&apos;Eau
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-600 dark:text-slate-400 mt-1">Guadeloupe</span>
+            </h1>
           </div>
-        </div>
 
-        {/* Cartes d'information */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              title: 'Cartographie instantanée',
-              description: 'Visualisez en un coup d’œil les communes actuellement en coupure.',
-              icon: Droplets,
-              badge: 'Live',
-              accent: 'text-blue-600',
-              border: 'hover:border-blue-200'
-            },
-            {
-              title: 'Planning intelligent',
-              description: 'Anticipez les tours d’eau grâce aux filtres Aujourd’hui, Demain et Semaine.',
-              icon: CalendarDays,
-              badge: 'Prévision',
-              accent: 'text-emerald-600',
-              border: 'hover:border-emerald-200'
-            },
-            {
-              title: 'Alertes locales',
-              description: 'Accédez aux secteurs, horaires et conseils pour chaque commune impactée.',
-              icon: Sparkles,
-              badge: 'Focus',
-              accent: 'text-amber-600',
-              border: 'hover:border-amber-200'
-            }
-          ].map(({ title, description, icon: Icon, badge, accent, border }) => (
-            <article
-              key={title}
-              className={`group relative bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 dark:border-gray-700 ${border} overflow-hidden flex flex-col`}
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity duration-500">
-                <Icon className={`w-32 h-32 ${accent} transform -rotate-6 translate-x-8 -translate-y-8`} />
-              </div>
-              <div className="relative z-10 flex flex-col gap-4">
-                <div className="w-fit px-3 py-1 text-xs font-semibold rounded-full bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-sm border border-gray-100 dark:border-gray-600">
-                  {badge}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  {title}
-                  <ArrowRight className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition" />
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed flex-1">{description}</p>
-              </div>
-            </article>
-          ))}
-        </section>
+          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium">
+            {getDateLabel()} - Consultez les coupures d&apos;eau programmées pour votre commune.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+            <div className="flex items-center gap-2 px-4 py-1.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-full shadow-sm border border-blue-100 dark:border-blue-900/50">
+              <span className="text-slate-500 dark:text-gray-400 font-medium">Données officielles :</span>
+              <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
+                SMGEAG
+              </a>
+            </div>
+          </div>
+        </header>
+
+
 
         {/* Layout Principal : Carte + Sidebar */}
-        <section className="flex flex-col lg:flex-row gap-6 w-full items-start relative z-10">
-
-            {/* Carte */}
-            <div className="w-full lg:flex-1 bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 flex flex-col relative" style={{ height: '700px' }}>
-                <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    💧 <span className="font-semibold">
-                        {dateFilter === 'week'
-                        ? 'Chaque commune concernée par des tours d\'eau a sa propre couleur'
-                        : `Les communes en couleur ont des coupures d'eau ${dateFilter === 'today' ? 'aujourd\'hui' : 'demain'}`
-                        }
-                    </span> - Cliquez sur une commune pour voir les détails
-                    </p>
-                </div>
-
-                <div className="w-full flex justify-center items-center p-6 bg-white dark:bg-gray-800 flex-1 min-h-0 relative">
-                    <GuadeloupeMap
-                        data={mapDataForComponent}
-                        selectedCommune={selectedCommune}
-                        onCommuneHover={handleCommuneHover}
-                        onCommuneLeave={handleCommuneLeave}
-                        onCommuneClick={handleCommuneClick}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
+            <div className="p-4">
+              <section className="flex flex-col lg:flex-row gap-6 w-full items-start relative z-10">
+                {/* Colonne Gauche : Carte + Tabs Navigation */}
+                <div className="w-full lg:flex-1 flex flex-col gap-4">
+                  {/* Selecteur de commune */}
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700">
+                    <CommuneSelector
+                      selectedCommune={selectedCommune}
+                      onSelectCommune={setSelectedCommune}
+                      communes={communesForSelector}
                     />
+                  </div>
+
+                  {/* Navigation Tabs */}
+                  <Tabs value={dateFilter} onValueChange={(val) => setDateFilter(val as DateFilter)} className="w-full gap-0">
+                    <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0">
+                      {DATE_TABS.map((tab) => (
+                        <TabsTrigger
+                          key={tab.id}
+                          value={tab.id}
+                          className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
+                        >
+                          {tab.icon}
+                          {tab.label}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+
+                    {/* Carte Container */}
+                    <div className="relative min-h-[500px] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden" style={{ height: '700px' }}>
+                      {/* Légende flottante */}
+                      <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
+                        <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                          Tours d&apos;eau
+                        </h4>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {getDateLabel()}
+                        </p>
+                      </div>
+
+                      <div className="p-4 h-full flex justify-center items-center">
+                        <GuadeloupeMap
+                          data={mapDataForComponent}
+                          selectedCommune={selectedCommune}
+                          onCommuneHover={handleCommuneHover}
+                          onCommuneLeave={handleCommuneLeave}
+                          onCommuneClick={handleCommuneClick}
+                        />
+                      </div>
+                    </div>
+                  </Tabs>
+
+                  {/* Tooltip Flottant simple (toujours visible au survol) */}
+                  {hoveredInfo && typeof document !== 'undefined' && createPortal(
+                    <div
+                      className="fixed pointer-events-none z-[9999] bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
+                      style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
+                    >
+                      {hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
+                    </div>,
+                    document.body
+                  )}
                 </div>
 
-                {/* Tooltip Flottant simple au survol */}
-                {hoveredInfo && (
-                    <div
-                    className="fixed pointer-events-none z-50 bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
-                    style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
-                    >
-                    {hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
-                    </div>
-                )}
+                {/* Sidebar */}
+                <WaterSidebar
+                  data={sidebarData}
+                  dateFilter={dateFilter}
+                  archipelInfo={archipelInfo}
+                />
+
+              </section>
             </div>
-
-            {/* Sidebar */}
-            <WaterSidebar
-                data={sidebarData}
-                dateFilter={dateFilter}
-                archipelInfo={archipelInfo}
-            />
-
-        </section>
+          </div>
+        </div>
       </div>
     </main>
   );

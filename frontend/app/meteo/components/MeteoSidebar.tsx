@@ -1,22 +1,82 @@
 import React, { useMemo } from 'react';
-import { Sunrise, Sunset, Wind, Waves, AlertTriangle, Shield, Droplets, MapPin } from 'lucide-react';
-import { WeatherDataMap, VigilanceLevelInfo } from '../types';
+import { Sunrise, Sunset, Wind, Waves, AlertTriangle, Droplets, MapPin, CloudRain, CloudLightning, ThermometerSun, Snowflake, Mountain } from 'lucide-react';
+import { WeatherDataMap, VigilanceLevelInfo, WeatherData } from '../types';
+import { getVigilanceLevelInfo } from '../utils';
 
 interface MeteoSidebarProps {
   weatherData: WeatherDataMap;
   currentVigilanceInfo: VigilanceLevelInfo;
   relativeLastUpdate: string | null;
   focusedCommuneName?: string | null;
-  focusedCommuneData?: any | null; // Type plus précis si possible, mais flexible pour l'instant
+  focusedCommuneData?: WeatherData | null;
+  risks?: Array<{ type: string; level: number }>;
 }
 
 export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
   weatherData,
   currentVigilanceInfo,
-  relativeLastUpdate,
   focusedCommuneName,
   focusedCommuneData,
+  risks,
 }) => {
+  // Fonction pour déterminer si c'est jour ou nuit
+  const isDayTime = (sunrise: string | null, sunset: string | null): boolean => {
+    if (!sunrise || !sunset) return true; // Par défaut, considérer comme jour
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes depuis minuit
+
+    const [sunriseHours, sunriseMinutes] = sunrise.split(':').map(Number);
+    const sunriseTime = sunriseHours * 60 + sunriseMinutes;
+
+    const [sunsetHours, sunsetMinutes] = sunset.split(':').map(Number);
+    const sunsetTime = sunsetHours * 60 + sunsetMinutes;
+
+    return currentTime >= sunriseTime && currentTime < sunsetTime;
+  };
+
+  // Fonction pour obtenir l'émoji météo selon la description et le moment de la journée
+  const getWeatherEmoji = (weatherDescription: string | null, isDay: boolean): string => {
+    if (!weatherDescription) return isDay ? '🌤️' : '🌙';
+
+    const desc = weatherDescription.toLowerCase();
+
+    // Conditions météorologiques
+    if (desc.includes('thunderstorm') || desc.includes('orage')) {
+      return '⛈️';
+    }
+    if (desc.includes('heavy rain') || desc.includes('pluie forte') || desc.includes('pluie intense')) {
+      return '🌧️';
+    }
+    if (desc.includes('rain') || desc.includes('pluie') || desc.includes('drizzle') || desc.includes('bruine')) {
+      return isDay ? '🌦️' : '🌧️';
+    }
+    if (desc.includes('snow') || desc.includes('neige')) {
+      return '❄️';
+    }
+    if (desc.includes('fog') || desc.includes('mist') || desc.includes('brume') || desc.includes('brouillard')) {
+      return '🌫️';
+    }
+    if (desc.includes('overcast') || desc.includes('couvert')) {
+      return '☁️';
+    }
+    if (desc.includes('broken clouds') || desc.includes('nuages fragmentés')) {
+      return isDay ? '⛅' : '☁️';
+    }
+    if (desc.includes('scattered clouds') || desc.includes('nuages dispersés')) {
+      return isDay ? '⛅' : '☁️';
+    }
+    if (desc.includes('few clouds') || desc.includes('quelques nuages')) {
+      return isDay ? '🌤️' : '☁️';
+    }
+    if (desc.includes('clear') || desc.includes('dégagé') || desc.includes('ciel dégagé')) {
+      return isDay ? '☀️' : '🌙';
+    }
+
+    // Par défaut selon le moment de la journée
+    return isDay ? '🌤️' : '🌙';
+  };
+
   // Calculer les informations communes de l'archipel
   const archipelInfo = useMemo(() => {
     const temperatures: number[] = [];
@@ -88,34 +148,56 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
     const sunriseTime = focusedCommuneData.sunrise || archipelInfo.sunrise;
     const sunsetTime = focusedCommuneData.sunset || archipelInfo.sunset;
 
+    if (temp === null) {
+      return (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              {focusedCommuneName}
+            </h2>
+          </div>
+          <div className="relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 border border-gray-200/50 bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-start">
+                  <span className="text-4xl font-bold text-gray-400">—</span>
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/60 p-3 backdrop-blur-sm text-center">
+                <p className="text-xs text-gray-600 font-medium">Données en cours de chargement...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                {focusedCommuneName}
-            </h2>
-            <span className="text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
-                Météo locale
-            </span>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            {focusedCommuneName}
+          </h2>
         </div>
 
         <div
           className="relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 border border-white/20"
           style={{
             background: temp <= 20
-              ? 'linear-gradient(to bottom, #3b82f6, #4f46e5)'
+              ? 'linear-gradient(to bottom, rgba(59, 130, 246, 0.5), rgba(79, 70, 229, 0.5))'
               : temp <= 24
-              ? 'linear-gradient(to bottom, #06b6d4, #3b82f6)'
-              : temp <= 28
-              ? 'linear-gradient(to bottom, #0ea5e9, #4f46e5)'
-              : temp <= 32
-              ? 'linear-gradient(to bottom, #f97316, #ef4444)'
-              : 'linear-gradient(to bottom, #ef4444, #f97316)',
+                ? 'linear-gradient(to bottom, rgba(6, 182, 212, 0.5), rgba(59, 130, 246, 0.5))'
+                : temp <= 28
+                  ? 'linear-gradient(to bottom, rgba(14, 165, 233, 0.5), rgba(79, 70, 229, 0.5))'
+                  : temp <= 32
+                    ? 'linear-gradient(to bottom, rgba(249, 115, 22, 0.5), rgba(239, 68, 68, 0.5))'
+                    : 'linear-gradient(to bottom, rgba(239, 68, 68, 0.5), rgba(249, 115, 22, 0.5))',
           }}
         >
-           {/* Pattern de fond SVG */}
-           <div
+          {/* Pattern de fond SVG */}
+          <div
             className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2016.2A4.5%204.5%200%200017.5%208h-1.8A7%207%200%104%2014.9%22%2F%3E%3Cpath%20d%3D%22M12%2012v9%22%2F%3E%3Cpath%20d%3D%22M8%2017l4%204%22%2F%3E%3Cpath%20d%3D%22M16%2017l-4%204%22%2F%3E%3C%2Fsvg%3E')] bg-center opacity-5"
           ></div>
 
@@ -123,47 +205,59 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
             {/* Température principale avec icône */}
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-start">
-                <span className="text-5xl font-bold text-white">{Math.round(temp)}°</span>
-                <span className="mt-1 text-xl text-white/80">C</span>
+                <span className="text-4xl font-bold text-white">{Math.round(temp)}°</span>
               </div>
-              <div className="text-right">
-                <p className="text-white font-medium capitalize text-lg leading-tight">{desc}</p>
+              <div className="relative">
+                <div className="absolute -inset-4 rounded-full bg-white/20 blur-xl transition-opacity duration-300"></div>
+                <span className="relative text-4xl drop-shadow-md">
+                  {getWeatherEmoji(desc, isDayTime(sunriseTime, sunsetTime))}
+                </span>
               </div>
             </div>
 
-            {/* Détails Grid */}
-            <div className="grid grid-cols-2 gap-3 rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-1">
-                    <Droplets className="h-5 w-5 text-white/90" />
-                    <span className="text-xs font-medium text-white/80">Humidité</span>
-                    <span className="text-sm font-semibold text-white">{humidity}%</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                    <Wind className="h-5 w-5 text-white/90" />
-                    <span className="text-xs font-medium text-white/80">Vent</span>
-                    <span className="text-sm font-semibold text-white">{wind} km/h</span>
-                </div>
-            </div>
-
-            {(sunriseTime || sunsetTime) && (
-                <div className="grid grid-cols-2 gap-3 rounded-lg bg-white/10 p-3 backdrop-blur-sm mt-3">
-                    {sunriseTime && (
-                        <div className="flex flex-col items-center gap-1">
-                            <Sunrise className="h-5 w-5 text-white/90" />
-                            <span className="text-xs font-medium text-white/80">Lever</span>
-                            <span className="text-sm font-semibold text-white">{sunriseTime}</span>
-                        </div>
-                    )}
-                    {sunsetTime && (
-                        <div className="flex flex-col items-center gap-1">
-                            <Sunset className="h-5 w-5 text-white/90" />
-                            <span className="text-xs font-medium text-white/80">Coucher</span>
-                            <span className="text-sm font-semibold text-white">{sunsetTime}</span>
-                        </div>
-                    )}
-                </div>
+            {/* Grille de 2 colonnes pour lever/coucher du soleil */}
+            {(sunriseTime || sunsetTime) ? (
+              <div className="grid grid-cols-2 gap-3 rounded-lg bg-white/10 p-3 backdrop-blur-sm mb-3">
+                {sunriseTime && (
+                  <div className="flex flex-col items-center gap-1">
+                    <Sunrise className="h-5 w-5 text-white/90" />
+                    <span className="text-xs font-medium text-white/80">Lever</span>
+                    <span className="text-sm font-semibold text-white">{sunriseTime}</span>
+                  </div>
+                )}
+                {sunsetTime && (
+                  <div className="flex flex-col items-center gap-1">
+                    <Sunset className="h-5 w-5 text-white/90" />
+                    <span className="text-xs font-medium text-white/80">Coucher</span>
+                    <span className="text-sm font-semibold text-white">{sunsetTime}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-lg bg-white/10 p-3 backdrop-blur-sm text-center mb-3">
+                <p className="text-xs text-white/80">Données soleil en cours de chargement...</p>
+              </div>
             )}
 
+            {/* Grille de 2 colonnes pour humidité et vent */}
+            <div className="grid grid-cols-2 gap-3 rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+              {/* Humidité */}
+              <div className="flex flex-col items-center gap-1">
+                <Droplets className="h-5 w-5 text-white/90" />
+                <span className="text-xs font-medium text-white/80">Humidité</span>
+                <span className="text-sm font-semibold text-white text-center">
+                  {humidity !== null ? `${humidity}%` : '—'}
+                </span>
+              </div>
+              {/* Vent */}
+              <div className="flex flex-col items-center gap-1">
+                <Wind className="h-5 w-5 text-white/90" />
+                <span className="text-xs font-medium text-white/80">Vent</span>
+                <span className="text-sm font-semibold text-white">
+                  {wind !== null ? `${Math.round(wind)} km/h` : '—'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -179,14 +273,14 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
           className="relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 border border-white/20"
           style={{
             background: archipelInfo.avgTemperature <= 20
-              ? 'linear-gradient(to bottom, #3b82f6, #4f46e5)'
+              ? 'linear-gradient(to bottom, rgba(59, 130, 246, 0.5), rgba(79, 70, 229, 0.5))'
               : archipelInfo.avgTemperature <= 24
-              ? 'linear-gradient(to bottom, #06b6d4, #3b82f6)'
-              : archipelInfo.avgTemperature <= 28
-              ? 'linear-gradient(to bottom, #0ea5e9, #4f46e5)'
-              : archipelInfo.avgTemperature <= 32
-              ? 'linear-gradient(to bottom, #f97316, #ef4444)'
-              : 'linear-gradient(to bottom, #ef4444, #f97316)',
+                ? 'linear-gradient(to bottom, rgba(6, 182, 212, 0.5), rgba(59, 130, 246, 0.5))'
+                : archipelInfo.avgTemperature <= 28
+                  ? 'linear-gradient(to bottom, rgba(14, 165, 233, 0.5), rgba(79, 70, 229, 0.5))'
+                  : archipelInfo.avgTemperature <= 32
+                    ? 'linear-gradient(to bottom, rgba(249, 115, 22, 0.5), rgba(239, 68, 68, 0.5))'
+                    : 'linear-gradient(to bottom, rgba(239, 68, 68, 0.5), rgba(249, 115, 22, 0.5))',
           }}
         >
           {/* Pattern de fond SVG */}
@@ -199,11 +293,12 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-start">
                 <span className="text-4xl font-bold text-white">{archipelInfo.avgTemperature}°</span>
-                <span className="mt-1 text-lg text-white/80">C</span>
               </div>
               <div className="relative">
                 <div className="absolute -inset-4 rounded-full bg-white/20 blur-xl transition-opacity duration-300"></div>
-                <span className="relative text-4xl drop-shadow-md">🌤️</span>
+                <span className="relative text-4xl drop-shadow-md">
+                  {getWeatherEmoji(archipelInfo.generalWeather, isDayTime(archipelInfo.sunrise, archipelInfo.sunset))}
+                </span>
               </div>
             </div>
 
@@ -303,41 +398,75 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
               </div>
             </div>
 
-            {/* Phrase d'action */}
-            <p className="text-sm text-gray-800 dark:text-gray-300 leading-relaxed font-medium">
-              {currentVigilanceInfo.advice}
-            </p>
+            {/* Liste des risques (seulement niveau >= 2) */}
+            {(() => {
+              // Fonction pour obtenir l'icône selon le type de risque
+              const getRiskIcon = (type: string) => {
+                switch (type) {
+                  case 'Vent':
+                    return <Wind className="w-5 h-5" />;
+                  case 'Pluie-inondation':
+                    return <CloudRain className="w-5 h-5" />;
+                  case 'Orages':
+                    return <CloudLightning className="w-5 h-5" />;
+                  case 'Crues':
+                    return <Waves className="w-5 h-5" />;
+                  case 'Vagues-submersion':
+                    return <Waves className="w-5 h-5" />;
+                  case 'Mer-houle':
+                    return <Waves className="w-5 h-5" />;
+                  case 'Neige-verglas':
+                    return <Snowflake className="w-5 h-5" />;
+                  case 'Canicule':
+                    return <ThermometerSun className="w-5 h-5" />;
+                  case 'Grand froid':
+                    return <Snowflake className="w-5 h-5" />;
+                  case 'Avalanches':
+                    return <Mountain className="w-5 h-5" />;
+                  default:
+                    return <AlertTriangle className="w-5 h-5" />;
+                }
+              };
 
-          </div>
-        </section>
+              // Filtrer les risques avec niveau >= 2 (vigilance à observer)
+              const risksToShow = risks?.filter(risk => risk.level >= 2) || [];
 
-        {/* Section Sources */}
-        <section className="pt-6 border-t border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Sources</h2>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800">
-              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center flex-shrink-0">
-                <span className="text-lg">🌤️</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">OpenWeather</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Données météo</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-800">
-              <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center flex-shrink-0">
-                <Shield className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">Météo-France</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Vigilance météo</p>
-              </div>
-            </div>
-            {relativeLastUpdate && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                Dernière mise à jour {relativeLastUpdate}
-              </p>
-            )}
+              if (risksToShow.length > 0) {
+                return (
+                  <div className="space-y-2 mt-4">
+                    {risksToShow.map((risk, index) => {
+                      const riskLevelInfo = getVigilanceLevelInfo(risk.level);
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-white/50 dark:bg-gray-900/50"
+                        >
+                          <div className="text-gray-700 dark:text-gray-300 flex-shrink-0">
+                            {getRiskIcon(risk.type)}
+                          </div>
+                          <div
+                            className="w-6 h-6 rounded flex-shrink-0 flex items-center justify-center text-xs font-bold text-white"
+                            style={{ backgroundColor: riskLevelInfo.color }}
+                          >
+                            {risk.level}
+                          </div>
+                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            {risk.type}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              } else {
+                return (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-4">
+                    Aucune vigilance particulière
+                  </p>
+                );
+              }
+            })()}
+
           </div>
         </section>
       </div>

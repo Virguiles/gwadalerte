@@ -21,7 +21,34 @@ export const WaterSidebar: React.FC<WaterSidebarProps> = ({
         <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-6">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  💧 Tours d'eau
+                  <svg
+                    fill="currentColor"
+                    height="42"
+                    width="42"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512.000000 512.000000"
+                    preserveAspectRatio="xMidYMid meet"
+                    className="shrink-0"
+                  >
+                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+                      <path d="M1913 4193 c-12 -2 -34 -18 -48 -34 -29 -35 -33 -83 -9 -118 32 -46
+66 -51 319 -51 l235 0 0 -175 0 -174 -657 -3 c-544 -3 -662 -5 -679 -17 -47
+-31 -49 -43 -52 -293 -4 -270 2 -309 51 -338 31 -19 59 -20 1120 -20 l1087 0
+0 -196 c0 -121 4 -203 11 -216 23 -43 62 -48 344 -48 283 0 321 5 345 49 8 15
+10 141 8 429 -3 405 -3 407 -27 452 -54 105 -151 173 -268 190 -37 5 -296 10
+-575 10 l-508 0 0 175 0 175 236 0 c256 0 288 6 314 55 16 29 16 76 0 105 -26
+49 -38 50 -652 49 -315 -1 -583 -4 -595 -6z m1806 -781 c69 -37 71 -50 71
+-394 l0 -308 -155 0 -155 0 0 199 c0 185 -1 200 -20 224 -12 15 -38 31 -58 37
+-24 6 -404 10 -1104 10 l-1068 0 0 125 0 125 1228 0 c1170 0 1229 -1 1261 -18z"/>
+                      <path d="M3590 2343 c-29 -15 -39 -30 -61 -88 -37 -102 -59 -141 -189 -340
+-182 -280 -214 -356 -213 -505 4 -334 349 -570 671 -459 210 72 343 250 345
+459 1 148 -33 231 -200 483 -114 172 -184 298 -204 364 -23 80 -87 117 -149
+86z m150 -513 c57 -85 123 -198 149 -250 42 -87 46 -101 46 -170 -1 -86 -20
+-132 -81 -192 -63 -63 -115 -83 -219 -83 -73 0 -99 4 -136 23 -95 46 -157 134
+-166 232 -6 65 4 105 54 205 32 63 244 397 249 392 1 -1 48 -72 104 -157z"/>
+                    </g>
+                  </svg>
+                  Tours d&apos;eau
                 </h2>
 
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800">
@@ -29,32 +56,12 @@ export const WaterSidebar: React.FC<WaterSidebarProps> = ({
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                         {archipelInfo && archipelInfo.affectedCommunes > 0 ? (
                             <>
-                                <span className="font-bold text-blue-600 text-xl">{archipelInfo.affectedCommunes}</span> commune{archipelInfo.affectedCommunes > 1 ? 's' : ''} concernée{archipelInfo.affectedCommunes > 1 ? 's' : ''} par des tours d'eau {dateFilter === 'today' ? "aujourd'hui" : dateFilter === 'tomorrow' ? "demain" : "cette semaine"}.
+                                <span className="font-bold text-blue-600 text-xl">{archipelInfo.affectedCommunes}</span> commune{archipelInfo.affectedCommunes > 1 ? 's' : ''} concernée{archipelInfo.affectedCommunes > 1 ? 's' : ''} par des tours d&apos;eau {dateFilter === 'today' ? "aujourd&apos;hui" : dateFilter === 'tomorrow' ? "demain" : "cette semaine"}.
                             </>
                         ) : (
                             "Aucune perturbation majeure signalée sur le réseau d'eau potable pour la période sélectionnée."
                         )}
                     </p>
-                </div>
-
-                <div className="space-y-4">
-                     <h3 className="font-semibold text-gray-900 dark:text-white">Informations</h3>
-                     <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mt-1">
-                             <span className="text-sm">ℹ️</span>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Les coupures sont généralement programmées par le SMGEAG pour gérer la distribution en période de sécheresse ou de travaux.
-                        </p>
-                     </div>
-                     <div className="flex items-start gap-3">
-                         <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mt-1">
-                             <span className="text-sm">📅</span>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Utilisez les filtres "Aujourd'hui", "Demain" ou "Semaine" pour anticiper les coupures dans votre secteur.
-                        </p>
-                     </div>
                 </div>
             </div>
         </div>

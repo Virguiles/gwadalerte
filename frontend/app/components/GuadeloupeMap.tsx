@@ -24,7 +24,6 @@ type MapProps = {
   onCommuneHover: (info: HoverInfo) => void;
   onCommuneLeave: () => void;
   onCommuneClick?: (codeZone: string) => void; // Ajout du clic
-  backgroundColor?: string;
   selectedCommune?: string | null;
   getFillColor?: (codeZone: string) => string; // Nouvelle prop pour la couleur personnalisée
 };
@@ -34,7 +33,6 @@ const GuadeloupeMap = ({
   onCommuneHover,
   onCommuneLeave,
   onCommuneClick,
-  backgroundColor,
   selectedCommune,
   getFillColor: customGetFillColor
 }: MapProps) => {
@@ -188,7 +186,7 @@ const GuadeloupeMap = ({
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97119 PETIT-CANAL" points="38163,17031 35152,17581 33624,17400 33095,16966 33327,14796 32095,13454 31881,13151 33663,11083 34425,10934 36347,11384 37090,11159 37917,9378 39352,8754 39471,8002 39849,7905 40157,8141 40219,9663 40932,9896 42126,8945 42229,7820 43099,7095 43743,9687 43014,12930 41916,13244 42089,14713 41516,15663 41614,16799 41114,17379 41109,18147 40484,18595 40484,18595 39818,18984 " style={getCommuneStyle('97119 PETIT-CANAL')} />
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97120 POINTE-À-PITRE" points="29527,29434 29852,30140 29747,31302 30309,31840 30119,32310 30119,32310 27789,28565 " style={getCommuneStyle('97120 POINTE-À-PITRE')} />
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97121 POINTE-NOIRE" points="4974,36738 4215,36679 2879,35966 2372,34928 2799,33427 2516,31891 833,29757 288,27096 3708,26506 5584,26546 5506,27685 5817,28380 7513,29237 9184,31326 8955,32438 8356,32907 8249,34396 8839,35771 7789,36711 7789,36711 6398,36230 " style={getCommuneStyle('97121 POINTE-NOIRE')} />
-        <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97122 PORT-LOUIS" points="30681,13146 29885,12338 28580,7914 29034,6445 30962,6238 34271,7939 35425,7809 36417,7200 37563,7171 38172,6692 38556,6747 39128,7721 39849,7905 39471,8002 39352,8754 37090,11159 36347,11384 34425,10934 33663,11083 31881,13151 32095,13454 32095,13454 31742,13613 " style={getCommuneStyle('97122 PORT-LOUIS')} />
+        <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97122 PORT-LOUIS" points="30681,13146 29885,12338 28580,7914 29034,6445 30962,6238 34271,7939 35425,7809 36417,7200 37563,7171 38172,6692 38556,6747 39128,7721 39849,7905 39471,8002 39352,8754 37917,9378 37090,11159 36347,11384 34425,10934 33663,11083 31881,13151 32095,13454 32095,13454 31742,13613 " style={getCommuneStyle('97122 PORT-LOUIS')} />
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97124 SAINT-CLAUDE" points="10072,54188 10736,51971 13311,49112 13526,47569 13824,47311 14414,48280 14671,49760 15610,50360 15750,51796 16089,51966 15715,52652 15890,53812 15265,54802 13909,55579 13138,55433 10474,57041 10474,57041 8579,55426 " style={getCommuneStyle('97124 SAINT-CLAUDE')} />
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97125 SAINT-FRANÇOIS" points="60087,25439 60865,26326 64445,27968 66392,28211 67679,29095 65828,28646 59541,28058 55074,29320 52428,29729 51719,29440 51723,28379 50514,24750 51943,24221 52381,23241 53727,22610 56326,22789 56684,21310 56684,21310 58830,22979 " style={getCommuneStyle('97125 SAINT-FRANÇOIS')} />
         <polygon onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={handleClick} className="commune-path" id="97126 SAINT-LOUIS" points="56592,63664 55044,63656 53595,63138 52578,62001 52189,61966 52600,61320 52928,59025 53671,58762 55462,56190 56980,55786 58486,56237 61576,57940 62734,60246 60556,61865 59467,62281 58871,64507 58534,64706 58534,64706 57427,64442 " style={getCommuneStyle('97126 SAINT-LOUIS')} />

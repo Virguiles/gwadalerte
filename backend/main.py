@@ -7,6 +7,12 @@ import io
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement
+load_dotenv()
+
 app = FastAPI()
 
 # Configure CORS
@@ -210,11 +216,11 @@ COMMUNE_COORDINATES = {
     "97801": {"name": "Saint-Martin", "lat": 18.067043, "lon": -63.084698},
 }
 
-OPENWEATHER_API_KEY = "REDACTED_OPENWEATHER_KEY"
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 # Credentials Météo France
-METEOFRANCE_CLIENT_ID = "REDACTED_METEOFRANCE_CLIENT_ID"
-METEOFRANCE_CLIENT_SECRET = "REDACTED_METEOFRANCE_SECRET"
+METEOFRANCE_CLIENT_ID = os.getenv("METEOFRANCE_CLIENT_ID")
+METEOFRANCE_CLIENT_SECRET = os.getenv("METEOFRANCE_CLIENT_SECRET")
 METEOFRANCE_TOKEN = None
 METEOFRANCE_TOKEN_EXPIRY = 0
 

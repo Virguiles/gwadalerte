@@ -24,9 +24,11 @@ https://public-api.meteofrance.fr/public/DPVigilance/v1/vigilanceom/flux/dernier
 
 ### Authentification
 L'API utilise OAuth 2.0 avec génération automatique de token :
-- **Client ID** : `REDACTED_METEOFRANCE_CLIENT_ID`
-- **Client Secret** : `REDACTED_METEOFRANCE_SECRET`
+- **Client ID** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_ID`
+- **Client Secret** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_SECRET`
 - **Token** : Généré automatiquement et rafraîchi toutes les heures
+
+⚠️ **Important** : Les clés API doivent être configurées dans un fichier `.env` (non versionné). Voir la section Configuration ci-dessous.
 
 ---
 
@@ -121,8 +123,23 @@ Le frontend à `frontend/app/meteo/page.tsx` :
 
 ## ⚙️ Configuration
 
+### Variables d'environnement
+
+Créez un fichier `.env` dans le dossier `backend/` avec les clés API Météo-France :
+
+```bash
+METEOFRANCE_CLIENT_ID=votre_client_id_ici
+METEOFRANCE_CLIENT_SECRET=votre_client_secret_ici
+```
+
+⚠️ **Sécurité** : Ne jamais commiter le fichier `.env` dans git. Il est déjà dans `.gitignore`.
+
+Pour obtenir vos clés API :
+1. Créez un compte sur le [Portail API Météo-France](https://portail-api.meteofrance.fr/)
+2. Générez un Client ID et Client Secret pour l'API DonneesPubliquesVigilance
+
 ### Cache
-- **Backend** : 2 heures (7200 secondes)
+- **Backend** : 10 minutes (600 secondes) - pour avoir des données plus fraîches
 - **Frontend** : 1 jour (vérification quotidienne)
 
 ### Démarrer le serveur
@@ -166,9 +183,10 @@ curl http://127.0.0.1:8000/api/vigilance | jq .
 ## 📝 Notes importantes
 
 1. **Mise à jour des données** : Les données de vigilance sont mises à jour par Météo-France plusieurs fois par jour
-2. **Cache intelligent** : Le backend met en cache les données pendant 2 heures pour éviter trop d'appels API
+2. **Cache intelligent** : Le backend met en cache les données pendant 10 minutes pour éviter trop d'appels API tout en gardant des données fraîches
 3. **Gestion des erreurs** : En cas d'erreur API, le système retourne des valeurs par défaut (Vert) et continue de fonctionner
 4. **Token automatique** : Le token est régénéré automatiquement avant expiration (marge de 5 minutes)
+5. **Sécurité** : Les clés API sont stockées dans des variables d'environnement et ne doivent jamais être committées dans git
 
 ---
 

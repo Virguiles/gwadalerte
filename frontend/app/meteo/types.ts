@@ -49,6 +49,7 @@ export type VigilanceLevelInfo = {
   advice: string;
   icon: string;
   highlight: string;
+  characteristics?: string[];
 };
 
 export type { CommuneData };

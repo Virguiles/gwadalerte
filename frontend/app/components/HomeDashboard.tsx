@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import GuadeloupeMap, { HoverInfo } from './GuadeloupeMap';
 import { useWaterData } from '../hooks/useWaterData';
@@ -10,12 +10,19 @@ import { getCommuneColors, hasCutsOnDay } from '../tours-deau/utils';
 import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '../meteo/constants';
 import { CommuneSelector } from './shared/CommuneSelector';
 
+import { CloudSun, Droplet, DropletOff, Wind } from 'lucide-react';
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
 type TabType = 'meteo' | 'air' | 'water';
 
-const TABS: { id: TabType; label: string; icon: string }[] = [
-  { id: 'meteo', label: 'Météo', icon: '🌤️' },
-  { id: 'water', label: 'Eau', icon: '💧' },
-  { id: 'air', label: 'Air', icon: '🍃' },
+const TABS: { id: TabType; label: string; icon: React.ReactNode }[] = [
+  { id: 'meteo', label: 'Météo', icon: <CloudSun size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+  { id: 'water', label: 'Eau', icon: <Droplet size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+  { id: 'air', label: 'Air', icon: <Wind size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
 ];
 
 export default function HomeDashboard() {
@@ -105,50 +112,108 @@ export default function HomeDashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
               <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
-              Vue d'ensemble
+              Vue d&apos;ensemble
             </h2>
 
             <div className="grid grid-cols-1 gap-4">
               {/* Météo Widget */}
-              <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-1 shadow-md transition-all hover:shadow-lg">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <span className="text-6xl">🌤️</span>
+              <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-blue-200 dark:hover:border-blue-700 transition-all">
+                <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <CloudSun className="w-10 h-10" />
                 </div>
-                <div className="relative h-full bg-white/10 backdrop-blur-sm rounded-xl p-4 text-white">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-blue-50">Météo</h3>
-                    {meteoLoading ? (
-                      <span className="text-xs opacity-75">...</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-full bg-white/20 text-xs font-bold backdrop-blur-md">
+                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <CloudSun className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                  Vigilance Météo
+                </h3>
+                {meteoLoading ? (
+                  <div className="h-8 w-24 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span
+                        className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                        style={{
+                          backgroundColor: (vigilanceData?.level !== undefined ? VIGILANCE_LEVEL_DETAILS[vigilanceData.level]?.highlight : undefined) || 'rgba(59, 130, 246, 0.1)',
+                          color: vigilanceData?.color || '#3b82f6',
+                          borderColor: vigilanceData?.color || '#3b82f6'
+                        }}
+                      >
                         {vigilanceData?.label || 'Normal'}
                       </span>
+                      {vigilanceData?.level !== undefined && VIGILANCE_LEVEL_DETAILS[vigilanceData.level]?.description && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {VIGILANCE_LEVEL_DETAILS[vigilanceData.level].description}
+                        </span>
+                      )}
+                    </div>
+
+                    {vigilanceData?.risks && vigilanceData.risks.length > 0 ? (
+                      <div className="space-y-2 mb-3">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                          Types de risques
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {vigilanceData.risks.map((risk, i) => {
+                            const riskLevelInfo = VIGILANCE_LEVEL_DETAILS[risk.level];
+                            const riskColor = riskLevelInfo?.color || '#3b82f6';
+                            const riskLabel = riskLevelInfo?.label || 'Normal';
+                            return (
+                              <span
+                                key={i}
+                                className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
+                                style={{
+                                  backgroundColor: riskLevelInfo?.highlight || 'rgba(59, 130, 246, 0.1)',
+                                  color: riskColor,
+                                  borderColor: riskColor
+                                }}
+                                title={`${risk.type} : ${riskLabel}`}
+                              >
+                                {risk.type}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {vigilanceData?.phenomenes_phrases && vigilanceData?.phenomenes_phrases.length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                          Phénomènes en cours
+                        </p>
+                        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+                          {vigilanceData.phenomenes_phrases.slice(0, 2).map((p, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span
+                                className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                                style={{
+                                  backgroundColor: vigilanceData?.color || '#3b82f6'
+                                }}
+                              ></span>
+                              <span className="leading-relaxed">{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Aucune vigilance particulière.
+                      </p>
                     )}
                   </div>
-
-                  {!meteoLoading && vigilanceData?.phenomenes_phrases && vigilanceData?.phenomenes_phrases.length > 0 ? (
-                    <ul className="mt-2 text-sm text-blue-50 space-y-1">
-                      {vigilanceData?.phenomenes_phrases.slice(0, 2).map((p, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          <span className="w-1 h-1 bg-white rounded-full"></span>
-                          <span className="truncate">{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-blue-100 mt-1">Aucune vigilance particulière.</p>
-                  )}
-                </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Eau Widget */}
-                {/* Eau Widget */}
                 <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-cyan-200 dark:hover:border-cyan-700 transition-all">
                   <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <span className="text-4xl">💧</span>
+                    <DropletOff className="w-10 h-10" />
                   </div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Eau Potable</h3>
+                  <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <DropletOff className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
+                    Tours d&apos;eau
+                  </h3>
                   {waterLoading ? (
                     <div className="h-8 w-16 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
                   ) : (
@@ -171,7 +236,7 @@ export default function HomeDashboard() {
                               {count > 0 ? 'communes touchées' : 'Réseau stable'}
                             </p>
                             {count > 0 && (
-                              <div className="max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+                              <div>
                                 <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
                                   {displayNames.map((name, i) => (
                                     <li key={i} className="truncate">• {name}</li>
@@ -189,15 +254,49 @@ export default function HomeDashboard() {
                 {/* Air Widget */}
                 <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-700 transition-all">
                   <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <span className="text-4xl">🍃</span>
+                    <Wind className="w-10 h-10" />
                   </div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Qualité Air</h3>
+                  <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Wind className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                    Qualité de l&apos;Air
+                  </h3>
                   {airLoading ? (
-                    <div className="h-8 w-16 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="h-8 w-24 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
                   ) : (
                     <div>
                       {(() => {
-                        // Filter out 'Bon', 'Indisponible' and null/undefined
+                        // Calcul de l'état global : qualité majoritaire sur l'archipel
+                        const qualities = Object.values(airData)
+                          .map(d => d.lib_qual)
+                          .filter(q => q && q.toLowerCase() !== 'indisponible');
+
+                        const counts: Record<string, number> = {};
+                        let maxCount = 0;
+                        let globalQuality = 'Bon';
+
+                        qualities.forEach(q => {
+                          if (!q) return;
+                          counts[q] = (counts[q] || 0) + 1;
+                          if (counts[q] > maxCount) {
+                            maxCount = counts[q];
+                            globalQuality = q;
+                          }
+                        });
+
+                        // Trouver la couleur correspondante dans les données
+                        const globalQualityData = Object.values(airData).find(d => d.lib_qual === globalQuality);
+                        const globalColor = globalQualityData?.coul_qual || '#50F0E6'; // Par défaut Bon
+
+                        // Créer une couleur highlight similaire au système de vigilance
+                        const hexToRgba = (hex: string, alpha: number) => {
+                          const r = parseInt(hex.slice(1, 3), 16);
+                          const g = parseInt(hex.slice(3, 5), 16);
+                          const b = parseInt(hex.slice(5, 7), 16);
+                          return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                        };
+                        const highlightColor = hexToRgba(globalColor, 0.15);
+
+                        // Filter out 'Bon', 'Indisponible' and null/undefined pour les alertes
                         const alertCommunes = Object.values(airData).filter(d => {
                           const qual = d.lib_qual?.toLowerCase();
                           return qual && qual !== 'bon' && qual !== 'indisponible';
@@ -208,57 +307,56 @@ export default function HomeDashboard() {
                           .map(d => ({ name: d.lib_zone, qual: d.lib_qual, color: d.coul_qual }))
                           .sort((a, b) => a.name.localeCompare(b.name));
 
-                        // Fallback logic for majority index if no alerts (meaning everything is Bon or Indisponible)
-                        const qualities = Object.values(airData).map(d => d.lib_qual);
-                        const counts: Record<string, number> = {};
-                        let maxCount = 0;
-                        let majority = 'Moyen';
-                        qualities.forEach(q => {
-                          if (!q) return;
-                          counts[q] = (counts[q] || 0) + 1;
-                          if (counts[q] > maxCount) {
-                            maxCount = counts[q];
-                            majority = q;
-                          }
-                        });
-
-                        const getColor = (m: string) => {
-                          if (['bon', 'moyen'].includes(m.toLowerCase())) return 'text-emerald-500';
-                          if (['dégradé'].includes(m.toLowerCase())) return 'text-yellow-500';
-                          return 'text-orange-500';
-                        }
-
-                        if (count > 0) {
-                          return (
-                            <>
-                              <div className="text-2xl font-bold mb-1 text-orange-500">
-                                {count}
-                              </div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight mb-2">
-                                communes à surveiller
-                              </p>
-                              <div className="max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                                <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
-                                  {displayNames.map((item, i) => (
-                                    <li key={i} className="flex items-center gap-1 truncate">
-                                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
-                                      <span>{item.name}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </>
-                          );
-                        }
-
                         return (
                           <>
-                            <div className={`text-lg font-bold mb-1 truncate ${getColor(majority)}`}>
-                              {majority}
+                            <div className="flex items-center gap-2 mb-3">
+                              <span
+                                className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                                style={{
+                                  backgroundColor: highlightColor,
+                                  color: globalColor,
+                                  borderColor: globalColor
+                                }}
+                              >
+                                {globalQuality}
+                              </span>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-                              Indice majoritaire
-                            </p>
+
+                            {count > 0 ? (
+                              <div className="space-y-2 mb-3">
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                  Zones à surveiller
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {displayNames.slice(0, 5).map((item, i) => {
+                                    const itemColor = item.color || '#50F0E6';
+                                    return (
+                                      <span
+                                        key={i}
+                                        className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
+                                        style={{
+                                          backgroundColor: hexToRgba(itemColor, 0.15),
+                                          color: itemColor,
+                                          borderColor: itemColor
+                                        }}
+                                        title={`${item.name} : ${item.qual}`}
+                                      >
+                                        {item.name}
+                                      </span>
+                                    );
+                                  })}
+                                  {count > 5 && (
+                                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                      +{count - 5} autres
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Qualité de l&apos;air satisfaisante sur l&apos;archipel.
+                              </p>
+                            )}
                           </>
                         );
                       })()}
@@ -266,13 +364,6 @@ export default function HomeDashboard() {
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Quick Actions / Legend Hint */}
-            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
-              <p className="text-xs text-center text-gray-400">
-                Cliquez sur une commune sur la carte pour voir le détail.
-              </p>
             </div>
           </div>
         </div>
@@ -303,18 +394,24 @@ export default function HomeDashboard() {
         <div className="space-y-6">
           {/* Section Météo Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-100 dark:border-blue-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3">
-              🌤️ Météo
+            <h3 className="flex items-center text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3 gap-2">
+              <CloudSun className="w-6 h-6" /> Météo
+              {!meteoLoading && weatherData[communeCode] && (
+                <span className="text-4xl font-bold ml-auto">{weatherData[communeCode].temperature}°</span>
+              )}
             </h3>
             {meteoLoading ? (
               <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
             ) : weatherData[communeCode] ? (
               <div className="text-gray-700 dark:text-gray-300">
-                <p className="text-3xl font-bold mb-1">{weatherData[communeCode].temperature}°C</p>
-                <p className="capitalize">{weatherData[communeCode].weather_description}</p>
+                <p className="capitalize mb-2">{weatherData[communeCode].weather_description}</p>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                  <div>💧 Humidité: {weatherData[communeCode].humidity}%</div>
-                  <div>💨 Vent: {weatherData[communeCode].wind_speed} km/h</div>
+                  <div className="flex items-center gap-1.5">
+                    <Droplet className="w-4 h-4" /> Humidité: {weatherData[communeCode].humidity}%
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Wind className="w-4 h-4" /> Vent: {weatherData[communeCode].wind_speed} km/h
+                  </div>
                 </div>
               </div>
             ) : (
@@ -324,8 +421,8 @@ export default function HomeDashboard() {
 
           {/* Section Eau Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 border border-cyan-100 dark:border-cyan-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-cyan-900 dark:text-cyan-300 mb-3">
-              💧 Tours d'eau
+            <h3 className="flex items-center text-lg font-semibold text-cyan-900 dark:text-cyan-300 mb-3 gap-2">
+              <DropletOff className="w-6 h-6" /> Tours d&apos;eau
             </h3>
             {waterLoading ? (
               <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
@@ -333,15 +430,15 @@ export default function HomeDashboard() {
               <div>
                 {hasCutsOnDay(waterData[communeCode], new Date()) ? (
                   <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-lg mb-2 border border-red-200 dark:border-red-800">
-                    <strong>⚠️ Coupure prévue aujourd'hui</strong>
+                    <strong>⚠️ Coupure prévue aujourd&apos;hui</strong>
                   </div>
                 ) : (
                   <div className="p-3 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-lg mb-2 border border-green-200 dark:border-green-800">
-                    ✅ Pas de coupure prévue aujourd'hui
+                    ✅ Pas de coupure prévue aujourd&apos;hui
                   </div>
                 )}
 
-                {waterData[communeCode].details.length > 0 && (
+                {hasCutsOnDay(waterData[communeCode], new Date()) && waterData[communeCode].details.length > 0 && (
                   <div className="mt-3">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Planning général :</p>
                     <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
@@ -353,28 +450,48 @@ export default function HomeDashboard() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">Aucune information de tour d'eau connue.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Aucune information de tour d&apos;eau connue.</p>
             )}
           </div>
 
           {/* Section Air Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-100 dark:border-green-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-green-900 dark:text-green-300 mb-3">
-              🍃 Qualité de l'Air
+            <h3 className="flex items-center text-lg font-semibold text-green-900 dark:text-green-300 mb-3 gap-2">
+              <Wind className="w-6 h-6" /> Qualité de l&apos;Air
             </h3>
             {airLoading ? (
               <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
             ) : airData[communeCode] ? (
               <div>
-                <div
-                  className="inline-block px-4 py-2 rounded-full font-bold text-white mb-2"
-                  style={{ backgroundColor: airData[communeCode].coul_qual }}
-                >
-                  {airData[communeCode].lib_qual}
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                  Dernière mesure : {new Date().toLocaleDateString()}
-                </p>
+                {(() => {
+                  const communeAirData = airData[communeCode];
+                  const airColor = communeAirData.coul_qual || '#50F0E6';
+                  const airQuality = communeAirData.lib_qual || 'Bon';
+
+                  // Créer une couleur highlight similaire au système de vigilance
+                  const hexToRgba = (hex: string, alpha: number) => {
+                    const r = parseInt(hex.slice(1, 3), 16);
+                    const g = parseInt(hex.slice(3, 5), 16);
+                    const b = parseInt(hex.slice(5, 7), 16);
+                    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                  };
+                  const highlightColor = hexToRgba(airColor, 0.15);
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                        style={{
+                          backgroundColor: highlightColor,
+                          color: airColor,
+                          borderColor: airColor
+                        }}
+                      >
+                        {airQuality}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400">Données non disponibles.</p>
@@ -397,54 +514,53 @@ export default function HomeDashboard() {
             selectedCommune={selectedCommune || ''}
             onSelectCommune={handleCommuneSelect}
             communes={ALL_COMMUNES}
-            title="Rechercher une commune"
           />
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 border border-gray-100 dark:border-gray-700 flex justify-around sm:justify-start sm:gap-4 overflow-x-auto">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
-                ${activeTab === tab.id
-                  ? 'bg-gray-900 dark:bg-blue-600 text-white shadow-md transform scale-105'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }
-              `}
-            >
-              <span className="text-xl">{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as TabType)} className="w-full gap-0">
+          <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0">
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
+              >
+                {tab.icon}
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {/* Carte Container */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden relative min-h-[500px]">
+          {/* Carte Container */}
+          <div className="relative min-h-[500px] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden">
 
-          {/* Légende flottante en fonction du tab */}
-          <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
-            <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-              {activeTab === 'meteo' ? 'Vigilance Météo' :
-                activeTab === 'water' ? 'Tours d\'eau' : 'Qualité de l\'air'}
-            </h4>
-            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {activeTab === 'meteo' ? (vigilanceData?.label || 'Chargement...') :
-                activeTab === 'water' ? 'Zones coupées en rouge' :
-                  'Indice ATMO'}
-            </p>
+            {/* Légende flottante en fonction du tab */}
+            <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
+              <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                {activeTab === 'meteo' ? 'Vigilance Météo' :
+                  activeTab === 'water' ? 'Tours d\'eau' : 'Qualité de l\'air'}
+              </h4>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                {activeTab === 'meteo' ? (vigilanceData?.label || 'Chargement...') :
+                  activeTab === 'water' ? 'Zones coupées en couleur' :
+                    'Indice ATMO'}
+              </p>
+            </div>
+
+            <div className="p-4">
+              <GuadeloupeMap
+                getFillColor={getFillColor}
+                onCommuneHover={handleCommuneHover}
+                onCommuneLeave={handleCommuneLeave}
+                onCommuneClick={handleCommuneClick}
+                selectedCommune={selectedCommune}
+              />
+            </div>
           </div>
+        </Tabs>
 
-          <GuadeloupeMap
-            getFillColor={getFillColor}
-            onCommuneHover={handleCommuneHover}
-            onCommuneLeave={handleCommuneLeave}
-            onCommuneClick={handleCommuneClick}
-            selectedCommune={selectedCommune}
-          />
-        </div>
+
 
         {/* Tooltip Flottant simple (toujours visible au survol) */}
         {hoveredInfo && typeof document !== 'undefined' && createPortal(
