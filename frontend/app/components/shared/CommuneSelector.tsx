@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Search, X, MapPin } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 interface CommuneSelectorProps {
   selectedCommune: string;
@@ -61,40 +61,26 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
 }) => {
   const communeOptions = useMemo(() => {
     return Object.entries(communes).sort(([, nameA], [, nameB]) =>
-      nameA.localeCompare(nameB, 'fr', { sensitivity: 'base' })
+      nameA.localeCompare(nameB)
     );
   }, [communes]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-6">
-      {/* Instructions discrètes */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-          <Search className="w-3.5 h-3.5" />
-          <span>Choisir dans la liste</span>
-        </div>
-        <span className="text-gray-300 dark:text-gray-600">•</span>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-          <MapPin className="w-3.5 h-3.5" />
-          <span>Toucher/survoler la carte</span>
-        </div>
-      </div>
+    <div className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-4 sm:mb-6 px-2 sm:px-4">
+      {/* Instructions simplifiées */}
+      <p className="text-left text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-2 px-2">
+        Choisir une commune dans la liste ou toucher/survoler la carte
+      </p>
 
       {/* Sélecteur principal */}
-      <div className="relative flex flex-col sm:flex-row gap-3">
+      <div className="relative flex flex-col sm:flex-row gap-2 sm:gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
           <select
             id="commune-select"
             value={selectedCommune}
             onChange={(event) => onSelectCommune(event.target.value)}
-            className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md appearance-none text-base"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              paddingRight: '2.75rem'
-            }}
+            className="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-3 sm:py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md appearance-none text-sm sm:text-base"
           >
             <option value="">-- Choisir une commune --</option>
             {communeOptions.map(([code, label]) => (
@@ -109,7 +95,7 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
         <button
           type="button"
           onClick={() => onSelectCommune('')}
-          className={`hidden sm:flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border-2 font-semibold transition-all duration-200 shadow-sm hover:shadow-md min-w-[140px] ${
+          className={`hidden sm:flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-3.5 rounded-lg sm:rounded-xl border-2 font-semibold transition-all duration-200 shadow-sm hover:shadow-md min-w-[120px] sm:min-w-[140px] text-sm sm:text-base ${
             selectedCommune
               ? 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 opacity-100 pointer-events-auto'
               : 'opacity-0 pointer-events-none'
@@ -117,39 +103,21 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
           aria-label="Réinitialiser la sélection"
           disabled={!selectedCommune}
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>Réinitialiser</span>
-        </button>
-
-        {/* Bouton mobile "Voir ma commune" - toujours présent sur mobile pour garder la même taille */}
-        <button
-          type="button"
-          onClick={() => {
-            const select = document.getElementById('commune-select') as HTMLSelectElement;
-            if (select) {
-              select.focus();
-              select.click();
-            }
-          }}
-          className={`sm:hidden flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 dark:bg-blue-700 text-white font-semibold text-base hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 ${
-            selectedCommune ? 'opacity-0 pointer-events-none invisible' : 'opacity-100 pointer-events-auto'
-          }`}
-        >
-          <Search className="w-4 h-4" />
-          Voir ma commune
         </button>
 
         {/* Bouton Réinitialiser mobile - toujours présent pour garder la même taille */}
         <button
           type="button"
           onClick={() => onSelectCommune('')}
-          className={`sm:hidden flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 shadow-sm hover:shadow-md ${
+          className={`sm:hidden flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base ${
             selectedCommune ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
           }`}
           aria-label="Réinitialiser la sélection"
           disabled={!selectedCommune}
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Réinitialiser
         </button>
       </div>

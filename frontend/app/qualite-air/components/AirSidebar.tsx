@@ -1,6 +1,6 @@
 import React from 'react';
-import { AirData, CommuneData } from '../../components/GuadeloupeMap';
-import { Info, Activity } from 'lucide-react';
+import { CommuneData } from '../../components/GuadeloupeMap';
+import { Activity, Wind } from 'lucide-react';
 
 interface AirSidebarProps {
   data: CommuneData | null;
@@ -65,13 +65,14 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
       <div className="w-full lg:w-80 flex flex-col gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-slate-100 dark:border-gray-700 p-6 space-y-6">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            🍃 Qualité de l'Air
+            <Wind className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
+            Qualité de l&apos;Air
           </h2>
 
           <div className="p-4 bg-teal-50 dark:bg-teal-900/30 rounded-xl border border-teal-100 dark:border-teal-800">
              <h3 className="font-semibold text-teal-900 dark:text-teal-300 mb-2 text-lg">Synthèse Régionale</h3>
              <p className="text-slate-700 dark:text-gray-300 leading-relaxed text-sm">
-                La qualité de l'air est surveillée en permanence sur l'ensemble de l'archipel par les stations de mesure de Gwad'Air.
+                La qualité de l&apos;air est surveillée en permanence sur l&apos;ensemble de l&apos;archipel par les stations de mesure de Gwad&apos;Air.
              </p>
           </div>
 
@@ -99,7 +100,7 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
             )}
             <div className="flex justify-center">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-700 text-xs font-medium text-slate-600 dark:text-gray-300">
-                    Source: Gwad'Air (AASQA)
+                    Source: Gwad&apos;Air (AASQA)
                 </span>
             </div>
           </div>
@@ -191,7 +192,7 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
             <div className="px-6 py-4 bg-slate-50 dark:bg-gray-700 border-t border-slate-100 dark:border-gray-600 flex justify-between items-center text-xs text-slate-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                    <span>Données Gwad'Air</span>
+                    <span>Données Gwad&apos;Air</span>
                 </div>
                 {lastUpdate && <span>MAJ {formatDateTime(lastUpdate).split(' ')[2]}</span>}
             </div>

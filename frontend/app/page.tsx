@@ -24,17 +24,6 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,#3b82f615,transparent)] dark:bg-[radial-gradient(circle_800px_at_50%_-100px,#3b82f630,transparent)] pointer-events-none" />
 
         <div className="w-full max-w-7xl mx-auto pt-24 pb-20 px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          {/* Live Status Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-slate-200 dark:border-gray-700 shadow-sm mb-8 animate-fade-in-up">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-            <span className="text-sm font-medium text-slate-600 dark:text-gray-300">
-              Systèmes opérationnels • <span className="text-slate-400 dark:text-gray-500">Mise à jour en temps réel</span>
-            </span>
-          </div>
-
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-slate-900 dark:text-white leading-tight">
             Gwad&apos;<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-400">Alerte</span>
           </h1>

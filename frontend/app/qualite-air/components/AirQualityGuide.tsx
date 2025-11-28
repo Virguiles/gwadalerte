@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Leaf, Info, AlertTriangle, AlertOctagon, Activity, Shield, HeartPulse, Wind } from 'lucide-react';
+import { ShieldCheck, Leaf, Info, AlertTriangle, AlertOctagon, Activity, HeartPulse, BookOpen } from 'lucide-react';
 
 // Données des niveaux ATMO
 const ATMO_LEVELS = [
@@ -69,11 +69,11 @@ export const AirQualityGuide = () => {
     <section className="w-full max-w-7xl mx-auto space-y-8 py-12">
       <div className="text-center space-y-3 mb-10">
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-3">
-          <Wind className="w-8 h-8 text-teal-500" />
-          Comprendre l'indice ATMO
+          <BookOpen className="w-8 h-8 text-teal-500" />
+          Comprendre l&apos;indice ATMO
         </h2>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          L'échelle de qualité de l'air et les recommandations sanitaires associées pour la Guadeloupe.
+          L&apos;échelle de qualité de l&apos;air et les recommandations sanitaires associées pour la Guadeloupe.
         </p>
       </div>
 

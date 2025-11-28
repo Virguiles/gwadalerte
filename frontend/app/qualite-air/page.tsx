@@ -27,15 +27,9 @@ export default function QualiteAir() {
     return null;
   };
 
-  const [airData, setAirData] = useState<AirData>(() => {
-    const cached = loadFromCache();
-    return cached?.data || {};
-  });
+  const [airData, setAirData] = useState<AirData>({});
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
-    const cached = loadFromCache();
-    return cached ? new Date(cached.timestamp) : null;
-  });
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [selectedCommune, setSelectedCommune] = useState<string>('');
 
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -52,6 +46,15 @@ export default function QualiteAir() {
       hour: '2-digit', minute: '2-digit',
     }).format(date);
   };
+
+  // Charger les données du cache au montage côté client
+  useEffect(() => {
+    const cached = loadFromCache();
+    if (cached) {
+      setAirData(cached.data);
+      setLastUpdate(new Date(cached.timestamp));
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

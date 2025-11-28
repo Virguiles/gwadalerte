@@ -33,7 +33,7 @@ export default function HomeDashboard() {
   // Chargement des données
   const { data: waterData, loading: waterLoading } = useWaterData();
   const { data: airData, loading: airLoading } = useAirData();
-  const { weatherData, vigilanceData, loading: meteoLoading } = useMeteoData();
+  const { weatherData, vigilanceData, loading: meteoLoading, mounted: meteoMounted } = useMeteoData();
 
   // --- Logique de couleur de la carte ---
   const getFillColor = (communeId: string): string => {
@@ -125,7 +125,7 @@ export default function HomeDashboard() {
                   <CloudSun className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                   Vigilance Météo
                 </h3>
-                {meteoLoading ? (
+                {!meteoMounted || meteoLoading ? (
                   <div className="h-8 w-24 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
                 ) : (
                   <div>
@@ -147,13 +147,13 @@ export default function HomeDashboard() {
                       )}
                     </div>
 
-                    {vigilanceData?.risks && vigilanceData.risks.length > 0 ? (
+                    {vigilanceData?.risks && vigilanceData.risks.filter(risk => risk.level > 1).length > 0 ? (
                       <div className="space-y-2 mb-3">
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                           Types de risques
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {vigilanceData.risks.map((risk, i) => {
+                          {vigilanceData.risks.filter(risk => risk.level > 1).map((risk, i) => {
                             const riskLevelInfo = VIGILANCE_LEVEL_DETAILS[risk.level];
                             const riskColor = riskLevelInfo?.color || '#3b82f6';
                             const riskLabel = riskLevelInfo?.label || 'Normal';
@@ -224,7 +224,7 @@ export default function HomeDashboard() {
                         );
                         const count = affectedCommunes.length;
                         const displayNames = affectedCommunes
-                          .map(code => waterData[code].commune)
+                          .map(code => waterData[code].commune.charAt(0).toUpperCase() + waterData[code].commune.slice(1).toLowerCase())
                           .sort();
 
                         return (
@@ -327,29 +327,17 @@ export default function HomeDashboard() {
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                   Zones à surveiller
                                 </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {displayNames.slice(0, 5).map((item, i) => {
-                                    const itemColor = item.color || '#50F0E6';
-                                    return (
-                                      <span
-                                        key={i}
-                                        className="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-                                        style={{
-                                          backgroundColor: hexToRgba(itemColor, 0.15),
-                                          color: itemColor,
-                                          borderColor: itemColor
-                                        }}
-                                        title={`${item.name} : ${item.qual}`}
-                                      >
-                                        {item.name}
-                                      </span>
-                                    );
-                                  })}
-                                  {count > 5 && (
-                                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                      +{count - 5} autres
-                                    </span>
-                                  )}
+                                <div>
+                                  <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                                    {displayNames.slice(0, 5).map((item, i) => (
+                                      <li key={i} className="truncate">• {item.name}</li>
+                                    ))}
+                                    {count > 5 && (
+                                      <li className="truncate text-gray-500 dark:text-gray-400">
+                                        • +{count - 5} autres
+                                      </li>
+                                    )}
+                                  </ul>
                                 </div>
                               </div>
                             ) : (
@@ -542,7 +530,7 @@ export default function HomeDashboard() {
                   activeTab === 'water' ? 'Tours d\'eau' : 'Qualité de l\'air'}
               </h4>
               <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {activeTab === 'meteo' ? (vigilanceData?.label || 'Chargement...') :
+                {activeTab === 'meteo' ? (!meteoMounted || meteoLoading ? 'Chargement...' : (vigilanceData?.label || 'Chargement...')) :
                   activeTab === 'water' ? 'Zones coupées en couleur' :
                     'Indice ATMO'}
               </p>
