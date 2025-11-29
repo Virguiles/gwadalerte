@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
+import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 // import { WaterTooltip, TooltipAnchor } from './components/WaterTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterDataMap, DateFilter } from './types';
@@ -97,7 +97,7 @@ export default function WaterMapPage() {
   }, [waterData, dateFilter]);
 
   const getDateLabel = (): string => {
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
     if (dateFilter === 'today') {
       return new Date().toLocaleDateString('fr-FR', options);
     } else if (dateFilter === 'tomorrow') {
@@ -232,15 +232,7 @@ export default function WaterMapPage() {
                   </Tabs>
 
                   {/* Tooltip Flottant simple (toujours visible au survol) */}
-                  {hoveredInfo && typeof document !== 'undefined' && createPortal(
-                    <div
-                      className="fixed pointer-events-none z-[9999] bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
-                      style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
-                    >
-                      {hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
-                    </div>,
-                    document.body
-                  )}
+                  <CommuneTooltip hoveredInfo={hoveredInfo} />
                 </div>
 
                 {/* Sidebar */}

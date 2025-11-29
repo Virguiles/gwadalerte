@@ -94,18 +94,16 @@ export const AirQualityGuide = () => {
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-8 h-8 rounded-lg shadow-sm transition-transform duration-300 flex items-center justify-center font-bold text-sm ${selectedLevel === info.level ? 'scale-110' : 'group-hover:scale-105'}`}
-                  style={{ backgroundColor: info.color, color: info.level >= 5 ? 'white' : 'black' }}
+                  className={`w-10 h-10 rounded-lg shadow-sm transition-transform duration-300 flex items-center justify-center ${selectedLevel === info.level ? 'scale-110' : 'group-hover:scale-105'}`}
+                  style={{ backgroundColor: `${info.color}20`, color: info.color }}
                 >
-                  {info.level}
+                  <info.icon className="w-5 h-5" />
                 </div>
-                <span className={`font-bold text-lg ${selectedLevel === info.level ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {info.label}
-                </span>
-              </div>
-
-              <div className={`text-slate-400 dark:text-slate-500 ${selectedLevel === info.level ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
-                <info.icon className="w-5 h-5" />
+                <div>
+                  <span className={`font-bold text-lg block ${selectedLevel === info.level ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                    {info.label}
+                  </span>
+                </div>
               </div>
             </button>
           ))}
@@ -124,7 +122,7 @@ export const AirQualityGuide = () => {
             >
               {/* Decorative background element */}
               <div
-                className="absolute top-0 right-0 w-64 h-64 opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"
+                className="absolute top-0 right-0 w-64 h-64 opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"
                 style={{ backgroundColor: selectedInfo.color }}
               />
 
@@ -135,35 +133,46 @@ export const AirQualityGuide = () => {
                     className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
                     style={{ backgroundColor: selectedInfo.color }}
                   >
-                    <Icon className={`w-10 h-10 ${selectedInfo.level >= 5 ? 'text-white' : 'text-slate-900'}`} />
+                    <div className="text-white flex items-center justify-center">
+                      <Icon className="w-10 h-10" />
+                    </div>
                   </div>
                   <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Indice ATMO</span>
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Niveau {selectedInfo.level}/6</span>
-                    </div>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
                       {selectedInfo.label}
                     </h3>
-                    <p className="text-xl text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                    <p className="text-xl text-slate-500 dark:text-slate-400 font-medium">
                       {selectedInfo.description}
                     </p>
                   </div>
                 </div>
 
-                {/* Recommendations */}
-                <div className="flex-1 flex flex-col justify-center">
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 sm:p-8 border border-slate-100 dark:border-slate-800/50 relative overflow-hidden group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300" style={{ backgroundColor: selectedInfo.color }}></div>
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                  {/* Description */}
+                  <div className="space-y-4 flex flex-col">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
+                      <Info className="w-5 h-5 text-blue-500" />
+                      Description
+                    </h4>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
+                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                        {selectedInfo.description}
+                      </p>
+                    </div>
+                  </div>
 
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg mb-4">
+                  {/* Recommendations */}
+                  <div className="space-y-4 flex flex-col">
+                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
                       <HeartPulse className="w-5 h-5 text-rose-500" />
                       Recommandations sanitaires
                     </h4>
-
-                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
-                      {selectedInfo.recommendations}
-                    </p>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
+                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                        {selectedInfo.recommendations}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { useMeteoData } from './hooks/useMeteoData';
 // import { useTooltip } from './hooks/useTooltip';
 import { getVigilanceLevelInfo, formatRelativeTime } from './utils';
@@ -9,6 +8,7 @@ import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { ALL_COMMUNES } from './constants';
 import { WeatherMapSection } from './components/WeatherMapSection';
 import { MeteoSidebar } from './components/MeteoSidebar';
+import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 // import { MeteoTooltip } from './components/MeteoTooltip';
 import { HoverInfo } from '../components/GuadeloupeMap';
 import { CyclonicVigilanceGuide } from './components/CyclonicVigilanceGuide';
@@ -196,15 +196,7 @@ export default function MeteoPage() {
                   </div>
 
                   {/* Tooltip Flottant simple (toujours visible au survol) */}
-                  {hoveredInfo && typeof document !== 'undefined' && createPortal(
-                    <div
-                      className="fixed pointer-events-none z-[9999] bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
-                      style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
-                    >
-                      {ALL_COMMUNES[hoveredInfo.data.code_zone || ''] || hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
-                    </div>,
-                    document.body
-                  )}
+                  <CommuneTooltip hoveredInfo={hoveredInfo} />
                 </div>
 
                 <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0">

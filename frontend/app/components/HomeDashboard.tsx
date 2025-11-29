@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import GuadeloupeMap, { HoverInfo } from './GuadeloupeMap';
 import { useWaterData } from '../hooks/useWaterData';
 import { useAirData } from '../hooks/useAirData';
@@ -9,6 +8,7 @@ import { useMeteoData } from '../meteo/hooks/useMeteoData';
 import { getCommuneColors, hasCutsOnDay } from '../tours-deau/utils';
 import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '../meteo/constants';
 import { CommuneSelector } from './shared/CommuneSelector';
+import { CommuneTooltip } from './shared/CommuneTooltip';
 
 import { CloudSun, Droplet, DropletOff, Wind } from 'lucide-react';
 import {
@@ -551,15 +551,7 @@ export default function HomeDashboard() {
 
 
         {/* Tooltip Flottant simple (toujours visible au survol) */}
-        {hoveredInfo && typeof document !== 'undefined' && createPortal(
-          <div
-            className="fixed pointer-events-none z-[9999] bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
-            style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
-          >
-            {ALL_COMMUNES[hoveredInfo.data.code_zone || ''] || hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
-          </div>,
-          document.body
-        )}
+        <CommuneTooltip hoveredInfo={hoveredInfo} />
       </div>
 
       {/* Colonne Droite : Info Panel (Sticky sur Desktop) */}

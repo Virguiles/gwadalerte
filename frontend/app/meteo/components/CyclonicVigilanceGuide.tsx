@@ -1,33 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VIGILANCE_LEVEL_DETAILS } from '../constants';
-import { AlertTriangle, Info, Shield, Home, Wind, CloudRain, Zap, Waves, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Info, Shield, Home, CheckCircle } from 'lucide-react';
 import { useMeteoData } from '../hooks/useMeteoData';
 
 export const CyclonicVigilanceGuide = () => {
   const { vigilanceData, mounted } = useMeteoData();
   const currentLevel = vigilanceData?.level;
-  const [selectedLevel, setSelectedLevel] = useState<number>(1);
+  const userInteractedRef = useRef(false);
+  const [userSelectedLevel, setUserSelectedLevel] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (currentLevel !== undefined && currentLevel >= 1) {
-      setSelectedLevel(currentLevel);
-    } else {
-      setSelectedLevel(1);
-    }
+  const defaultLevel = useMemo(() => {
+    return (currentLevel !== undefined && currentLevel >= 1) ? currentLevel : 1;
   }, [currentLevel]);
+
+  const selectedLevel = userSelectedLevel ?? defaultLevel;
 
   const selectedInfo = VIGILANCE_LEVEL_DETAILS[selectedLevel] || VIGILANCE_LEVEL_DETAILS[1];
 
-  const getIcon = (level: number) => {
+  const getIcon = (level: number, size: 'small' | 'large' = 'large') => {
+    const iconSize = size === 'small' ? 'w-5 h-5' : 'w-10 h-10';
     switch (level) {
-      case 1: return <CheckCircle className="w-8 h-8" />;
-      case 2: return <Info className="w-8 h-8" />;
-      case 3: return <AlertTriangle className="w-8 h-8" />;
-      case 4: return <AlertTriangle className="w-8 h-8" />;
-      case 5: return <Home className="w-8 h-8" />;
-      case 6: return <Shield className="w-8 h-8" />;
-      default: return <Info className="w-8 h-8" />;
+      case 1: return <CheckCircle className={iconSize} />;
+      case 2: return <Info className={iconSize} />;
+      case 3: return <AlertTriangle className={iconSize} />;
+      case 4: return <AlertTriangle className={iconSize} />;
+      case 5: return <Home className={iconSize} />;
+      case 6: return <Shield className={iconSize} />;
+      default: return <Info className={iconSize} />;
     }
   };
 
@@ -41,7 +41,10 @@ export const CyclonicVigilanceGuide = () => {
   return (
     <section className="w-full max-w-7xl mx-auto space-y-8 py-12">
       <div className="text-center space-y-3 mb-10">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Comprendre la vigilance</h2>
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-3">
+          <AlertTriangle className="w-8 h-8 text-blue-500" />
+          Comprendre la vigilance
+        </h2>
         <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
           Découvrez la signification des couleurs de vigilance et les comportements à adopter pour votre sécurité.
         </p>
@@ -51,33 +54,39 @@ export const CyclonicVigilanceGuide = () => {
         {/* Left: List of Levels */}
         <div className="lg:col-span-4 flex flex-col gap-3">
           {visibleLevels.map((info) => (
-            <button
-              key={info.level}
-              onClick={() => setSelectedLevel(info.level)}
-              className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 text-left ${selectedLevel === info.level
-                  ? 'bg-white dark:bg-slate-800 shadow-lg scale-[1.02] z-10'
-                  : 'bg-white/50 dark:bg-slate-800/50 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm'
-                }`}
-              style={{
-                borderColor: selectedLevel === info.level ? info.color : 'transparent'
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-4 h-4 rounded-full shadow-sm transition-transform duration-300 ${selectedLevel === info.level ? 'scale-125' : 'group-hover:scale-110'}`}
-                  style={{ backgroundColor: info.color }}
-                />
-                <span className={`font-bold text-lg ${selectedLevel === info.level ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {info.label}
-                </span>
-              </div>
-
-              {currentLevel === info.level && (
-                <span className="px-3 py-1 text-xs font-bold text-white rounded-full bg-slate-900 dark:bg-white dark:text-slate-900 shadow-sm animate-pulse">
-                  ACTUEL
-                </span>
-              )}
-            </button>
+              <button
+                key={info.level}
+                onClick={() => {
+                  userInteractedRef.current = true;
+                  setUserSelectedLevel(info.level);
+                }}
+                className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 text-left ${selectedLevel === info.level
+                    ? 'bg-white dark:bg-slate-800 shadow-lg scale-[1.02] z-10'
+                    : 'bg-white/50 dark:bg-slate-800/50 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm'
+                  }`}
+                style={{
+                  borderColor: selectedLevel === info.level ? info.color : 'transparent'
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-10 h-10 rounded-lg shadow-sm transition-transform duration-300 flex items-center justify-center ${selectedLevel === info.level ? 'scale-110' : 'group-hover:scale-105'}`}
+                    style={{ backgroundColor: `${info.color}20`, color: info.color }}
+                  >
+                    {getIcon(info.level, 'small')}
+                  </div>
+                  <div>
+                    <span className={`font-bold text-lg block ${selectedLevel === info.level ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                      {info.label}
+                    </span>
+                    {currentLevel === info.level && (
+                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                        Niveau actuel
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
           ))}
         </div>
 
@@ -90,7 +99,7 @@ export const CyclonicVigilanceGuide = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative"
+              className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative min-h-[400px] flex flex-col"
             >
               {/* Decorative background element */}
               <div
@@ -98,54 +107,57 @@ export const CyclonicVigilanceGuide = () => {
                 style={{ backgroundColor: selectedInfo.color }}
               />
 
-              <div className="flex flex-col gap-8 relative z-10">
+              <div className="flex flex-col gap-8 relative z-10 flex-1">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-700/50">
                   <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
                     style={{ backgroundColor: selectedInfo.color }}
                   >
-                    <div className="text-white">
-                      {getIcon(selectedInfo.level)}
+                    <div className="text-white flex items-center justify-center">
+                      {getIcon(selectedInfo.level, 'large')}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
                       Vigilance {selectedInfo.label}
                     </h3>
-                    <p className="text-xl text-slate-600 dark:text-slate-300 font-medium">
+                    <p className="text-xl text-slate-500 dark:text-slate-400 font-medium">
                       {selectedInfo.description}
                     </p>
                   </div>
                 </div>
 
+                {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                   {/* Characteristics */}
-                  <div className="space-y-5">
+                  <div className="space-y-4 flex flex-col">
                     <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
                       <AlertTriangle className="w-5 h-5 text-amber-500" />
                       Phénomènes surveillés
                     </h4>
-                    <ul className="space-y-4">
-                      {selectedInfo.characteristics?.map((char, idx) => (
-                        <li key={idx} className="flex items-start gap-3.5 group">
-                          <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 mt-2.5 shrink-0 group-hover:bg-amber-500 transition-colors" />
-                          <span className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                            {char}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
+                      <ul className="space-y-3">
+                        {selectedInfo.characteristics?.map((char, idx) => (
+                          <li key={idx} className="flex items-start gap-3.5">
+                            <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 mt-2.5 shrink-0" />
+                            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                              {char}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
                   {/* Advice */}
-                  <div className="space-y-5">
+                  <div className="space-y-4 flex flex-col">
                     <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
                       <Shield className="w-5 h-5 text-blue-500" />
                       Comportements à adopter
                     </h4>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800/50 h-full">
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
+                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                         {selectedInfo.advice}
                       </p>
                     </div>

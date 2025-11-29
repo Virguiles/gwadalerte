@@ -57,6 +57,34 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
     { label: 'Extrêmement Mauvais', color: '#803399' },
   ];
 
+  // Fonction pour formater la date de mise à jour de manière claire et précise
+  const formatLastUpdate = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+    // Si moins de 1 minute
+    if (diffMinutes < 1) {
+      return 'à l\'instant';
+    }
+    // Si moins d'1 heure
+    if (diffMinutes < 60) {
+      return `il y a ${diffMinutes} min`;
+    }
+    // Si moins de 24 heures
+    if (diffHours < 24) {
+      return `il y a ${diffHours}h`;
+    }
+    // Sinon, afficher la date complète avec l'heure
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
   // Rendu par défaut : Vue globale (Synthèse Archipel)
   if (!data) {
     // Calculer l'indice majoritaire sur l'archipel (simplifié pour l'exemple, on pourrait passer toutes les data en props si besoin précis)
@@ -133,8 +161,18 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Indice ATMO</span>
                   <span
-                    className="px-4 py-1.5 rounded-full text-sm font-bold text-white shadow-sm"
-                    style={{ backgroundColor: data.coul_qual }}
+                    className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                    style={{
+                      backgroundColor: (() => {
+                        const hex = data.coul_qual || '#50F0E6';
+                        const r = parseInt(hex.slice(1, 3), 16);
+                        const g = parseInt(hex.slice(3, 5), 16);
+                        const b = parseInt(hex.slice(5, 7), 16);
+                        return `rgba(${r}, ${g}, ${b}, 0.15)`;
+                      })(),
+                      color: data.coul_qual || '#50F0E6',
+                      borderColor: data.coul_qual || '#50F0E6'
+                    }}
                   >
                     {data.lib_qual}
                   </span>
@@ -172,13 +210,23 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
                               <span className="text-[10px] text-slate-400 dark:text-gray-500">{polluant.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-slate-500 dark:text-gray-400">
-                                    {getQualityFromCode(polluant.code as number | undefined).label}
+
+                                <span
+                                  className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                                  style={{
+                                    backgroundColor: (() => {
+                                      const hex = getQualityFromCode(polluant.code as number | undefined).color || '#50F0E6';
+                                      const r = parseInt(hex.slice(1, 3), 16);
+                                      const g = parseInt(hex.slice(3, 5), 16);
+                                      const b = parseInt(hex.slice(5, 7), 16);
+                                      return `rgba(${r}, ${g}, ${b}, 0.15)`;
+                                    })(),
+                                    color: getQualityFromCode(polluant.code as number | undefined).color || '#50F0E6',
+                                    borderColor: getQualityFromCode(polluant.code as number | undefined).color || '#50F0E6'
+                                  }}
+                                >
+                                  {getQualityFromCode(polluant.code as number | undefined).label}
                                 </span>
-                                <div
-                                className="w-3 h-3 rounded-full shadow-sm"
-                                style={{ backgroundColor: getQualityFromCode(polluant.code as number | undefined).color }}
-                                />
                             </div>
                           </div>
                         )
@@ -194,7 +242,11 @@ export const AirSidebar: React.FC<AirSidebarProps> = ({
                     <span className="w-2 h-2 rounded-full bg-teal-500"></span>
                     <span>Données Gwad&apos;Air</span>
                 </div>
-                {lastUpdate && <span>MAJ {formatDateTime(lastUpdate).split(' ')[2]}</span>}
+                {lastUpdate && (
+                  <span className="font-medium">
+                    MAJ {formatLastUpdate(lastUpdate)}
+                  </span>
+                )}
             </div>
         </div>
     </div>

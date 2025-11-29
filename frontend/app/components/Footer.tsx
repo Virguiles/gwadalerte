@@ -14,7 +14,7 @@ export default function Footer() {
               Gwad&apos;Alerte
             </h3>
             <p className="text-slate-600 dark:text-gray-400 text-sm leading-relaxed max-w-xs">
-              Le tableau de bord citoyen pour surveiller l&apos;eau, l&apos;air et la météo en Guadeloupe.
+              Le tableau de bord citoyen en Guadeloupe.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-500">
               <span>Développé avec</span>
-              <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+              <Heart className="w-4 h-4 text-blue-500 fill-blue-500" />
               <span>par</span>
               <Link
                 href="https://virgile.site/"

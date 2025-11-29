@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import GuadeloupeMap, { AirData, HoverInfo } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
+import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 import { AirSidebar } from './components/AirSidebar';
 import { AirQualityGuide } from './components/AirQualityGuide';
 import { PollutantsGuide } from './components/PollutantsGuide';
@@ -27,9 +28,17 @@ export default function QualiteAir() {
     return null;
   };
 
-  const [airData, setAirData] = useState<AirData>({});
+  const [airData, setAirData] = useState<AirData>(() => {
+    // Initialisation lazy avec les données du cache
+    const cached = loadFromCache();
+    return cached ? cached.data : {};
+  });
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
+    // Initialisation lazy avec le timestamp du cache
+    const cached = loadFromCache();
+    return cached ? new Date(cached.timestamp) : null;
+  });
   const [selectedCommune, setSelectedCommune] = useState<string>('');
 
   const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -46,15 +55,6 @@ export default function QualiteAir() {
       hour: '2-digit', minute: '2-digit',
     }).format(date);
   };
-
-  // Charger les données du cache au montage côté client
-  useEffect(() => {
-    const cached = loadFromCache();
-    if (cached) {
-      setAirData(cached.data);
-      setLastUpdate(new Date(cached.timestamp));
-    }
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -190,14 +190,7 @@ export default function QualiteAir() {
                     </div>
 
                     {/* Tooltip Flottant simple au survol */}
-                    {hoveredInfo && (
-                      <div
-                        className="fixed pointer-events-none z-50 bg-black/80 text-white text-xs px-2 py-1 rounded shadow-lg transform -translate-x-1/2 -translate-y-full"
-                        style={{ left: hoveredInfo.x, top: hoveredInfo.y - 10 }}
-                      >
-                        {hoveredInfo.data.lib_zone || hoveredInfo.data.code_zone}
-                      </div>
-                    )}
+                    <CommuneTooltip hoveredInfo={hoveredInfo} />
                   </div>
                 </div>
 

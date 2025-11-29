@@ -2,12 +2,11 @@
 
 import Link from 'next/link';
 import HomeDashboard from './components/HomeDashboard';
-import { Wind, Droplets, CloudSun, ArrowRight, MapPin, Activity, Info } from 'lucide-react';
-
+import { Wind, Droplets, CloudSun, ArrowRight, Activity, Info } from 'lucide-react';
 import { useAirData } from './hooks/useAirData';
 
 export default function Home() {
-  const { data: airData, loading: airLoading } = useAirData();
+  const { data: airData } = useAirData();
 
   // Filtrer les communes en alerte
   const alertCommunes = Object.values(airData || {}).filter(data => {
@@ -25,7 +24,7 @@ export default function Home() {
 
         <div className="w-full max-w-7xl mx-auto pt-24 pb-20 px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-slate-900 dark:text-white leading-tight">
-            Gwad&apos;<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-400">Alerte</span>
+            Gwad&apos;<span className="text-blue-600 dark:text-blue-400">Alerte</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-light mb-10">
