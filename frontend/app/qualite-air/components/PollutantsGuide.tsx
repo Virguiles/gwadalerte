@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Wind, Sun, Factory, Activity, Stethoscope } from 'lucide-react';
 import type { SVGProps } from 'react';
+import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
 
 // Composant SVG pour l'icône de fumée
 const SmokeIcon = ({ className, ...props }: SVGProps<SVGSVGElement>) => (
@@ -37,7 +36,7 @@ const SmokeIcon = ({ className, ...props }: SVGProps<SVGSVGElement>) => (
 );
 
 // Données des polluants
-const POLLUTANTS = [
+const POLLUTANTS_DATA = [
   {
     id: 'pm',
     label: 'Particules Fines',
@@ -77,126 +76,38 @@ const POLLUTANTS = [
 ];
 
 export const PollutantsGuide = () => {
-  const [selectedId, setSelectedId] = useState<string>('pm');
-  const selectedInfo = POLLUTANTS.find(p => p.id === selectedId) || POLLUTANTS[0];
-  const Icon = selectedInfo.icon;
+  const guideItems: GuideItem[] = POLLUTANTS_DATA.map(item => ({
+    id: item.id,
+    label: item.label,
+    subLabel: item.subLabel,
+    color: item.color,
+    icon: item.icon,
+    // Note: The original PollutantsGuide used subLabel as description in the header.
+    // InteractiveGuide uses headerDescription if present, or subLabel if not, but headerDescription is preferred for the description text below title.
+    headerDescription: item.subLabel,
+    sections: [
+      {
+        title: "Origine",
+        icon: Activity,
+        iconColorClass: "text-blue-500",
+        content: item.origin
+      },
+      {
+        title: "Impact Santé",
+        icon: Stethoscope,
+        iconColorClass: "text-rose-500",
+        content: item.healthImpact
+      }
+    ]
+  }));
 
   return (
-    <section className="w-full max-w-7xl mx-auto space-y-8 py-12">
-      <div className="text-center space-y-3 mb-10">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-3">
-          <Factory className="w-8 h-8 text-blue-500" />
-          Guide des polluants
-        </h2>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Comprendre l&apos;origine et les effets des principaux polluants atmosphériques surveillés en Guadeloupe.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
-        {/* Left: List of Pollutants */}
-        <div className="lg:col-span-4 flex flex-col gap-3">
-          {POLLUTANTS.map((info) => (
-            <button
-              key={info.id}
-              onClick={() => setSelectedId(info.id)}
-              className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 text-left ${selectedId === info.id
-                ? 'bg-white dark:bg-slate-800 shadow-lg scale-[1.02] z-10'
-                : 'bg-white/50 dark:bg-slate-800/50 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm'
-                }`}
-              style={{
-                borderColor: selectedId === info.id ? info.color : 'transparent'
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-10 h-10 rounded-lg shadow-sm transition-transform duration-300 flex items-center justify-center ${selectedId === info.id ? 'scale-110' : 'group-hover:scale-105'}`}
-                  style={{ backgroundColor: `${info.color}20`, color: info.color }}
-                >
-                  <info.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className={`font-bold text-lg block ${selectedId === info.id ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                    {info.label}
-                  </span>
-                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
-                    {info.subLabel}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Right: Card Details */}
-        <div className="lg:col-span-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedId}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative min-h-[400px] flex flex-col"
-            >
-              {/* Decorative background element */}
-              <div
-                className="absolute top-0 right-0 w-64 h-64 opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"
-                style={{ backgroundColor: selectedInfo.color }}
-              />
-
-              <div className="flex flex-col gap-8 relative z-10 flex-1">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-700/50">
-                  <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
-                    style={{ backgroundColor: selectedInfo.color }}
-                  >
-                    <Icon className="w-10 h-10 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-                      {selectedInfo.label}
-                    </h3>
-                    <p className="text-xl text-slate-500 dark:text-slate-400 font-medium">
-                      {selectedInfo.subLabel}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                  {/* Origin */}
-                  <div className="space-y-4 flex flex-col">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
-                      <Activity className="w-5 h-5 text-blue-500" />
-                      Origine
-                    </h4>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {selectedInfo.origin}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Health Impact */}
-                  <div className="space-y-4 flex flex-col">
-                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2.5 text-lg">
-                      <Stethoscope className="w-5 h-5 text-rose-500" />
-                      Impact Santé
-                    </h4>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50 flex-1 min-h-fit">
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                        {selectedInfo.healthImpact}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-    </section>
+    <InteractiveGuide
+      title="Guide des polluants"
+      description="Comprendre l'origine et les effets des principaux polluants atmosphériques surveillés en Guadeloupe."
+      mainIcon={Factory}
+      mainIconColorClass="text-blue-500"
+      items={guideItems}
+    />
   );
 };

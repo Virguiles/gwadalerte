@@ -199,16 +199,15 @@ export default function MeteoPage() {
                   <CommuneTooltip hoveredInfo={hoveredInfo} />
                 </div>
 
-                <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0">
-                  <MeteoSidebar
-                    weatherData={weatherData}
-                    currentVigilanceInfo={currentVigilanceInfo}
-                    relativeLastUpdate={relativeLastUpdate}
-                    focusedCommuneName={sidebarCommuneName}
-                    focusedCommuneData={sidebarCommuneData}
-                    risks={vigilanceData?.risks}
-                  />
-                </div>
+                <MeteoSidebar
+                  weatherData={weatherData}
+                  currentVigilanceInfo={currentVigilanceInfo}
+                  relativeLastUpdate={relativeLastUpdate}
+                  focusedCommuneName={sidebarCommuneName}
+                  focusedCommuneData={sidebarCommuneData}
+                  risks={vigilanceData?.risks}
+                  onClose={() => setSelectedCommune('')}
+                />
               </section>
             </div>
           </div>

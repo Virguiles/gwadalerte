@@ -6,9 +6,10 @@ import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 // import { WaterTooltip, TooltipAnchor } from './components/WaterTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
+import { WaterTowersGuide } from './components/WaterTowersGuide';
 import { WaterDataMap, DateFilter } from './types';
 import { getCommuneColors, hasCutsOnDay, getTargetDate } from './utils';
-import { CalendarDays, Droplets } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import {
   Tabs,
   TabsList,
@@ -240,11 +241,17 @@ export default function WaterMapPage() {
                   data={sidebarData}
                   dateFilter={dateFilter}
                   archipelInfo={archipelInfo}
+                  onClose={() => setSelectedCommune('')}
                 />
 
               </section>
             </div>
           </div>
+        </div>
+
+        {/* Guide Informatif */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+           <WaterTowersGuide />
         </div>
       </div>
     </main>

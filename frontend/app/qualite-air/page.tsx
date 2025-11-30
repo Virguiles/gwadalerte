@@ -195,13 +195,12 @@ export default function QualiteAir() {
                 </div>
 
                 {/* Sidebar Latérale */}
-                <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0">
-                  <AirSidebar
-                    data={sidebarData}
-                    lastUpdate={lastUpdate}
-                    formatDateTime={formatDateTime}
-                  />
-                </div>
+                <AirSidebar
+                  data={sidebarData}
+                  lastUpdate={lastUpdate}
+                  formatDateTime={formatDateTime}
+                  onClose={() => setSelectedCommune('')}
+                />
               </section>
             </div>
           </div>

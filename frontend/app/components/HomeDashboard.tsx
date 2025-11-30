@@ -117,7 +117,10 @@ export default function HomeDashboard() {
 
             <div className="grid grid-cols-1 gap-4">
               {/* Météo Widget */}
-              <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-blue-200 dark:hover:border-blue-700 transition-all">
+              <div
+                onClick={() => setActiveTab('meteo')}
+                className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-blue-200 dark:hover:border-blue-700 transition-all cursor-pointer"
+              >
                 <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
                   <CloudSun className="w-10 h-10" />
                 </div>
@@ -206,7 +209,10 @@ export default function HomeDashboard() {
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Eau Widget */}
-                <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-cyan-200 dark:hover:border-cyan-700 transition-all">
+                <div
+                  onClick={() => setActiveTab('water')}
+                  className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-cyan-200 dark:hover:border-cyan-700 transition-all cursor-pointer"
+                >
                   <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
                     <DropletOff className="w-10 h-10" />
                   </div>
@@ -252,7 +258,10 @@ export default function HomeDashboard() {
                 </div>
 
                 {/* Air Widget */}
-                <div className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-700 transition-all">
+                <div
+                  onClick={() => setActiveTab('air')}
+                  className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-700 transition-all cursor-pointer"
+                >
                   <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
                     <Wind className="w-10 h-10" />
                   </div>

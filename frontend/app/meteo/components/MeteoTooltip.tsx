@@ -1,8 +1,10 @@
 import React, { RefObject } from 'react';
-import { HoverInfo, CommuneData } from '../../components/GuadeloupeMap';
+import { HoverInfo } from '../../components/GuadeloupeMap';
 import { WeatherData } from '../types';
 import { getWeatherEmoji } from '../utils';
 import { ALL_COMMUNES } from '../constants';
+import { Droplets, Wind, Gauge, Sun, Cloud, CloudRain, X } from 'lucide-react';
+import { TooltipContainer } from '../../components/shared/TooltipContainer';
 
 interface MeteoTooltipProps {
   tooltip: HoverInfo;
@@ -42,21 +44,14 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
   const communeName = weatherInfo.lib_zone || ALL_COMMUNES[weatherInfo.code_zone] || weatherInfo.code_zone || 'Commune';
 
   return (
-    <div className="group relative w-[280px] sm:w-[300px]">
-      <div
-        ref={tooltipRef}
-        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${getGradientColors()} shadow-2xl transition-all duration-200 pointer-events-auto z-50 border-2 border-white/30`}
-        style={{
-          left: `${tooltipPosition.left}px`,
-          top: `${tooltipPosition.top}px`,
-          position: 'fixed',
-          maxHeight: 'calc(100vh - 24px)',
-          overflowY: 'auto',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(255,255,255,0.3) transparent',
-          animation: 'tooltip-fade-in 0.2s ease-out',
-        }}
-      >
+    <TooltipContainer
+      ref={tooltipRef}
+      position={tooltipPosition}
+      onClose={onClose}
+      transparent={true}
+      className={`bg-gradient-to-br ${getGradientColors()} border-2 border-white/30`}
+      width="300px"
+    >
         {/* Pattern de fond doux */}
         <div
           className="absolute inset-0 opacity-10"
@@ -82,18 +77,7 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
               aria-label="Fermer"
               title="Fermer"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           </div>
 
@@ -128,15 +112,7 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {/* Humidité */}
                 <div className="flex flex-col items-center gap-2 rounded-xl bg-white/15 p-3 backdrop-blur-md">
-                  <svg
-                    className="h-5 w-5 text-white/90"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
-                  </svg>
+                  <Droplets className="h-5 w-5 text-white/90" />
                   <span className="text-xs font-medium text-white/80">Humidité</span>
                   <span className="text-base font-bold text-white">
                     {weatherInfo.humidity != null ? `${weatherInfo.humidity}%` : '—'}
@@ -145,17 +121,7 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
 
                 {/* Vent */}
                 <div className="flex flex-col items-center gap-2 rounded-xl bg-white/15 p-3 backdrop-blur-md">
-                  <svg
-                    className="h-5 w-5 text-white/90"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12.8 19.6A2 2 0 1 0 14 16H2"/>
-                    <path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/>
-                    <path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>
-                  </svg>
+                  <Wind className="h-5 w-5 text-white/90" />
                   <span className="text-xs font-medium text-white/80">Vent</span>
                   <span className="text-base font-bold text-white">
                     {weatherInfo.wind_speed != null ? `${Math.round(weatherInfo.wind_speed)} km/h` : '—'}
@@ -164,16 +130,7 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
 
                 {/* Pression */}
                 <div className="flex flex-col items-center gap-2 rounded-xl bg-white/15 p-3 backdrop-blur-md">
-                  <svg
-                    className="h-5 w-5 text-white/90"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                  </svg>
+                  <Gauge className="h-5 w-5 text-white/90" />
                   <span className="text-xs font-medium text-white/80">Pression</span>
                   <span className="text-base font-bold text-white">
                     {weatherInfo.pressure != null ? `${weatherInfo.pressure} hPa` : '—'}
@@ -183,29 +140,13 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
                 {/* Nuages ou UV */}
                 {weatherInfo.uv_index !== null && weatherInfo.uv_index !== undefined ? (
                   <div className="flex flex-col items-center gap-2 rounded-xl bg-white/15 p-3 backdrop-blur-md">
-                    <svg
-                      className="h-5 w-5 text-white/90"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>
-                    </svg>
+                    <Sun className="h-5 w-5 text-white/90" />
                     <span className="text-xs font-medium text-white/80">UV Index</span>
                     <span className="text-base font-bold text-white">{weatherInfo.uv_index}</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2 rounded-xl bg-white/15 p-3 backdrop-blur-md">
-                    <svg
-                      className="h-5 w-5 text-white/90"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/>
-                    </svg>
+                    <Cloud className="h-5 w-5 text-white/90" />
                     <span className="text-xs font-medium text-white/80">Nuages</span>
                     <span className="text-base font-bold text-white">
                       {weatherInfo.clouds != null ? `${weatherInfo.clouds}%` : '—'}
@@ -259,7 +200,6 @@ export const MeteoTooltip: React.FC<MeteoTooltipProps> = ({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </TooltipContainer>
   );
 };
