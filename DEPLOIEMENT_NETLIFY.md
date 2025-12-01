@@ -126,7 +126,7 @@ Netlify scanne automatiquement votre code pour détecter les secrets exposés. S
 - Dans le dashboard Netlify : Site settings → Environment variables
 - Ajoutez : `SECRETS_SCAN_OMIT_KEYS` = `nom_de_la_variable`
 
-**Note importante** : La variable `METEOFRANCE_TOKEN_URL` doit être définie dans les variables d'environnement Netlify. Cette variable contient l'URL publique de l'API Météo-France pour l'authentification OAuth2 (par défaut : `https://portail-api.meteofrance.fr/token`). Bien que cette URL soit publique, elle doit être définie via une variable d'environnement pour éviter les alertes du scanner de secrets.
+**Note importante** : La variable `METEOFRANCE_TOKEN_URL` doit être définie dans les variables d'environnement Netlify. Cette variable contient l'URL publique de l'API Météo-France pour l'authentification OAuth2 (par défaut : `https://.../token`). Bien que cette URL soit publique, elle doit être définie via une variable d'environnement pour éviter les alertes du scanner de secrets.
 
 ## 🧪 Tester le déploiement
 
