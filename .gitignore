@@ -1,32 +1,25 @@
-# Python
+# Python (si nécessaire pour d'autres outils)
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-backend/venv/
-backend/env/
-backend/.venv
-backend/ENV/
-backend/env.bak/
-backend/venv.bak/
 *.egg-info/
 dist/
 build/
 
 # Node.js / Next.js
 node_modules/
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
-frontend/.pnp
-frontend/.pnp.*
-frontend/.yarn/*
-!frontend/.yarn/patches
-!frontend/.yarn/plugins
-!frontend/.yarn/releases
-!frontend/.yarn/versions
+.next/
+out/
+build/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # Environment variables
 .env
@@ -35,6 +28,7 @@ frontend/.yarn/*
 .env.test.local
 .env.production.local
 *.env
+!.env.example
 
 # IDE
 .vscode/
@@ -58,7 +52,6 @@ coverage/
 .nyc_output
 
 # Cache
-backend/cache/
 .cache/
 *.tsbuildinfo
 
@@ -72,4 +65,3 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-

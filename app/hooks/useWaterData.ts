@@ -9,9 +9,8 @@ export function useWaterData() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // En production, il faudrait gérer l'URL de l'API via une variable d'environnement
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/water-cuts`);
+        // Utiliser les API Routes Next.js locales (plus besoin de NEXT_PUBLIC_API_URL)
+        const res = await fetch('/api/water-cuts');
         if (!res.ok) {
           throw new Error('Erreur lors de la récupération des données');
         }

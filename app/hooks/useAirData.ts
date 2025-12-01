@@ -70,8 +70,8 @@ export function useAirData() {
 
       if (shouldFetch) {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-          const res = await fetch(`${apiUrl}/api/air-quality`);
+          // Utiliser les API Routes Next.js locales (plus besoin de NEXT_PUBLIC_API_URL)
+          const res = await fetch('/api/air-quality');
           if (!res.ok) throw new Error('Erreur fetch air quality');
           const newData = await res.json();
           setData(newData);

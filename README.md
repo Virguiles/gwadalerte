@@ -13,77 +13,95 @@ Gwad'Alerte est un tableau de bord citoyen qui centralise les informations essen
 
 ```
 GwadaSVG/
-├── backend/              # API FastAPI
-│   ├── main.py          # Point d'entrée de l'API
-│   ├── requirements.txt # Dépendances Python
-│   ├── tours-deau.json  # Données des coupures d'eau
-│   └── cache/           # Cache des données API
-├── frontend/            # Application Next.js
-│   ├── app/            # Pages et composants
-│   │   ├── components/ # Composants réutilisables
-│   │   ├── meteo/      # Page météo
-│   │   ├── qualite-air/# Page qualité de l'air
-│   │   └── tours-deau/ # Page tours d'eau
-│   └── public/         # Assets statiques (cartes SVG)
-└── docs/               # Documentation technique
+├── app/                # Pages et composants Next.js
+│   ├── api/           # API Routes serverless
+│   │   ├── air-quality/
+│   │   ├── weather/
+│   │   ├── forecast/
+│   │   ├── vigilance/
+│   │   └── water-cuts/
+│   ├── components/    # Composants réutilisables
+│   ├── meteo/         # Page météo
+│   ├── qualite-air/   # Page qualité de l'air
+│   └── tours-deau/     # Page tours d'eau
+├── lib/               # Utilitaires et clients API
+├── public/            # Assets statiques (cartes SVG)
+└── docs/              # Documentation technique
 ```
 
-## 🚀 Installation
+## 🚀 Déploiement sur Vercel
+
+Le projet est optimisé pour Vercel. Pour déployer :
+
+1. **Connecter votre dépôt Git à Vercel**
+   - Allez sur [vercel.com](https://vercel.com)
+   - Importez votre dépôt GitHub/GitLab/Bitbucket
+
+2. **Configurer les variables d'environnement**
+   - Dans Vercel Dashboard → Settings → Environment Variables
+   - Ajoutez : `OPENWEATHER_API_KEY`, `METEOFRANCE_CLIENT_ID`, `METEOFRANCE_CLIENT_SECRET`
+
+3. **Déployer**
+   - Vercel détecte automatiquement Next.js
+   - Le build se lance automatiquement à chaque push
+
+4. **Optionnel : Ajouter Vercel KV pour le cache**
+   - Dashboard → Storage → Create Database → KV
+   - Lier au projet (les variables sont ajoutées automatiquement)
+
+Pour plus de détails, consultez [MIGRATION.md](MIGRATION.md).
+
+## 🚀 Installation locale
 
 ### Prérequis
 
-- Python 3.8+
 - Node.js 18+
 - npm ou yarn
 
 ### Configuration des variables d'environnement
 
-Créez un fichier `.env` dans le dossier `backend/` avec les clés API suivantes :
+Créez un fichier `.env.local` à la racine du projet avec les clés API suivantes :
 
 ```env
-# OpenWeatherMap (pour les données météo)
+# OpenWeatherMap (pour les données météo et prévisions)
+# Obtenez votre clé sur : https://openweathermap.org/api
 OPENWEATHER_API_KEY=votre_cle_openweather
 
-# Météo-France (pour la vigilance)
+# Météo-France (pour la vigilance météo)
+# Obtenez vos credentials sur : https://portail-api.meteofrance.fr/
 METEOFRANCE_CLIENT_ID=votre_client_id
 METEOFRANCE_CLIENT_SECRET=votre_client_secret
 ```
 
-### Backend
+**Note** : Le fichier `.env.local` est automatiquement ignoré par git pour la sécurité. Ne commitez jamais vos clés API !
 
+Pour créer le fichier rapidement :
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
+touch .env.local
+# Puis éditez .env.local avec vos vraies clés API
 ```
 
-L'API sera disponible sur `http://localhost:8000`
-
-**Endpoints disponibles :**
-- `GET /api/air-quality` - Données qualité de l'air (Gwad'Air)
-- `GET /api/weather` - Données météo par commune (OpenWeather)
-- `GET /api/forecast/{code_zone}` - Prévisions 5 jours pour une commune
-- `GET /api/vigilance` - Niveau de vigilance météo (Météo-France)
-- `GET /api/water-cuts` - Planning des tours d'eau (SMGEAG)
-
-### Frontend
+### Installation et lancement
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
 
 L'application sera disponible sur `http://localhost:3000`
 
+**API Routes disponibles :**
+- `GET /api/air-quality` - Données qualité de l'air (Gwad'Air)
+- `GET /api/weather` - Données météo par commune (OpenWeather)
+- `GET /api/forecast/[code_zone]` - Prévisions 5 jours pour une commune
+- `GET /api/vigilance` - Niveau de vigilance météo (Météo-France)
+- `GET /api/water-cuts` - Planning des tours d'eau (SMGEAG)
+
 ## 📦 Technologies utilisées
 
-### Backend
-- **FastAPI** - Framework web moderne et performant
-- **httpx** - Client HTTP asynchrone
-- **python-dotenv** - Gestion des variables d'environnement
+### Backend (API Routes Next.js)
+- **Next.js API Routes** - API serverless intégrée
+- **Vercel KV** - Cache Redis managé (optionnel, fallback mémoire en local)
 - **Cache intelligent** - Optimisation des appels API avec TTL
 
 ### Frontend
@@ -149,11 +167,14 @@ L'application sera disponible sur `http://localhost:3000`
 
 ### Cache et performance
 
-Le backend implémente un système de cache intelligent :
+L'application utilise un système de cache intelligent :
 - **Qualité de l'air** : Cache de 3 minutes (TTL)
 - **Météo** : Cache de 1 heure
 - **Vigilance** : Cache de 10 minutes
 - **Prévisions** : Cache de 3 heures
+- **Tours d'eau** : Cache de 24 heures
+
+En production (Vercel), le cache utilise Vercel KV (Redis). En développement local, un cache mémoire est utilisé automatiquement.
 
 Le frontend utilise également le localStorage pour mettre en cache les données côté client.
 

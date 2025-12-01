@@ -24,8 +24,8 @@ export default function WaterMapPage() {
 
   // 1. Récupérer les données
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    fetch(`${apiUrl}/api/water-cuts`)
+    // Utiliser les API Routes Next.js locales
+    fetch('/api/water-cuts')
       .then((res) => res.json())
       .then((data) => {
         setWaterData(data);

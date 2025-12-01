@@ -109,10 +109,10 @@ export function useMeteoData() {
     if (shouldFetch()) {
       setLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        // Utiliser les API Routes Next.js locales (plus besoin de NEXT_PUBLIC_API_URL)
         const [weatherResponse, vigilanceResponse] = await Promise.all([
-          fetch(`${apiUrl}/api/weather`),
-          fetch(`${apiUrl}/api/vigilance`),
+          fetch('/api/weather'),
+          fetch('/api/vigilance'),
         ]);
 
         const [newWeatherData, newVigilanceData] = await Promise.all([

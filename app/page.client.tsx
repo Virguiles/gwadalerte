@@ -207,8 +207,8 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
 
     // Faire un appel API seulement si nécessaire (toutes les 3 minutes ou si pas d'aujourd'hui)
     if (shouldFetch()) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      fetch(`${apiUrl}/api/air-quality`)
+      // Utiliser les API Routes Next.js locales
+      fetch('/api/air-quality')
         .then((res) => res.json())
         .then((data) => {
           setAirData(data);

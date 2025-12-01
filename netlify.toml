@@ -1,0 +1,57 @@
+# Configuration Netlify pour Gwad'Alerte
+# Documentation: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Répertoire de base (si le projet est à la racine, ne pas mettre "frontend")
+  # Si votre repo est dans frontend/, décommentez la ligne suivante :
+  # base = "frontend"
+  # Commande de build
+  command = "npm run build"
+  # Répertoire de publication (Next.js avec plugin Netlify)
+  publish = ".next"
+
+# Plugin Next.js pour Netlify (gère automatiquement les API Routes)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Headers de sécurité
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Sécurité
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Permissions Policy
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # Content Security Policy (ajustez selon vos besoins)
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.openweathermap.org https://portail-api.meteofrance.fr https://services1.arcgis.com;"
+
+# Headers pour les API Routes
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    # Cache pour les API Routes
+    Cache-Control = "public, s-maxage=60, stale-while-revalidate=300"
+    # CORS (si nécessaire pour des appels externes)
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
+# Headers pour les assets statiques
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Headers pour les images
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Variables d'environnement (à configurer dans le dashboard Netlify)
+# Ne pas mettre de valeurs sensibles ici, utilisez le dashboard Netlify
+# [build.environment]
+#   NODE_VERSION = "18"

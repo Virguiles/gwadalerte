@@ -201,9 +201,15 @@ python3 test_meteo_improvements.py
 
 ### Clé API OpenWeather
 
-La clé API est déjà configurée dans `backend/main.py` :
+La clé API doit être configurée via une variable d'environnement dans un fichier `.env` :
+
+```bash
+OPENWEATHER_API_KEY=votre_cle_api_openweather
+```
+
+Dans `backend/main.py`, la clé est récupérée depuis les variables d'environnement :
 ```python
-OPENWEATHER_API_KEY = "REDACTED_OPENWEATHER_KEY"
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 ```
 
 **Limites gratuites :**

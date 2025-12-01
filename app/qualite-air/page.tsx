@@ -1,53 +1,20 @@
 'use client'; // Indispensable pour utiliser les hooks
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import GuadeloupeMap, { AirData, HoverInfo } from '../components/GuadeloupeMap';
+import { useState, useMemo, useCallback } from 'react';
+import GuadeloupeMap, { HoverInfo } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 import { AirSidebar } from './components/AirSidebar';
 import { AirQualityGuide } from './components/AirQualityGuide';
 import { PollutantsGuide } from './components/PollutantsGuide';
+import { useAirData } from '../hooks/useAirData';
 
 export default function QualiteAir() {
-  // --- GESTION DU CACHE ET DE L'ÉTAT ---
-  const loadFromCache = (): { data: AirData; timestamp: number } | null => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const CACHE_KEY = 'gwada_air_quality_cache';
-      const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
-      const cachedData = localStorage.getItem(CACHE_KEY);
-      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+  // --- GESTION DES DONNÉES ---
+  const { data: airData, lastUpdate, loading } = useAirData();
 
-      if (cachedData && cachedTimestamp) {
-        const timestamp = parseInt(cachedTimestamp, 10);
-        return { data: JSON.parse(cachedData), timestamp };
-      }
-    } catch (error) {
-      console.error('Erreur lecture cache:', error);
-    }
-    return null;
-  };
-
-  const [airData, setAirData] = useState<AirData>(() => {
-    // Initialisation lazy avec les données du cache
-    const cached = loadFromCache();
-    return cached ? cached.data : {};
-  });
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(() => {
-    // Initialisation lazy avec le timestamp du cache
-    const cached = loadFromCache();
-    return cached ? new Date(cached.timestamp) : null;
-  });
   const [selectedCommune, setSelectedCommune] = useState<string>('');
-
-  const isSameDay = (date1: Date, date2: Date): boolean => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
-  };
 
   const formatDateTime = (date: Date): string => {
     return new Intl.DateTimeFormat('fr-FR', {
@@ -55,54 +22,6 @@ export default function QualiteAir() {
       hour: '2-digit', minute: '2-digit',
     }).format(date);
   };
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const CACHE_KEY = 'gwada_air_quality_cache';
-    const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
-
-    const saveToCache = (data: AirData) => {
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        const timestamp = Date.now();
-        localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-        setLastUpdate(new Date(timestamp));
-      } catch (error) {
-        console.error('Erreur sauvegarde cache:', error);
-      }
-    };
-
-    const shouldFetch = (): boolean => {
-      try {
-        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-        if (!cachedTimestamp) return true;
-        const timestamp = parseInt(cachedTimestamp, 10);
-        const lastUpdateDate = new Date(timestamp);
-        const now = new Date();
-        const diffMinutes = (now.getTime() - lastUpdateDate.getTime()) / (1000 * 60);
-
-        if (!isSameDay(lastUpdateDate, now) || diffMinutes > 3) {
-          console.log(`[Cache] Expiré (${Math.round(diffMinutes)} min), refresh...`);
-          return true;
-        }
-        console.log(`[Cache] Valide (${Math.round(diffMinutes)} min).`);
-        return false;
-      } catch {
-        return true;
-      }
-    };
-
-    if (shouldFetch()) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      fetch(`${apiUrl}/api/air-quality`)
-        .then((res) => res.json())
-        .then((data) => {
-          setAirData(data);
-          saveToCache(data);
-        })
-        .catch((error) => console.error('Erreur API:', error));
-    }
-  }, []);
 
   const communesForSelector = useMemo(() => {
     const communes: { [code: string]: string } = {};
@@ -165,6 +84,19 @@ export default function QualiteAir() {
         {/* Layout Principal : Carte + Sidebar */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
+            {loading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-3xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+              </div>
+            )}
+
+            {!loading && Object.keys(airData).length === 0 && (
+              <div className="p-4 m-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center text-red-600 dark:text-red-400">
+                <p className="font-medium">Impossible de charger les données de qualité de l&apos;air.</p>
+                <p className="text-sm mt-1 opacity-80">Veuillez vérifier votre connexion internet ou réessayer plus tard.</p>
+              </div>
+            )}
+
             <div className="p-4">
               <section className="flex flex-col lg:flex-row gap-6 w-full items-start relative z-10" aria-label="Carte et détails qualité de l'air">
                 {/* Colonne Gauche : Carte + Sélecteur */}
