@@ -35,13 +35,15 @@ L'API utilise OAuth 2.0 avec génération automatique de token :
 ## 🔧 Comment ça marche
 
 ### 1. Génération du token
-Le backend génère automatiquement un token OAuth 2.0 en appelant :
+Le backend génère automatiquement un token OAuth 2.0 en appelant l'endpoint configuré via la variable d'environnement `METEOFRANCE_TOKEN_URL` :
 ```bash
-POST https://portail-api.meteofrance.fr/token
+POST {METEOFRANCE_TOKEN_URL}
 Authorization: Basic <credentials>
 Content-Type: application/x-www-form-urlencoded
 Body: grant_type=client_credentials
 ```
+
+**Note** : Par défaut, l'endpoint est `https://portail-api.meteofrance.fr/token` si la variable d'environnement n'est pas définie.
 
 ### 2. Téléchargement des données
 Une fois le token obtenu, le backend :

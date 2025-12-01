@@ -126,6 +126,24 @@ Si vous avez besoin d'un cache partagé entre toutes les instances, vous pouvez 
 - Utiliser Netlify Edge Functions (plan Pro)
 - Intégrer un service externe (Redis, Upstash, etc.)
 
+### Configuration du scan de secrets
+
+Netlify scanne automatiquement votre code pour détecter les secrets exposés. Si vous recevez une erreur concernant `METEOFRANCE_TOKEN_URL` :
+
+**Solution 1 (recommandée)** : Le code utilise maintenant une variable d'environnement. Assurez-vous que :
+- La variable `METEOFRANCE_TOKEN_URL` est configurée dans le dashboard Netlify
+- Le code source n'a plus de valeurs en dur (déjà corrigé dans `lib/api-clients.ts`)
+
+**Solution 2** : Exclure les fichiers de documentation du scan (car ils contiennent des exemples) :
+- Dans le dashboard Netlify : Site settings → Environment variables
+- Ajoutez : `SECRETS_SCAN_OMIT_PATHS` = `docs/**`
+
+**Solution 3** : Ignorer spécifiquement la clé `METEOFRANCE_TOKEN_URL` :
+- Dans le dashboard Netlify : Site settings → Environment variables
+- Ajoutez : `SECRETS_SCAN_OMIT_KEYS` = `METEOFRANCE_TOKEN_URL`
+
+Note : L'URL du token Météo-France (`https://portail-api.meteofrance.fr/token`) est une URL publique documentée, pas un secret. Le scan la détecte car elle correspond à une variable d'environnement configurée.
+
 ## 🧪 Tester le déploiement
 
 Après le déploiement, testez les endpoints :

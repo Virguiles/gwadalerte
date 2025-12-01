@@ -55,3 +55,7 @@
 # Ne pas mettre de valeurs sensibles ici, utilisez le dashboard Netlify
 # [build.environment]
 #   NODE_VERSION = "18"
+#
+# Note: Pour exclure les fichiers de documentation du scan de secrets,
+# ajoutez dans le dashboard Netlify (Site settings → Environment variables):
+# SECRETS_SCAN_OMIT_PATHS = "docs/**"

@@ -259,7 +259,7 @@ https://public-api.meteofrance.fr/public/
 Votre site utilise déjà l'authentification OAuth 2.0 :
 - **Client ID** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_ID`
 - **Client Secret** : Configuré via la variable d'environnement `METEOFRANCE_CLIENT_SECRET`
-- **Token endpoint** : `https://portail-api.meteofrance.fr/token`
+- **Token endpoint** : Configuré via la variable d'environnement `METEOFRANCE_TOKEN_URL` (par défaut: `https://portail-api.meteofrance.fr/token`)
 
 Le token est déjà généré automatiquement dans `get_meteofrance_token()`.
 
