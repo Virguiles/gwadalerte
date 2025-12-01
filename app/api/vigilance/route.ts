@@ -18,7 +18,6 @@ import {
   VigilanceRisk,
   VIGILANCE_LEVELS,
   PHENOMENON_NAMES,
-  createErrorResponse,
 } from '@/lib/api-clients';
 import JSZip from 'jszip';
 
@@ -69,9 +68,14 @@ async function getMeteoFranceToken(): Promise<string> {
 
   const clientId = process.env.METEOFRANCE_CLIENT_ID;
   const clientSecret = process.env.METEOFRANCE_CLIENT_SECRET;
+  const tokenUrl = API_CONFIG.METEOFRANCE.TOKEN_URL;
 
   if (!clientId || !clientSecret) {
     throw new Error('Credentials Météo-France non configurés');
+  }
+
+  if (!tokenUrl) {
+    throw new Error('URL du token Météo-France non configurée (METEOFRANCE_TOKEN_URL)');
   }
 
   console.log('[Météo-France] Génération d\'un nouveau token...');
@@ -80,7 +84,7 @@ async function getMeteoFranceToken(): Promise<string> {
   const credentials = `${clientId}:${clientSecret}`;
   const encodedCredentials = Buffer.from(credentials).toString('base64');
 
-  const response = await fetch(API_CONFIG.METEOFRANCE.TOKEN_URL, {
+  const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${encodedCredentials}`,

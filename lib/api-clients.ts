@@ -27,7 +27,8 @@ export const API_CONFIG = {
 
   // Météo-France - Vigilance
   METEOFRANCE: {
-    TOKEN_URL: process.env.METEOFRANCE_TOKEN_URL || 'https://portail-api.meteofrance.fr/token',
+    // URL du token OAuth2 - doit être définie via la variable d'environnement METEOFRANCE_TOKEN_URL
+    TOKEN_URL: process.env.METEOFRANCE_TOKEN_URL || '',
     VIGILANCE_URL: 'https://public-api.meteofrance.fr/public/DPVigilance/v1/vigilanceom/flux/dernier',
     GUADELOUPE_FILE: 'CDPV85_TFFR_.txt',
     DOMAIN_ID: 'VIGI971',
