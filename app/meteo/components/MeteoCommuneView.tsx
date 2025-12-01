@@ -20,15 +20,17 @@ export const MeteoCommuneView: React.FC<MeteoCommuneViewProps> = ({
 }) => {
     return (
         <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 relative">
                 <div className="flex items-center gap-2">
                     <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     {name}
                 </div>
+                {/* Espace réservé pour le bouton - toujours présent pour éviter les décalages */}
+                <div className="w-6 h-6"></div>
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 absolute right-0"
                         aria-label="Fermer"
                     >
                         ✕
