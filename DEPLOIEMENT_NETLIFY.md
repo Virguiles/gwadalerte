@@ -41,23 +41,9 @@ npm install --save-dev @netlify/plugin-nextjs
 
 ### Variables requises
 
-Dans le dashboard Netlify → Site settings → Environment variables, ajoutez :
+Dans le dashboard Netlify → Site settings → Environment variables, ajoutez toutes les variables d'environnement nécessaires au fonctionnement de l'application.
 
-```env
-# OpenWeatherMap (requis)
-OPENWEATHER_API_KEY=votre_cle_openweather
-
-# Météo-France (requis)
-METEOFRANCE_CLIENT_ID=votre_client_id
-METEOFRANCE_CLIENT_SECRET=votre_client_secret
-```
-
-### Variables optionnelles
-
-```env
-# Google Analytics (optionnel)
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-```
+Consultez la documentation du projet pour la liste complète des variables requises et optionnelles.
 
 ### ⚠️ Important : Sécurité
 
@@ -83,7 +69,7 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
 3. **Ajouter les variables d'environnement**
    - Dans "Site settings" → "Environment variables"
-   - Ajoutez toutes les variables listées ci-dessus
+   - Ajoutez toutes les variables d'environnement nécessaires (voir section Configuration des variables d'environnement)
 
 4. **Déployer**
    - Cliquez sur "Deploy site"
@@ -128,21 +114,17 @@ Si vous avez besoin d'un cache partagé entre toutes les instances, vous pouvez 
 
 ### Configuration du scan de secrets
 
-Netlify scanne automatiquement votre code pour détecter les secrets exposés. Si vous recevez une erreur concernant `METEOFRANCE_TOKEN_URL` :
+Netlify scanne automatiquement votre code pour détecter les secrets exposés. Si vous recevez des alertes :
 
-**Solution 1 (recommandée)** : Le code utilise maintenant une variable d'environnement. Assurez-vous que :
-- La variable `METEOFRANCE_TOKEN_URL` est configurée dans le dashboard Netlify
-- Le code source n'a plus de valeurs en dur (déjà corrigé dans `lib/api-clients.ts`)
+**Solution 1 (recommandée)** : Assurez-vous que toutes les valeurs sensibles utilisent des variables d'environnement et qu'aucune valeur n'est hardcodée dans le code source.
 
-**Solution 2** : Exclure les fichiers de documentation du scan (car ils contiennent des exemples) :
+**Solution 2** : Exclure les fichiers de documentation du scan (car ils peuvent contenir des exemples) :
 - Dans le dashboard Netlify : Site settings → Environment variables
 - Ajoutez : `SECRETS_SCAN_OMIT_PATHS` = `docs/**`
 
-**Solution 3** : Ignorer spécifiquement la clé `METEOFRANCE_TOKEN_URL` :
+**Solution 3** : Si nécessaire, ignorer des clés spécifiques dans le scan :
 - Dans le dashboard Netlify : Site settings → Environment variables
-- Ajoutez : `SECRETS_SCAN_OMIT_KEYS` = `METEOFRANCE_TOKEN_URL`
-
-Note : L'URL du token Météo-France (`https://portail-api.meteofrance.fr/token`) est une URL publique documentée, pas un secret. Le scan la détecte car elle correspond à une variable d'environnement configurée.
+- Ajoutez : `SECRETS_SCAN_OMIT_KEYS` = `nom_de_la_variable`
 
 ## 🧪 Tester le déploiement
 
@@ -190,10 +172,10 @@ Vous devriez voir :
 
 ## 🐛 Dépannage
 
-### Erreur "OPENWEATHER_API_KEY non configurée"
+### Erreur "Variable d'environnement non configurée"
 
-- Vérifier que la variable est bien définie dans Netlify Dashboard
-- Redéployer le site après avoir ajouté la variable
+- Vérifier que toutes les variables requises sont bien définies dans Netlify Dashboard
+- Redéployer le site après avoir ajouté les variables
 
 ### Erreur de timeout sur /api/weather
 

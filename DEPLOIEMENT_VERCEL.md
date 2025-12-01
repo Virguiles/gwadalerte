@@ -50,12 +50,8 @@ Ce guide vous accompagne pour déployer Gwad'Alerte sur Vercel en toute simplici
    - **Output Directory** : `.next` (géré automatiquement)
 
 3. **Ajouter les variables d'environnement**
-   - Dans "Environment Variables", ajoutez :
-     ```env
-     OPENWEATHER_API_KEY=votre_cle_openweather
-     METEOFRANCE_CLIENT_ID=votre_client_id
-     METEOFRANCE_CLIENT_SECRET=votre_client_secret
-     ```
+   - Dans "Environment Variables", ajoutez toutes les variables d'environnement nécessaires
+   - Consultez la documentation du projet pour la liste complète des variables requises
    - Sélectionnez tous les environnements (Production, Preview, Development)
 
 4. **Déployer**
@@ -90,7 +86,7 @@ vercel --prod
 
 2. **Lier au projet**
    - Sélectionnez votre projet
-   - Les variables `KV_REST_API_URL` et `KV_REST_API_TOKEN` seront automatiquement ajoutées
+   - Les variables de connexion KV seront automatiquement ajoutées
 
 3. **Avantages**
    - Cache partagé entre toutes les instances serverless
@@ -123,26 +119,6 @@ Des crons sont configurés pour préchauffer le cache :
 
 Cela garantit que les données sont toujours fraîches même sans trafic.
 
-## 🧪 Tester le déploiement
-
-Après le déploiement, testez les endpoints :
-
-```bash
-# Qualité de l'air
-curl https://votre-site.vercel.app/api/air-quality
-
-# Météo
-curl https://votre-site.vercel.app/api/weather
-
-# Prévisions
-curl https://votre-site.vercel.app/api/forecast/97105
-
-# Vigilance
-curl https://votre-site.vercel.app/api/vigilance
-
-# Tours d'eau
-curl https://votre-site.vercel.app/api/water-cuts
-```
 
 ## 🔍 Vérification de la sécurité
 
@@ -164,11 +140,11 @@ Vercel ajoute automatiquement les headers de sécurité nécessaires.
 
 ## 🐛 Dépannage
 
-### Erreur "OPENWEATHER_API_KEY non configurée"
+### Erreur "Variable d'environnement non configurée"
 
-- Vérifier que la variable est bien définie dans Vercel Dashboard
+- Vérifier que toutes les variables requises sont bien définies dans Vercel Dashboard
 - Vérifier que tous les environnements sont sélectionnés
-- Redéployer le site après avoir ajouté la variable
+- Redéployer le site après avoir ajouté les variables
 
 ### Erreur de timeout sur /api/weather
 
