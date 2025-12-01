@@ -18,7 +18,7 @@ export const NavbarVigilanceWidget = () => {
   return (
     <Link
       href="/meteo"
-      className="hidden md:flex items-center justify-center p-1 rounded-lg transition-all hover:scale-110 active:scale-95 mx-2"
+      className="hidden md:flex items-center justify-center p-1 rounded-lg transition-all active:scale-95 mx-2"
       title={`Vigilance Météo : ${currentVigilanceInfo.label}\n${currentVigilanceInfo.description}`}
     >
       <div

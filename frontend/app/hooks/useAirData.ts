@@ -70,7 +70,8 @@ export function useAirData() {
 
       if (shouldFetch) {
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/air-quality');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+          const res = await fetch(`${apiUrl}/api/air-quality`);
           if (!res.ok) throw new Error('Erreur fetch air quality');
           const newData = await res.json();
           setData(newData);

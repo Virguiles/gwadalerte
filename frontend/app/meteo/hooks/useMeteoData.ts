@@ -109,9 +109,10 @@ export function useMeteoData() {
     if (shouldFetch()) {
       setLoading(true);
       try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const [weatherResponse, vigilanceResponse] = await Promise.all([
-          fetch('http://127.0.0.1:8000/api/weather'),
-          fetch('http://127.0.0.1:8000/api/vigilance'),
+          fetch(`${apiUrl}/api/weather`),
+          fetch(`${apiUrl}/api/vigilance`),
         ]);
 
         const [newWeatherData, newVigilanceData] = await Promise.all([

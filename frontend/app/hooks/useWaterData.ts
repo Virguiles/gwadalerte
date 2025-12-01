@@ -10,7 +10,8 @@ export function useWaterData() {
     const fetchData = async () => {
       try {
         // En production, il faudrait gérer l'URL de l'API via une variable d'environnement
-        const res = await fetch('http://127.0.0.1:8000/api/water-cuts');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/api/water-cuts`);
         if (!res.ok) {
           throw new Error('Erreur lors de la récupération des données');
         }

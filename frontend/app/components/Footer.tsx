@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -69,15 +69,13 @@ export default function Footer() {
             <p className="text-slate-500 dark:text-gray-500 text-sm text-center md:text-left">
               © {currentYear} Gwad&apos;Alerte. Tous droits réservés.
             </p>
-            <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-500">
-              <span>Développé avec</span>
-              <Heart className="w-4 h-4 text-blue-500 fill-blue-500" />
-              <span>par</span>
+            <div className="text-sm text-slate-500 dark:text-gray-500">
+              <span>Par </span>
               <Link
                 href="https://virgile.site/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-500 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium"
+                className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent hover:from-blue-700 hover:to-cyan-700 dark:hover:from-blue-300 dark:hover:to-cyan-300 transition-all duration-200"
               >
                 Virgile
               </Link>

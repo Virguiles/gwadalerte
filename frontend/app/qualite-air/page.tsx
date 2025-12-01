@@ -93,7 +93,8 @@ export default function QualiteAir() {
     };
 
     if (shouldFetch()) {
-      fetch('http://127.0.0.1:8000/api/air-quality')
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      fetch(`${apiUrl}/api/air-quality`)
         .then((res) => res.json())
         .then((data) => {
           setAirData(data);

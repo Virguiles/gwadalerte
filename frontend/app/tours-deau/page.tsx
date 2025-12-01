@@ -24,7 +24,8 @@ export default function WaterMapPage() {
 
   // 1. Récupérer les données
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/water-cuts')
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    fetch(`${apiUrl}/api/water-cuts`)
       .then((res) => res.json())
       .then((data) => {
         setWaterData(data);
@@ -251,7 +252,7 @@ export default function WaterMapPage() {
 
         {/* Guide Informatif */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-           <WaterTowersGuide />
+          <WaterTowersGuide />
         </div>
       </div>
     </main>
