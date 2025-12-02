@@ -120,10 +120,10 @@ export default function MeteoPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 transition-colors duration-300">
+    <main className="flex min-h-screen flex-col items-center justify-start pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 transition-colors duration-300">
       <MeteoJsonLd />
 
-      <div className="w-full max-w-7xl space-y-8">
+      <div className="w-full max-w-7xl space-y-6 md:space-y-8">
         {/* En-tête amélioré */}
         <header className="text-center space-y-4">
           <div className="inline-flex items-center justify-center gap-3 mb-2">
@@ -171,7 +171,7 @@ export default function MeteoPage() {
                   </div>
 
                   {/* Carte Container */}
-                  <div className="relative min-h-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style={{ height: '700px' }}>
+                  <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     {/* Légende flottante */}
                     <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
                       <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">

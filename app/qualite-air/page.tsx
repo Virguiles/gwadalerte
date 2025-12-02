@@ -56,8 +56,8 @@ export default function QualiteAir() {
 
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 dark:from-slate-950 dark:via-teal-950 dark:to-emerald-950 transition-colors duration-300">
-      <div className="w-full max-w-7xl space-y-8">
+    <main className="flex min-h-screen flex-col items-center justify-start pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 dark:from-slate-950 dark:via-teal-950 dark:to-emerald-950 transition-colors duration-300">
+      <div className="w-full max-w-7xl space-y-6 md:space-y-8">
         {/* En-tête amélioré */}
         <header className="text-center space-y-4">
           <div className="inline-flex items-center justify-center gap-3 mb-2">
@@ -111,7 +111,7 @@ export default function QualiteAir() {
                   </div>
 
                   {/* Carte Container */}
-                  <div className="relative min-h-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style={{ height: '700px' }}>
+                  <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     <div className="w-full h-full flex justify-center items-center p-4">
                       <GuadeloupeMap
                         data={airData}

@@ -55,7 +55,7 @@ export const AirGlobalView: React.FC<AirGlobalViewProps> = ({ lastUpdate, format
           )}
           <div className="flex justify-center">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-700 text-xs font-medium text-slate-600 dark:text-gray-300">
-                  Source: Gwad&apos;Air (AASQA)
+                  Source: Gwad&apos;Air
               </span>
           </div>
         </div>
