@@ -80,3 +80,23 @@ export function getTooltipAnchor(communeName: string): 'left' | 'right' {
   // Sinon (Ouest, Sud), on affiche le tooltip à DROITE
   return 'right';
 }
+
+// Formater le nom d'une commune : première lettre de chaque mot en majuscule
+// Exemples: "LES ABYMES" -> "Les Abymes", "SAINT-CLAUDE" -> "Saint-Claude"
+export function formatCommuneName(communeName: string): string {
+  // Séparer par espaces ET tirets, en préservant les séparateurs
+  return communeName
+    .toLowerCase()
+    .split(/([\s-]+)/)
+    .map((part, index) => {
+      // Si c'est un séparateur (espace ou tiret), le garder tel quel
+      if (/^[\s-]+$/.test(part)) {
+        return part;
+      }
+      // Sinon, mettre la première lettre en majuscule
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim();
+}

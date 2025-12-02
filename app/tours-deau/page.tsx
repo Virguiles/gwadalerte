@@ -8,8 +8,7 @@ import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterTowersGuide } from './components/WaterTowersGuide';
 import { WaterDataMap, DateFilter } from './types';
-import { getCommuneColors, hasCutsOnDay, getTargetDate } from './utils';
-import { CalendarDays } from 'lucide-react';
+import { getCommuneColors, hasCutsOnDay, getTargetDate, formatCommuneName } from './utils';
 import {
   Tabs,
   TabsList,
@@ -110,10 +109,10 @@ export default function WaterMapPage() {
     return 'Planning de la semaine';
   };
 
-  const DATE_TABS: { id: DateFilter; label: string; icon: React.ReactNode }[] = [
-    { id: 'today', label: "Aujourd'hui", icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
-    { id: 'tomorrow', label: 'Demain', icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
-    { id: 'week', label: 'Semaine', icon: <CalendarDays size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+  const DATE_TABS: { id: DateFilter; label: string; labelShort: string }[] = [
+    { id: 'today', label: "Aujourd'hui", labelShort: 'Auj.' },
+    { id: 'tomorrow', label: 'Demain', labelShort: 'Dem.' },
+    { id: 'week', label: 'Semaine', labelShort: 'Sem.' },
   ];
 
   const communesForSelector = useMemo(() => {
@@ -128,13 +127,20 @@ export default function WaterMapPage() {
 
   const archipelInfo = useMemo(() => {
     const targetDate = getTargetDate(dateFilter);
-    const affectedCommunes = waterEntries.filter(commune => {
-      if (!commune.details || commune.details.length === 0) return false;
-      if (dateFilter === 'week') return true;
-      return hasCutsOnDay(commune, targetDate);
-    }).length;
-    return { affectedCommunes };
-  }, [waterEntries, dateFilter]);
+    const affectedCommunesList = Object.entries(waterData)
+      .filter(([code, commune]) => {
+        if (!commune.details || commune.details.length === 0) return false;
+        if (dateFilter === 'week') return true;
+        return hasCutsOnDay(commune, targetDate);
+      })
+      .map(([code, commune]) => formatCommuneName(commune.commune))
+      .sort();
+
+    return {
+      affectedCommunes: affectedCommunesList.length,
+      affectedCommunesList
+    };
+  }, [waterData, waterEntries, dateFilter]);
 
   const totalCuts = useMemo(
     () => waterEntries.reduce((acc, commune) => acc + (commune.details?.length || 0), 0),
@@ -203,8 +209,8 @@ export default function WaterMapPage() {
                           value={tab.id}
                           className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
                         >
-                          {tab.icon}
-                          {tab.label}
+                          <span className="hidden sm:inline">{tab.label}</span>
+                          <span className="sm:hidden">{tab.labelShort}</span>
                         </TabsTrigger>
                       ))}
                     </TabsList>

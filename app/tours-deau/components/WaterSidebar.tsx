@@ -8,6 +8,7 @@ interface WaterSidebarProps {
   dateFilter: DateFilter;
   archipelInfo?: {
     affectedCommunes: number;
+    affectedCommunesList?: string[];
   };
   onClose?: () => void;
 }

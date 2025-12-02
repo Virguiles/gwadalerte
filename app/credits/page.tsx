@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function Credits() {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
@@ -9,65 +7,38 @@ export default function Credits() {
           <p className="text-slate-600 dark:text-gray-400">Transparence sur les données et ressources utilisées</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {/* Sources de données */}
-          <div className="bg-slate-50 dark:bg-gray-800 p-8 rounded-3xl border border-slate-100 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              📊 Sources des Données
-            </h2>
-            <ul className="space-y-6">
-              <li>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Météo France</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Les données météorologiques et les niveaux de vigilance sont issus des bulletins publics de Météo France.
-                </p>
-              </li>
-              <li>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Gwad'Air</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Les indices de qualité de l'air (ATMO) sont fournis par Gwad'Air, l'association agréée de surveillance de la qualité de l'air en Guadeloupe.
-                </p>
-              </li>
-              <li>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">OpenWeather</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Certaines données météorologiques complémentaires peuvent provenir de l'API OpenWeather.
-                </p>
-              </li>
+        <div className="prose prose-slate dark:prose-invert max-w-none">
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">1. Sources de Données</h2>
+            <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
+              Ce site agrège et affiche des données provenant des organismes suivants, qui en conservent la pleine propriété intellectuelle et la responsabilité de leur exactitude :
+            </p>
+            <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
+              <li><strong>Météo-France :</strong> Données officielles de vigilance météorologique et bulletins publics (<a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">meteofrance.fr</a> via leur API).</li>
+              <li><strong>Gwad&apos;Air :</strong> Indices de qualité de l&apos;air (ATMO) fournis par l&apos;association agréée de surveillance de la qualité de l&apos;air en Guadeloupe (<a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">gwadair.fr</a> via leur API).</li>
+              <li><strong>OpenWeatherMap :</strong> Données météorologiques et prévisions complémentaires (<a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">openweathermap.org</a> via leur API).</li>
+              <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">smgeag.fr</a>).</li>
             </ul>
-          </div>
+          </section>
 
-          {/* Ressources Graphiques */}
-          <div className="bg-slate-50 dark:bg-gray-800 p-8 rounded-3xl border border-slate-100 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-              🎨 Ressources Graphiques
-            </h2>
-            <ul className="space-y-6">
-              <li>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Photographies</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Les images d'illustration proviennent de banques d'images libres de droits :
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-slate-600 dark:text-gray-400 ml-2">
-                  <li>Pexels</li>
-                  <li>Unsplash</li>
-                </ul>
-              </li>
-              <li>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Icônes</h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                  Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.dev/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lucide React</a>.
-                </p>
-              </li>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">2. Ressources Graphiques</h2>
+            <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
+              Les ressources visuelles utilisées sur ce site proviennent des sources suivantes :
+            </p>
+            <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
+              <li><strong>Photographies :</strong> Les images d&apos;illustration proviennent de banques d&apos;images libres de droits : <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pexels</a> et <a href="https://unsplash.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash</a>.</li>
+              <li><strong>Icônes :</strong> Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lucide</a>.</li>
             </ul>
-          </div>
-        </div>
+          </section>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-800 text-center">
-          <p className="text-slate-700 dark:text-blue-200 text-sm">
-            Ce site est un projet indépendant et n'est pas affilié directement aux organismes cités ci-dessus.
-            Les données sont utilisées dans le respect des licences Open Data disponibles.
-          </p>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">3. Avertissement</h2>
+            <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
+              Ce site est un projet indépendant et n&apos;est pas affilié directement aux organismes cités ci-dessus.
+              Les données sont utilisées dans le respect des licences Open Data disponibles.
+            </p>
+          </section>
         </div>
       </div>
     </main>

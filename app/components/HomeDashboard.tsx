@@ -5,7 +5,7 @@ import GuadeloupeMap, { HoverInfo } from './GuadeloupeMap';
 import { useWaterData } from '../hooks/useWaterData';
 import { useAirData } from '../hooks/useAirData';
 import { useMeteoData } from '../meteo/hooks/useMeteoData';
-import { getCommuneColors, hasCutsOnDay } from '../tours-deau/utils';
+import { getCommuneColors, hasCutsOnDay, formatCommuneName } from '../tours-deau/utils';
 import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '../meteo/constants';
 import { CommuneSelector } from './shared/CommuneSelector';
 import { CommuneTooltip } from './shared/CommuneTooltip';
@@ -230,7 +230,7 @@ export default function HomeDashboard() {
                         );
                         const count = affectedCommunes.length;
                         const displayNames = affectedCommunes
-                          .map(code => waterData[code].commune.charAt(0).toUpperCase() + waterData[code].commune.slice(1).toLowerCase())
+                          .map(code => formatCommuneName(waterData[code].commune))
                           .sort();
 
                         return (

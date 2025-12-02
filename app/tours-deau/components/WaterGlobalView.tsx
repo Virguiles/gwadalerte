@@ -5,6 +5,7 @@ import { WaterLogoIcon } from './WaterIcons';
 interface WaterGlobalViewProps {
   archipelInfo?: {
     affectedCommunes: number;
+    affectedCommunesList?: string[];
   };
   dateFilter: DateFilter;
 }
@@ -32,6 +33,16 @@ export const WaterGlobalView: React.FC<WaterGlobalViewProps> = ({
               "Aucune perturbation majeure signalée sur le réseau d'eau potable pour la période sélectionnée."
             )}
           </p>
+
+          {archipelInfo && archipelInfo.affectedCommunes > 0 && archipelInfo.affectedCommunesList && archipelInfo.affectedCommunesList.length > 0 && (
+            <div className="mt-4">
+              <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                {archipelInfo.affectedCommunesList.map((name, i) => (
+                  <li key={i} className="truncate">• {name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
