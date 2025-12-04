@@ -59,7 +59,7 @@ export default function MentionsLegales() {
             </p>
             <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
               <li><strong>Qualité de l&apos;Air :</strong> Données fournies par <a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Gwad&apos;Air</a> .</li>
-              <li><strong>Météo et Prévisions :</strong> Données fournies par <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">OpenWeatherMap</a> .</li>
+              <li><strong>Météo et Prévisions :</strong> Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Open Meteo</a> .</li>
               <li><strong>Vigilance Météo :</strong> Données officielles fournies par <a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Météo-France</a>.</li>
               <li><strong>Tours d&apos;eau :</strong> Planning fourni par la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">SMGEAG</a>.</li>
             </ul>

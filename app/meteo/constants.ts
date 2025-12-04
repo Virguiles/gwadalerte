@@ -1,12 +1,5 @@
 import { VigilanceLevelInfo } from './types';
 
-// Extension de l'interface pour inclure les caractéristiques
-// Note: Il faudrait idéalement mettre à jour types.ts, mais on peut le faire ici ou caster
-interface ExtendedVigilanceLevelInfo extends VigilanceLevelInfo {
-  characteristics?: string[];
-}
-
-
 export const VIGILANCE_LEVEL_DETAILS: Record<number, VigilanceLevelInfo> = {
   [-1]: {
     level: -1,

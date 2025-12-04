@@ -16,11 +16,11 @@ export default function Credits() {
             <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
               <li><strong>Météo-France :</strong> Données officielles de vigilance météorologique et bulletins publics (<a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">meteofrance.fr</a> via leur API).</li>
               <li><strong>Gwad&apos;Air :</strong> Indices de qualité de l&apos;air (ATMO) fournis par l&apos;association agréée de surveillance de la qualité de l&apos;air en Guadeloupe (<a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">gwadair.fr</a> via leur API).</li>
-              <li><strong>OpenWeatherMap :</strong> Données météorologiques et prévisions complémentaires (<a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">openweathermap.org</a> via leur API).</li>
+              <li><strong>Open Meteo :</strong> Données météorologiques et prévisions complémentaires (<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">open-meteo.com</a>).</li>
               <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">smgeag.fr</a>).</li>
             </ul>
           </section>
-
+<br />
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">2. Ressources Graphiques</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -31,7 +31,7 @@ export default function Credits() {
               <li><strong>Icônes :</strong> Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lucide</a>.</li>
             </ul>
           </section>
-
+<br />
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">3. Avertissement</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">

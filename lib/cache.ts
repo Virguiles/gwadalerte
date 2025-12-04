@@ -8,13 +8,15 @@
 
 import { kv } from '@vercel/kv';
 
-// TTL (Time To Live) en secondes - alignés sur le backend Python original
+// TTL (Time To Live) en secondes
+// Optimisé pour Open-Meteo (API gratuite avec limites)
 export const CACHE_TTL = {
-  AIR_QUALITY: 180,      // 3 minutes - données qualité de l'air
-  WEATHER: 3600,         // 1 heure - données météo actuelles
-  FORECAST: 10800,       // 3 heures - prévisions météo
-  VIGILANCE: 600,        // 10 minutes - vigilance Météo-France
-  WATER_CUTS: 86400,     // 24 heures - planning tours d'eau (données statiques)
+  AIR_QUALITY: 180,        // 3 minutes - données qualité de l'air
+  CURRENT_WEATHER: 900,    // 15 minutes - météo actuelle Open-Meteo (fréquentes)
+  WEATHER: 900,            // 15 minutes - alias pour compatibilité
+  FORECAST: 10800,         // 3 heures - prévisions météo (stables)
+  VIGILANCE: 300,          // 5 minutes - vigilance Météo-France (rafraîchie plus souvent)
+  WATER_CUTS: 86400,       // 24 heures - planning tours d'eau (données statiques)
 } as const;
 
 // Clés de cache

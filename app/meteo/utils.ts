@@ -8,30 +8,6 @@ export function getVigilanceLevelInfo(level?: number): VigilanceLevelInfo {
   return VIGILANCE_LEVEL_DETAILS[level] || DEFAULT_VIGILANCE_INFO;
 }
 
-export function getWeatherEmoji(weatherMain: string, icon: string): string {
-  const isDay = icon.includes('d');
-
-  switch (weatherMain.toLowerCase()) {
-    case 'clear':
-      return isDay ? '☀️' : '🌙';
-    case 'clouds':
-      return '☁️';
-    case 'rain':
-    case 'drizzle':
-      return '🌧️';
-    case 'thunderstorm':
-      return '⛈️';
-    case 'snow':
-      return '❄️';
-    case 'mist':
-    case 'fog':
-    case 'haze':
-      return '🌫️';
-    default:
-      return '🌤️';
-  }
-}
-
 export function formatRelativeTime(date: Date): string {
   const diffMs = Date.now() - date.getTime();
 

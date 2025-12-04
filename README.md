@@ -15,16 +15,19 @@ Gwad'Alerte est un tableau de bord citoyen qui centralise les informations essen
 GwadaSVG/
 ├── app/                # Pages et composants Next.js
 │   ├── api/           # API Routes serverless
-│   │   ├── air-quality/
-│   │   ├── weather/
-│   │   ├── forecast/
-│   │   ├── vigilance/
-│   │   └── water-cuts/
+│   │   ├── air-quality/   # Qualité de l'air (Gwad'Air)
+│   │   ├── meteo/         # Météo actuelle et prévisions (Open-Meteo)
+│   │   │   ├── current/   # Météo actuelle
+│   │   │   └── forecast/  # Prévisions 3 jours
+│   │   ├── vigilance/     # Vigilance météo (Météo-France)
+│   │   └── water-cuts/    # Tours d'eau (SMGEAG)
 │   ├── components/    # Composants réutilisables
 │   ├── meteo/         # Page météo
 │   ├── qualite-air/   # Page qualité de l'air
-│   └── tours-deau/     # Page tours d'eau
+│   └── tours-deau/    # Page tours d'eau
 ├── lib/               # Utilitaires et clients API
+│   ├── weather-codes.ts  # Mapping codes météo WMO
+│   └── cache.ts          # Système de cache
 ├── public/            # Assets statiques (cartes SVG)
 └── docs/              # Documentation technique
 ```
@@ -39,7 +42,8 @@ Le projet est optimisé pour Vercel. Pour déployer :
 
 2. **Configurer les variables d'environnement**
    - Dans Vercel Dashboard → Settings → Environment Variables
-   - Ajoutez : `OPENWEATHER_API_KEY`, `METEOFRANCE_CLIENT_ID`, `METEOFRANCE_CLIENT_SECRET`
+   - Ajoutez : `METEOFRANCE_CLIENT_ID`, `METEOFRANCE_CLIENT_SECRET`
+   - **Note** : Open-Meteo ne nécessite PAS de clé API ! 🎉
 
 3. **Déployer**
    - Vercel détecte automatiquement Next.js
@@ -60,25 +64,24 @@ Pour plus de détails, consultez [MIGRATION.md](MIGRATION.md).
 
 ### Configuration des variables d'environnement
 
-Créez un fichier `.env.local` à la racine du projet avec les clés API suivantes :
+Créez un fichier `.env.local` à la racine du projet :
 
 ```env
-# OpenWeatherMap (pour les données météo et prévisions)
-# Obtenez votre clé sur : https://openweathermap.org/api
-OPENWEATHER_API_KEY=votre_cle_openweather
-
-# Météo-France (pour la vigilance météo)
+# Météo-France (pour la vigilance météo uniquement)
 # Obtenez vos credentials sur : https://portail-api.meteofrance.fr/
 METEOFRANCE_CLIENT_ID=votre_client_id
 METEOFRANCE_CLIENT_SECRET=votre_client_secret
 ```
 
-**Note** : Le fichier `.env.local` est automatiquement ignoré par git pour la sécurité. Ne commitez jamais vos clés API !
+**Note importante** :
+- ✅ **Open-Meteo** : Gratuit, sans clé API nécessaire !
+- ✅ **Gwad'Air** : API publique, sans clé API
+- ⚙️ **Météo-France** : Credentials nécessaires uniquement pour la vigilance
 
 Pour créer le fichier rapidement :
 ```bash
 touch .env.local
-# Puis éditez .env.local avec vos vraies clés API
+# Puis éditez .env.local avec vos credentials Météo-France
 ```
 
 ### Installation et lancement
@@ -92,8 +95,9 @@ L'application sera disponible sur `http://localhost:3000`
 
 **API Routes disponibles :**
 - `GET /api/air-quality` - Données qualité de l'air (Gwad'Air)
-- `GET /api/weather` - Données météo par commune (OpenWeather)
-- `GET /api/forecast/[code_zone]` - Prévisions 5 jours pour une commune
+- `GET /api/meteo/current` - Météo actuelle par commune (Open-Meteo) 🆕
+- `GET /api/meteo/forecast` - Prévisions 3 jours (Open-Meteo) 🆕
+- `GET /api/meteo/forecast?code_zone=97105` - Prévisions pour une commune spécifique
 - `GET /api/vigilance` - Niveau de vigilance météo (Météo-France)
 - `GET /api/water-cuts` - Planning des tours d'eau (SMGEAG)
 
@@ -134,10 +138,11 @@ L'application sera disponible sur `http://localhost:3000`
 
 ### 🌤️ Météo & Vigilance
 - **Carte météo interactive** : Températures, conditions par commune
-- **Prévisions 5 jours** : Détails horaires et résumés quotidiens
-- **Vigilance météo** : Niveaux officiels (Vert, Jaune, Orange, Rouge)
+- **Prévisions 3 jours** : Onglets Aujourd'hui / Demain / 3 jours 🆕
+- **Détails horaires** : Température, précipitations, vent heure par heure
+- **Vigilance météo** : Niveaux officiels (Vert, Jaune, Orange, Rouge, Violet, Gris)
 - **Alertes cycloniques** : Guide éducatif sur la vigilance cyclonique
-- **Données multi-sources** : OpenWeather + Météo-France
+- **Données multi-sources** : Open-Meteo (météo) + Météo-France (vigilance)
 - **Micro-climats** : Adaptation au relief guadeloupéen
 
 ### 💧 Tours d'eau
@@ -162,21 +167,26 @@ L'application sera disponible sur `http://localhost:3000`
 - `components/Navbar.tsx` - Navigation principale
 - `components/Footer.tsx` - Pied de page
 - `hooks/useAirData.ts` - Hook pour les données qualité de l'air
-- `hooks/useMeteoData.ts` - Hook pour les données météo
+- `hooks/useMeteoData.ts` - Hook pour les données météo (Open-Meteo)
+- `hooks/useMeteoForecast.ts` - Hook pour les prévisions 3 jours 🆕
 - `hooks/useWaterData.ts` - Hook pour les tours d'eau
 
 ### Cache et performance
 
-L'application utilise un système de cache intelligent :
+L'application utilise un système de cache intelligent optimisé pour Open-Meteo :
 - **Qualité de l'air** : Cache de 3 minutes (TTL)
-- **Météo** : Cache de 1 heure
-- **Vigilance** : Cache de 10 minutes
+- **Météo actuelle** : Cache de 15 minutes (Open-Meteo) 🆕
 - **Prévisions** : Cache de 3 heures
+- **Vigilance** : Cache de 10 minutes (Météo-France)
 - **Tours d'eau** : Cache de 24 heures
 
 En production (Vercel), le cache utilise Vercel KV (Redis). En développement local, un cache mémoire est utilisé automatiquement.
 
 Le frontend utilise également le localStorage pour mettre en cache les données côté client.
+
+### Codes météo WMO
+
+Les conditions météo sont basées sur les codes WMO (World Meteorological Organization) utilisés par Open-Meteo. Le mapping vers les icônes et descriptions françaises est dans `lib/weather-codes.ts`.
 
 ## 📚 Documentation
 
@@ -190,10 +200,12 @@ Vous trouverez la documentation détaillée dans le dossier `docs/` :
 
 ## 🌐 Sources de données
 
-- **Gwad'Air** : Qualité de l'air (indice ATMO, polluants)
-- **OpenWeatherMap** : Données météorologiques par commune
-- **Météo-France** : Vigilance météo et alertes officielles
-- **SMGEAG** : Planning des tours d'eau
+| Source | Données | Clé API |
+|--------|---------|---------|
+| **[Open-Meteo](https://open-meteo.com/)** | Météo actuelle, prévisions 3 jours | ❌ Non requise (gratuit) |
+| **[Météo-France](https://portail-api.meteofrance.fr/)** | Vigilance météo officielle | ✅ Requise |
+| **[Gwad'Air](https://gwadair.fr/)** | Qualité de l'air (ATMO) | ❌ Non requise |
+| **SMGEAG** | Tours d'eau | ❌ Non requise |
 
 ## 📄 Licence
 
@@ -202,3 +214,7 @@ Ce projet est en cours de développement. Les fonctionnalités sont ajoutées pr
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+
+---
+
+*Dernière mise à jour : Migration vers Open-Meteo (gratuit, sans clé API) - Décembre 2025*

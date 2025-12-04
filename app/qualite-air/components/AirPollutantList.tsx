@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity } from 'lucide-react';
 import { CommuneData } from '../../components/GuadeloupeMap';
+import { hexToRgba } from './colorUtils';
 
 interface AirPollutantListProps {
   data: CommuneData;
@@ -25,13 +26,15 @@ function getQualityFromCode(code: number | undefined): { label: string; color: s
 }
 
 export const AirPollutantList: React.FC<AirPollutantListProps> = ({ data }) => {
-  const hasPollutants = data.code_no2 !== undefined ||
-    data.code_so2 !== undefined ||
-    data.code_o3 !== undefined ||
-    data.code_pm10 !== undefined ||
-    data.code_pm25 !== undefined;
+  const pollutants = [
+    { code: data.code_no2, label: 'NO₂', name: 'Dioxyde d\'azote' },
+    { code: data.code_so2, label: 'SO₂', name: 'Dioxyde de soufre' },
+    { code: data.code_o3, label: 'O₃', name: 'Ozone' },
+    { code: data.code_pm10, label: 'PM10', name: 'Particules < 10µm' },
+    { code: data.code_pm25, label: 'PM2.5', name: 'Particules < 2.5µm' },
+  ].filter(p => p.code !== undefined);
 
-  if (!hasPollutants) return null;
+  if (pollutants.length === 0) return null;
 
   return (
     <div>
@@ -40,52 +43,38 @@ export const AirPollutantList: React.FC<AirPollutantListProps> = ({ data }) => {
         Détails par polluant
       </p>
       <div className="space-y-2">
-        {[
-          { code: data.code_no2, label: 'NO₂', name: 'Dioxyde d\'azote' },
-          { code: data.code_so2, label: 'SO₂', name: 'Dioxyde de soufre' },
-          { code: data.code_o3, label: 'O₃', name: 'Ozone' },
-          { code: data.code_pm10, label: 'PM10', name: 'Particules < 10µm' },
-          { code: data.code_pm25, label: 'PM2.5', name: 'Particules < 2.5µm' },
-        ].map((polluant) => {
+        {pollutants.map((polluant) => {
           const quality = getQualityFromCode(polluant.code as number | undefined);
           const isNotBon = polluant.code !== undefined && polluant.code !== 1;
 
           return (
-            polluant.code !== undefined && (
-              <div
-                key={polluant.label}
-                className={`flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border rounded-xl transition-colors shadow-sm ${
-                  !isNotBon ? 'border-slate-100 dark:border-gray-600 hover:border-slate-200 dark:hover:border-gray-500' : ''
-                }`}
-                style={isNotBon ? {
-                  borderColor: quality.color,
-                  borderWidth: '1px',
-                } : undefined}
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-700 dark:text-white">{polluant.label}</span>
-                  <span className="text-[10px] text-slate-400 dark:text-gray-500">{polluant.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
-                    style={{
-                      backgroundColor: (() => {
-                        const hex = quality.color || '#50F0E6';
-                        const r = parseInt(hex.slice(1, 3), 16);
-                        const g = parseInt(hex.slice(3, 5), 16);
-                        const b = parseInt(hex.slice(5, 7), 16);
-                        return `rgba(${r}, ${g}, ${b}, 0.15)`;
-                      })(),
-                      color: quality.color || '#50F0E6',
-                      borderColor: quality.color || '#50F0E6'
-                    }}
-                  >
-                    {quality.label}
-                  </span>
-                </div>
+            <div
+              key={polluant.label}
+              className={`flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border rounded-xl transition-colors shadow-sm ${
+                !isNotBon ? 'border-slate-100 dark:border-gray-600 hover:border-slate-200 dark:hover:border-gray-500' : ''
+              }`}
+              style={isNotBon ? {
+                borderColor: quality.color,
+                borderWidth: '1px',
+              } : undefined}
+            >
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-slate-700 dark:text-white">{polluant.label}</span>
+                <span className="text-[10px] text-slate-400 dark:text-gray-500">{polluant.name}</span>
               </div>
-            )
+              <div className="flex items-center gap-2">
+                <span
+                  className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                  style={{
+                    backgroundColor: hexToRgba(quality.color),
+                    color: quality.color || '#50F0E6',
+                    borderColor: quality.color || '#50F0E6'
+                  }}
+                >
+                  {quality.label}
+                </span>
+              </div>
+            </div>
           );
         })}
       </div>

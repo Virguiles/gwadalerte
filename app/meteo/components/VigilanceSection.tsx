@@ -91,11 +91,11 @@ export const VigilanceSection: React.FC<VigilanceSectionProps> = ({ vigilanceInf
                 })}
               </div>
             </div>
-          ) : (
+          ) : vigilanceInfo.level > 1 ? (
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Aucune vigilance particulière.
             </p>
-          )}
+          ) : null}
         </div>
       </div>
     </section>

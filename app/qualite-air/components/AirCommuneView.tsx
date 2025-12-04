@@ -1,6 +1,7 @@
 import React from 'react';
 import { CommuneData } from '../../components/GuadeloupeMap';
 import { AirPollutantList } from './AirPollutantList';
+import { hexToRgba } from './colorUtils';
 
 interface AirCommuneViewProps {
   data: CommuneData;
@@ -63,13 +64,7 @@ export const AirCommuneView: React.FC<AirCommuneViewProps> = ({ data, lastUpdate
               <span
                 className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
                 style={{
-                  backgroundColor: (() => {
-                    const hex = data.coul_qual || '#50F0E6';
-                    const r = parseInt(hex.slice(1, 3), 16);
-                    const g = parseInt(hex.slice(3, 5), 16);
-                    const b = parseInt(hex.slice(5, 7), 16);
-                    return `rgba(${r}, ${g}, ${b}, 0.15)`;
-                  })(),
+                  backgroundColor: hexToRgba(data.coul_qual),
                   color: data.coul_qual || '#50F0E6',
                   borderColor: data.coul_qual || '#50F0E6'
                 }}

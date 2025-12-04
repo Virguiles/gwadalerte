@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { WeatherDataMap } from '../types';
+import { getSeaState } from '../utils';
 
 interface ArchipelMeteoInfo {
   avgTemperature: number | null;
@@ -50,15 +51,6 @@ export const useArchipelMeteo = (weatherData: WeatherDataMap): ArchipelMeteoInfo
       weatherCount[normalized] = (weatherCount[normalized] || 0) + 1;
     });
     const mostCommonWeather = Object.entries(weatherCount).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
-
-    const getSeaState = (windSpeed: number | null): string => {
-      if (windSpeed === null) return 'Données non disponibles';
-      if (windSpeed < 10) return 'Calme';
-      if (windSpeed < 20) return 'Peu agitée';
-      if (windSpeed < 30) return 'Agitée';
-      if (windSpeed < 40) return 'Très agitée';
-      return 'Dangereuse';
-    };
 
     return {
       avgTemperature,

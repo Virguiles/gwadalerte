@@ -21,8 +21,8 @@ import {
 } from '@/lib/api-clients';
 import JSZip from 'jszip';
 
-// Configuration ISR - 10 minutes
-export const revalidate = 600;
+// Configuration ISR - 5 minutes
+export const revalidate = 300;
 
 // Note: On ne peut pas utiliser runtime='edge' car JSZip n'est pas compatible
 
@@ -207,7 +207,9 @@ export async function GET() {
   try {
     // Vérifier les credentials
     if (!process.env.METEOFRANCE_CLIENT_ID || !process.env.METEOFRANCE_CLIENT_SECRET) {
-      console.warn('[Vigilance] Credentials Météo-France non configurés, utilisation des valeurs par défaut');
+      console.warn('[Vigilance] ⚠️ Credentials Météo-France non configurés');
+      console.warn('[Vigilance] Pour obtenir les vraies données de vigilance, configurez METEOFRANCE_CLIENT_ID et METEOFRANCE_CLIENT_SECRET dans .env.local');
+      console.warn('[Vigilance] Retour de valeurs par défaut (niveau 1 - Vert)');
 
       // Retourner des valeurs par défaut si pas de credentials
       return NextResponse.json({
@@ -218,7 +220,7 @@ export async function GET() {
         label: 'Vert',
         risks: [],
         last_update: Date.now(),
-        error: 'Credentials Météo-France non configurés',
+        error: 'Credentials Météo-France non configurés. Les données affichées sont des valeurs par défaut.',
       });
     }
 

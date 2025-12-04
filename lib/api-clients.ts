@@ -18,14 +18,13 @@ export const API_CONFIG = {
     BASE_URL: 'https://services8.arcgis.com/7RrxpwWeFIQ8JGGp/arcgis/rest/services/ind_guadeloupe_1/FeatureServer/0/query',
   },
 
-  // OpenWeatherMap - Données météo
-  OPENWEATHER: {
-    BASE_URL: 'https://api.openweathermap.org/data/2.5',
-    WEATHER_ENDPOINT: '/weather',
-    FORECAST_ENDPOINT: '/forecast',
+  // Open-Meteo - Données météo (gratuit, sans clé API)
+  OPEN_METEO: {
+    BASE_URL: 'https://api.open-meteo.com/v1/forecast',
+    // Documentation: https://open-meteo.com/en/docs
   },
 
-  // Météo-France - Vigilance
+  // Météo-France - Vigilance (conservé pour les alertes officielles)
   METEOFRANCE: {
     // URL du token OAuth2 - doit être définie via la variable d'environnement METEOFRANCE_TOKEN_URL
     TOKEN_URL: process.env.METEOFRANCE_TOKEN_URL || '',
@@ -124,7 +123,7 @@ export interface WeatherData {
   wind_gust: number | null;
   weather_main: string;
   weather_description: string;
-  weather_icon: string;
+  weather_icon: string; // Nom de l'icône Lucide React (ex: 'Sun', 'CloudRain')
   clouds: number | null;
   visibility: number | null;
   dew_point: number | null;
@@ -134,6 +133,9 @@ export interface WeatherData {
   rain_1h: number | null;
   rain_3h: number | null;
   uv_index: number | null;
+  // Nouveaux champs Open-Meteo
+  weather_code?: number; // Code WMO pour des traitements avancés
+  is_day?: boolean; // true si jour, false si nuit
 }
 
 export type WeatherDataMap = Record<string, WeatherData>;
@@ -205,11 +207,12 @@ export interface VigilanceData {
 }
 
 // Mapping des niveaux de vigilance vers couleurs et labels
+// Note: Les couleurs doivent correspondre à celles définies dans app/meteo/constants.ts
 export const VIGILANCE_LEVELS: Record<number, { color: string; label: string }> = {
   [-1]: { color: "#CCCCCC", label: "Non disponible" },
   0: { color: "#28d761", label: "Vert" },
   1: { color: "#28d761", label: "Vert" },
-  2: { color: "#FFFF00", label: "Jaune" },
+  2: { color: "#f0d53c", label: "Jaune" }, // Aligné avec app/meteo/constants.ts
   3: { color: "#FF9900", label: "Orange" },
   4: { color: "#FF0000", label: "Rouge" },
 };

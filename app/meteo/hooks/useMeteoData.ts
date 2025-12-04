@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { WeatherDataMap, VigilanceData } from '../types';
 
-const WEATHER_CACHE_KEY = 'gwada_weather_cache';
+const WEATHER_CACHE_KEY = 'gwada_weather_cache_v2'; // v2 pour Open-Meteo
 const VIGILANCE_CACHE_KEY = 'gwada_vigilance_cache';
-const CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp';
-const CACHE_VALIDITY_MS = 15 * 60 * 1000; // 15 minutes
-const VIGILANCE_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes (aligné avec le cache backend)
+const WEATHER_CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp_v2';
+const VIGILANCE_CACHE_TIMESTAMP_KEY = 'gwada_vigilance_cache_timestamp';
+const WEATHER_CACHE_VALIDITY_MS = 15 * 60 * 1000; // 15 minutes (aligné avec le cache backend Open-Meteo)
+const VIGILANCE_CACHE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes (vigilance Météo-France)
+const VIGILANCE_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (vigilance Météo-France)
 
 export function useMeteoData() {
   const [mounted, setMounted] = useState(false);
@@ -13,19 +15,20 @@ export function useMeteoData() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fonction pour charger depuis le cache
-  const loadFromCache = (): { weatherData: WeatherDataMap; vigilanceData: VigilanceData; timestamp: number } | null => {
+  const loadFromCache = (): { weatherData: WeatherDataMap; vigilanceData: VigilanceData; weatherTimestamp: number; vigilanceTimestamp: number } | null => {
     if (typeof window === 'undefined') return null;
     try {
       const cachedWeather = localStorage.getItem(WEATHER_CACHE_KEY);
       const cachedVigilance = localStorage.getItem(VIGILANCE_CACHE_KEY);
-      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+      const cachedWeatherTimestamp = localStorage.getItem(WEATHER_CACHE_TIMESTAMP_KEY);
+      const cachedVigilanceTimestamp = localStorage.getItem(VIGILANCE_CACHE_TIMESTAMP_KEY);
 
-      if (cachedWeather && cachedVigilance && cachedTimestamp) {
-        const timestamp = parseInt(cachedTimestamp, 10);
+      if (cachedWeather && cachedVigilance && cachedWeatherTimestamp && cachedVigilanceTimestamp) {
         return {
           weatherData: JSON.parse(cachedWeather),
           vigilanceData: JSON.parse(cachedVigilance),
-          timestamp,
+          weatherTimestamp: parseInt(cachedWeatherTimestamp, 10),
+          vigilanceTimestamp: parseInt(cachedVigilanceTimestamp, 10),
         };
       }
     } catch (error) {
@@ -44,110 +47,252 @@ export function useMeteoData() {
     setMounted(true);
   }, []);
 
-  const isCacheValid = (timestamp: number): boolean => {
+  const isWeatherCacheValid = (timestamp: number): boolean => {
     const now = Date.now();
-    return (now - timestamp) < CACHE_VALIDITY_MS;
+    return (now - timestamp) < WEATHER_CACHE_VALIDITY_MS;
   };
 
-  const saveToCache = (weather: WeatherDataMap, vigilance: VigilanceData) => {
+  const isVigilanceCacheValid = (timestamp: number): boolean => {
+    const now = Date.now();
+    return (now - timestamp) < VIGILANCE_CACHE_VALIDITY_MS;
+  };
+
+  const saveWeatherToCache = (weather: WeatherDataMap) => {
     try {
       localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(weather));
-      localStorage.setItem(VIGILANCE_CACHE_KEY, JSON.stringify(vigilance));
-      const timestamp = Date.now();
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
+      localStorage.setItem(WEATHER_CACHE_TIMESTAMP_KEY, Date.now().toString());
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde du cache:', error);
+      console.error('Erreur lors de la sauvegarde du cache météo:', error);
     }
   };
 
-  const fetchData = async (forceRefresh = false) => {
+  const saveVigilanceToCache = (vigilance: VigilanceData) => {
+    try {
+      localStorage.setItem(VIGILANCE_CACHE_KEY, JSON.stringify(vigilance));
+      localStorage.setItem(VIGILANCE_CACHE_TIMESTAMP_KEY, Date.now().toString());
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du cache vigilance:', error);
+    }
+  };
+
+  const saveToCache = (weather: WeatherDataMap, vigilance: VigilanceData) => {
+    saveWeatherToCache(weather);
+    saveVigilanceToCache(vigilance);
+  };
+
+  // Fonction pour rafraîchir uniquement la vigilance
+  const fetchVigilanceOnly = async (forceRefresh = false) => {
     if (typeof window === 'undefined') return;
 
-    const shouldFetch = (): boolean => {
+    const shouldFetchVigilance = (): boolean => {
       if (forceRefresh) return true;
 
       try {
-        const cachedWeather = localStorage.getItem(WEATHER_CACHE_KEY);
         const cachedVigilance = localStorage.getItem(VIGILANCE_CACHE_KEY);
-        const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        const cachedVigilanceTimestamp = localStorage.getItem(VIGILANCE_CACHE_TIMESTAMP_KEY);
 
-        if (!cachedWeather || !cachedVigilance || !cachedTimestamp) {
-          console.log('[Cache] Pas de cache trouvé, chargement des données...');
+        if (!cachedVigilance || !cachedVigilanceTimestamp) {
+          console.log('[Vigilance Cache] Pas de cache trouvé, chargement...');
           return true;
         }
 
         try {
-          const weatherData = JSON.parse(cachedWeather);
-          const vigilanceData = JSON.parse(cachedVigilance);
-
-          if (!weatherData || Object.keys(weatherData).length === 0) {
-            console.log('[Cache] Données météo vides, chargement...');
-            return true;
-          }
-
-          if (!vigilanceData || !vigilanceData.department) {
-            console.log('[Cache] Données vigilance vides, chargement...');
+          const parsedVigilance = JSON.parse(cachedVigilance);
+          if (!parsedVigilance || !parsedVigilance.department) {
+            console.log('[Vigilance Cache] Données vigilance vides, chargement...');
             return true;
           }
         } catch (parseError) {
-          console.error('[Cache] Erreur lors du parsing du cache:', parseError);
+          console.error('[Vigilance Cache] Erreur lors du parsing:', parseError);
           return true;
         }
 
-        const timestamp = parseInt(cachedTimestamp, 10);
-        const needsRefresh = !isCacheValid(timestamp);
+        const timestamp = parseInt(cachedVigilanceTimestamp, 10);
+        const needsRefresh = !isVigilanceCacheValid(timestamp);
         if (needsRefresh) {
-          console.log('[Cache] Cache expiré, rafraîchissement...');
+          console.log('[Vigilance Cache] Cache expiré, rafraîchissement...');
         }
         return needsRefresh;
       } catch (error) {
-        console.error('Erreur lors de la vérification du cache:', error);
+        console.error('Erreur lors de la vérification du cache vigilance:', error);
         return true;
       }
     };
 
-    if (shouldFetch()) {
+    if (shouldFetchVigilance()) {
+      try {
+        const vigilanceResponse = await fetch('/api/vigilance');
+        const newVigilanceData = await vigilanceResponse.json();
+
+        if (newVigilanceData && newVigilanceData.department) {
+          // Si l'API retourne une erreur, ne pas mettre à jour le cache avec des données par défaut
+          if (newVigilanceData.error) {
+            console.warn('[Vigilance] Erreur API détectée:', newVigilanceData.error);
+            console.warn('[Vigilance] Les données par défaut ne seront pas mises en cache');
+            // Ne pas sauvegarder les données par défaut en cache pour éviter de masquer le problème
+            // On garde les anciennes données si disponibles
+            if (!vigilanceData) {
+              // Si on n'a pas de données du tout, on utilise quand même les données par défaut pour l'affichage
+              setVigilanceData(newVigilanceData);
+            }
+          } else {
+            // Vérifier si le niveau de vigilance a changé
+            const previousLevel = vigilanceData?.level;
+            const newLevel = newVigilanceData.level;
+
+            setVigilanceData(newVigilanceData);
+            saveVigilanceToCache(newVigilanceData);
+            console.log('[Vigilance] Données mises à jour:', newVigilanceData.label, `(Niveau: ${newLevel})`);
+
+            if (previousLevel !== undefined && previousLevel !== newLevel) {
+              console.log(`[Vigilance] Niveau changé: ${previousLevel} → ${newLevel}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération de la vigilance:', error);
+        const cached = loadFromCache();
+        if (cached && cached.vigilanceData) {
+          console.log('[Vigilance Fallback] Utilisation du cache en cas d\'erreur API');
+          setVigilanceData(cached.vigilanceData);
+        }
+      }
+    }
+  };
+
+  const fetchData = async (forceRefresh = false, fetchVigilance = true) => {
+    if (typeof window === 'undefined') return;
+
+    const shouldFetchWeather = (): boolean => {
+      if (forceRefresh) return true;
+
+      try {
+        const cachedWeather = localStorage.getItem(WEATHER_CACHE_KEY);
+        const cachedWeatherTimestamp = localStorage.getItem(WEATHER_CACHE_TIMESTAMP_KEY);
+
+        if (!cachedWeather || !cachedWeatherTimestamp) {
+          console.log('[Weather Cache] Pas de cache trouvé, chargement...');
+          return true;
+        }
+
+        try {
+          const parsedWeather = JSON.parse(cachedWeather);
+          if (!parsedWeather || Object.keys(parsedWeather).length === 0) {
+            console.log('[Weather Cache] Données météo vides, chargement...');
+            return true;
+          }
+        } catch (parseError) {
+          console.error('[Weather Cache] Erreur lors du parsing:', parseError);
+          return true;
+        }
+
+        const timestamp = parseInt(cachedWeatherTimestamp, 10);
+        const needsRefresh = !isWeatherCacheValid(timestamp);
+        if (needsRefresh) {
+          console.log('[Weather Cache] Cache expiré, rafraîchissement...');
+        }
+        return needsRefresh;
+      } catch (error) {
+        console.error('Erreur lors de la vérification du cache météo:', error);
+        return true;
+      }
+    };
+
+    const shouldFetchVigilanceData = (): boolean => {
+      if (!fetchVigilance) return false;
+      if (forceRefresh) return true;
+
+      try {
+        const cachedVigilance = localStorage.getItem(VIGILANCE_CACHE_KEY);
+        const cachedVigilanceTimestamp = localStorage.getItem(VIGILANCE_CACHE_TIMESTAMP_KEY);
+
+        if (!cachedVigilance || !cachedVigilanceTimestamp) {
+          return true;
+        }
+
+        try {
+          const parsedVigilance = JSON.parse(cachedVigilance);
+          if (!parsedVigilance || !parsedVigilance.department) {
+            return true;
+          }
+        } catch {
+          return true;
+        }
+
+        const timestamp = parseInt(cachedVigilanceTimestamp, 10);
+        return !isVigilanceCacheValid(timestamp);
+      } catch {
+        return true;
+      }
+    };
+
+    const needsWeather = shouldFetchWeather();
+    const needsVigilance = shouldFetchVigilanceData();
+
+    if (needsWeather || needsVigilance) {
       setLoading(true);
       try {
-        // Utiliser les API Routes Next.js locales (plus besoin de NEXT_PUBLIC_API_URL)
-        const [weatherResponse, vigilanceResponse] = await Promise.all([
-          fetch('/api/weather'),
-          fetch('/api/vigilance'),
-        ]);
+        // Utiliser les API Routes Next.js locales
+        // /api/meteo/current utilise Open-Meteo (gratuit, sans clé API)
+        // /api/vigilance utilise Météo-France (vigilance officielle)
+        const promises: Promise<any>[] = [];
 
-        const [newWeatherData, newVigilanceData] = await Promise.all([
-          weatherResponse.json(),
-          vigilanceResponse.json(),
-        ]);
+        if (needsWeather) {
+          promises.push(fetch('/api/meteo/current').then(r => r.json()));
+        } else {
+          promises.push(Promise.resolve(null));
+        }
 
-        if (newWeatherData && Object.keys(newWeatherData).length > 0) {
+        if (needsVigilance) {
+          promises.push(fetch('/api/vigilance').then(r => r.json()));
+        } else {
+          promises.push(Promise.resolve(null));
+        }
+
+        const [newWeatherData, newVigilanceData] = await Promise.all(promises);
+
+        if (needsWeather && newWeatherData && Object.keys(newWeatherData).length > 0) {
           setWeatherData(newWeatherData);
+          saveWeatherToCache(newWeatherData);
           console.log(`[Weather] ${Object.keys(newWeatherData).length} communes chargées`);
         }
 
-        if (newVigilanceData && newVigilanceData.department) {
-          // Vérifier si le niveau de vigilance a changé
-          const previousLevel = vigilanceData?.level;
-          const newLevel = newVigilanceData.level;
+        if (needsVigilance && newVigilanceData && newVigilanceData.department) {
+          // Si l'API retourne une erreur, ne pas mettre à jour le cache avec des données par défaut
+          if (newVigilanceData.error) {
+            console.warn('[Vigilance] Erreur API détectée:', newVigilanceData.error);
+            console.warn('[Vigilance] Les données par défaut ne seront pas mises en cache');
+            // Ne pas sauvegarder les données par défaut en cache pour éviter de masquer le problème
+            // On garde les anciennes données si disponibles
+            if (!vigilanceData) {
+              // Si on n'a pas de données du tout, on utilise quand même les données par défaut pour l'affichage
+              setVigilanceData(newVigilanceData);
+            }
+          } else {
+            // Vérifier si le niveau de vigilance a changé
+            const previousLevel = vigilanceData?.level;
+            const newLevel = newVigilanceData.level;
 
-          setVigilanceData(newVigilanceData);
-          console.log('[Vigilance] Données chargées:', newVigilanceData.label, `(Niveau: ${newLevel})`);
+            setVigilanceData(newVigilanceData);
+            saveVigilanceToCache(newVigilanceData);
+            console.log('[Vigilance] Données chargées:', newVigilanceData.label, `(Niveau: ${newLevel})`);
 
-          if (previousLevel !== undefined && previousLevel !== newLevel) {
-            console.log(`[Vigilance] Niveau changé: ${previousLevel} → ${newLevel}`);
+            if (previousLevel !== undefined && previousLevel !== newLevel) {
+              console.log(`[Vigilance] Niveau changé: ${previousLevel} → ${newLevel}`);
+            }
           }
-        }
-
-        if (newWeatherData && newVigilanceData && Object.keys(newWeatherData).length > 0) {
-          saveToCache(newWeatherData, newVigilanceData);
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
         const cached = loadFromCache();
-        if (cached && cached.weatherData && Object.keys(cached.weatherData).length > 0) {
+        if (cached) {
           console.log('[Fallback] Utilisation du cache en cas d\'erreur API');
-          setWeatherData(cached.weatherData);
-          setVigilanceData(cached.vigilanceData);
+          if (cached.weatherData && Object.keys(cached.weatherData).length > 0) {
+            setWeatherData(cached.weatherData);
+          }
+          if (cached.vigilanceData) {
+            setVigilanceData(cached.vigilanceData);
+          }
         }
       } finally {
         setLoading(false);
@@ -155,10 +300,12 @@ export function useMeteoData() {
     } else {
       // Force reload if data is empty in state but cache is valid
       const cached = loadFromCache();
-      if (cached && cached.weatherData && Object.keys(cached.weatherData).length > 0) {
+      if (cached) {
         // Check if state is empty
-        if (Object.keys(weatherData).length === 0 || !vigilanceData) {
+        if (Object.keys(weatherData).length === 0 && cached.weatherData && Object.keys(cached.weatherData).length > 0) {
           setWeatherData(cached.weatherData);
+        }
+        if (!vigilanceData && cached.vigilanceData) {
           setVigilanceData(cached.vigilanceData);
         }
       }
@@ -173,9 +320,10 @@ export function useMeteoData() {
     fetchData();
 
     // Rafraîchissement périodique de la vigilance (toutes les 10 minutes)
+    // On rafraîchit uniquement la vigilance pour éviter de surcharger l'API météo
     intervalRef.current = setInterval(() => {
       console.log('[Vigilance] Rafraîchissement périodique...');
-      fetchData(true); // Force le rafraîchissement même si le cache est valide
+      fetchVigilanceOnly(true); // Force le rafraîchissement même si le cache est valide
     }, VIGILANCE_REFRESH_INTERVAL_MS);
 
     // Nettoyage de l'intervalle au démontage

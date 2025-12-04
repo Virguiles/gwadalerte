@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useMeteoData } from './hooks/useMeteoData';
 // import { useTooltip } from './hooks/useTooltip';
 import { getVigilanceLevelInfo, formatRelativeTime } from './utils';
@@ -12,7 +12,15 @@ import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 // import { MeteoTooltip } from './components/MeteoTooltip';
 import { HoverInfo } from '../components/GuadeloupeMap';
 import { CyclonicVigilanceGuide } from './components/CyclonicVigilanceGuide';
-import { CloudSun } from 'lucide-react';
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+// Icônes Lucide supprimées - utilisant maintenant le composant WeatherIcon
+
+// Type pour les filtres de prévision
+type ForecastFilter = 'today' | 'tomorrow' | '3days';
 
 // Composant pour les données structurées SEO (JSON-LD)
 const MeteoJsonLd = () => {
@@ -43,7 +51,7 @@ export default function MeteoPage() {
   const { weatherData, vigilanceData, loading, mounted } = useMeteoData();
   const [selectedCommune, setSelectedCommune] = useState<string>('');
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
-  const vigilanceDetailsRef = useRef<HTMLDivElement>(null);
+  const [forecastFilter, setForecastFilter] = useState<ForecastFilter>('today');
 
   const currentVigilanceInfo = useMemo(
     () => getVigilanceLevelInfo(vigilanceData?.level),
@@ -98,26 +106,14 @@ export default function MeteoPage() {
     return weatherData[sidebarCommuneCode] || null;
   }, [sidebarCommuneCode, weatherData]);
 
-  const weatherEntries = useMemo(() => Object.values(weatherData || {}), [weatherData]);
-  const activeStations = useMemo(
-    () => weatherEntries.filter((entry) => typeof entry.temperature === 'number').length,
-    [weatherEntries]
-  );
-  const humidityAverage = useMemo(() => {
-    const values = weatherEntries
-      .map((entry) => entry.humidity)
-      .filter((value): value is number => typeof value === 'number');
-    if (values.length === 0) return null;
-    return Math.round(values.reduce((acc, value) => acc + value, 0) / values.length);
-  }, [weatherEntries]);
-  const phenomenaCount = vigilanceData?.phenomenes_phrases?.length || vigilanceData?.risks?.length || 0;
+  // Variables conservées pour référence future si besoin
+  // const weatherEntries = useMemo(() => Object.values(weatherData || {}), [weatherData]);
 
-
-  const scrollToVigilanceDetails = useCallback(() => {
-    if (vigilanceDetailsRef.current) {
-      vigilanceDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, []);
+  const FORECAST_TABS: { id: ForecastFilter; label: string; labelShort: string }[] = [
+    { id: 'today', label: "Aujourd'hui", labelShort: 'Auj.' },
+    { id: 'tomorrow', label: 'Demain', labelShort: 'Dem.' },
+    { id: '3days', label: '3 jours', labelShort: '3J' },
+  ];
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 transition-colors duration-300">
@@ -139,13 +135,13 @@ export default function MeteoPage() {
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
             <div className="flex items-center gap-2 px-4 py-1.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-full shadow-sm border border-sky-100 dark:border-sky-900/50">
-              <span className="text-slate-500 dark:text-gray-400 font-medium">Données officielles :</span>
-              <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
-                OpenWeather
+              <span className="text-slate-500 dark:text-gray-400 font-medium">Données :</span>
+              <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold transition-colors">
+                Open-Meteo
               </a>
               <span className="text-slate-300 dark:text-gray-600 mx-1">•</span>
               <a href="https://meteofrance.gp/" target="_blank" rel="noopener noreferrer" className="text-cyan-700 dark:text-cyan-400 hover:text-cyan-900 dark:hover:text-cyan-300 font-semibold transition-colors">
-                Météo France
+                Météo France (vigilance)
               </a>
             </div>
           </div>
@@ -170,30 +166,46 @@ export default function MeteoPage() {
                     />
                   </div>
 
-                  {/* Carte Container */}
-                  <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                    {/* Légende flottante */}
-                    <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
-                      <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                        Vigilance Météo
-                      </h4>
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {currentVigilanceInfo.label || 'Chargement...'}
-                      </p>
-                    </div>
+                  {/* Navigation Tabs */}
+                  <Tabs value={forecastFilter} onValueChange={(val) => setForecastFilter(val as ForecastFilter)} className="w-full gap-0">
+                    <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0">
+                      {FORECAST_TABS.map((tab) => (
+                        <TabsTrigger
+                          key={tab.id}
+                          value={tab.id}
+                          className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
+                        >
+                          <span className="hidden sm:inline">{tab.label}</span>
+                          <span className="sm:hidden">{tab.labelShort}</span>
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
 
-                    <div className="p-4 h-full flex justify-center items-center">
-                      <WeatherMapSection
-                        weatherData={weatherData}
-                        currentVigilanceInfo={currentVigilanceInfo}
-                        selectedCommune={selectedCommune}
-                        onCommuneHover={handleCommuneHover}
-                        onCommuneLeave={handleCommuneLeave}
-                        onCommuneClick={handleCommuneClick}
-                        loading={loading}
-                      />
+                    {/* Carte Container */}
+                    <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden">
+                      {/* Légende flottante */}
+                      <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
+                        <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                          Vigilance Météo
+                        </h4>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {currentVigilanceInfo.label || 'Chargement...'}
+                        </p>
+                      </div>
+
+                      <div className="p-4 h-full flex justify-center items-center">
+                        <WeatherMapSection
+                          weatherData={weatherData}
+                          currentVigilanceInfo={currentVigilanceInfo}
+                          selectedCommune={selectedCommune}
+                          onCommuneHover={handleCommuneHover}
+                          onCommuneLeave={handleCommuneLeave}
+                          onCommuneClick={handleCommuneClick}
+                          loading={loading}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  </Tabs>
 
                   {/* Tooltip Flottant simple (toujours visible au survol) */}
                   <CommuneTooltip hoveredInfo={hoveredInfo} />
@@ -203,9 +215,11 @@ export default function MeteoPage() {
                   weatherData={weatherData}
                   currentVigilanceInfo={currentVigilanceInfo}
                   relativeLastUpdate={relativeLastUpdate}
+                  focusedCommuneCode={sidebarCommuneCode}
                   focusedCommuneName={sidebarCommuneName}
                   focusedCommuneData={sidebarCommuneData}
                   risks={vigilanceData?.risks}
+                  forecastFilter={forecastFilter}
                   onClose={() => setSelectedCommune('')}
                 />
               </section>
