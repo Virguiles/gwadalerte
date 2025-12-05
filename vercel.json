@@ -7,13 +7,13 @@
       "memory": 256,
       "maxDuration": 10
     },
-    "app/api/weather/route.ts": {
+    "app/api/meteo/current/route.ts": {
       "memory": 512,
-      "maxDuration": 30
+      "maxDuration": 25
     },
-    "app/api/forecast/[code_zone]/route.ts": {
-      "memory": 256,
-      "maxDuration": 15
+    "app/api/meteo/forecast/route.ts": {
+      "memory": 512,
+      "maxDuration": 25
     },
     "app/api/vigilance/route.ts": {
       "memory": 512,
@@ -26,8 +26,8 @@
   },
   "crons": [
     {
-      "path": "/api/weather",
-      "schedule": "0 * * * *"
+      "path": "/api/meteo/current",
+      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/vigilance",

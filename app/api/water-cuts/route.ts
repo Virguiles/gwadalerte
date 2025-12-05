@@ -16,6 +16,7 @@ import waterCutsData from '@/lib/data/tours-deau.json';
 
 // Configuration ISR - 24 heures (données statiques)
 export const revalidate = 86400;
+// Peut utiliser Edge Runtime car données statiques, mais ISR est suffisant
 
 // ============================================================================
 // HANDLER GET

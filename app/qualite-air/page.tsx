@@ -140,7 +140,7 @@ export default function QualiteAir() {
         </div>
 
         {/* --- NOUVELLE SECTION: Comprendre l'indice (Interactive) --- */}
-        <AirQualityGuide />
+        <AirQualityGuide airData={airData} selectedCommune={selectedCommune} />
 
         {/* --- NOUVELLE SECTION: Guide des polluants (Interactive) --- */}
         <PollutantsGuide />

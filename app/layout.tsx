@@ -28,6 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        {/* Preconnect aux APIs externes pour améliorer la vitesse de chargement */}
+        <link rel="preconnect" href="https://api.open-meteo.com" />
+        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+        <link rel="preconnect" href="https://public-api.meteofrance.fr" />
+        <link rel="dns-prefetch" href="https://public-api.meteofrance.fr" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

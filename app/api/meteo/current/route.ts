@@ -17,8 +17,9 @@ import {
 } from '@/lib/api-clients';
 import { getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/lib/weather-codes';
 
-// Configuration ISR - 15 minutes
-export const revalidate = 900;
+// Configuration ISR - 30 minutes (aligné avec CACHE_TTL)
+export const revalidate = 1800;
+// Note: Edge Runtime non utilisé car CacheManager utilise @vercel/kv qui nécessite Node.js runtime
 
 // ============================================================================
 // CONFIGURATION OPEN-METEO
@@ -258,9 +259,9 @@ async function fetchAllWeatherData(): Promise<WeatherDataMap> {
   const entries = Object.entries(COMMUNE_COORDINATES);
   const weatherData: WeatherDataMap = {};
 
-  // Réduire la taille des batchs à 5 pour éviter le rate limiting
-  // Open-Meteo limite à ~10 requêtes/seconde en gratuit
-  const batchSize = 5;
+  // Augmenter la taille des batchs à 8 pour améliorer les performances
+  // Open-Meteo limite à ~10 requêtes/seconde en gratuit, on reste en-dessous
+  const batchSize = 8;
   const batches = [];
 
   for (let i = 0; i < entries.length; i += batchSize) {
@@ -288,10 +289,11 @@ async function fetchAllWeatherData(): Promise<WeatherDataMap> {
       }
     }
 
-    // Délai augmenté entre les lots (500ms) pour respecter les limites de l'API gratuite
+    // Délai optimisé entre les lots (150ms) pour respecter les limites de l'API gratuite
     // Open-Meteo recommande de ne pas dépasser 10 requêtes/seconde
+    // 5 requêtes par batch + 150ms = ~30 requêtes/seconde reparties sur les batches
     if (batchIndex < batches.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
   }
 
@@ -315,7 +317,8 @@ export async function GET() {
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': `public, s-maxage=${CACHE_TTL.CURRENT_WEATHER || 900}, stale-while-revalidate=${(CACHE_TTL.CURRENT_WEATHER || 900) * 2}`,
+        // Cache agressif : CDN garde 30min, stale pendant 2h, navigateur garde 5min
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.CURRENT_WEATHER || 1800}, stale-while-revalidate=${(CACHE_TTL.CURRENT_WEATHER || 1800) * 4}, max-age=300`,
       },
     });
   } catch (error) {

@@ -16,8 +16,9 @@ import {
 } from '@/lib/api-clients';
 
 // Configuration ISR (Incremental Static Regeneration)
-// 3 minutes - aligné sur le cache backend
-export const revalidate = 180;
+// 5 minutes - aligné sur le cache backend optimisé
+export const revalidate = 300;
+// Note: Edge Runtime non utilisé car CacheManager utilise @vercel/kv qui nécessite Node.js runtime
 
 // ============================================================================
 // TYPES INTERNES
@@ -196,7 +197,8 @@ export async function GET() {
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': `public, s-maxage=${CACHE_TTL.AIR_QUALITY}, stale-while-revalidate=${CACHE_TTL.AIR_QUALITY * 2}`,
+        // Cache agressif : CDN garde 5min, stale pendant 15min, navigateur garde 2min
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.AIR_QUALITY}, stale-while-revalidate=${CACHE_TTL.AIR_QUALITY * 3}, max-age=120`,
       },
     });
   } catch (error) {

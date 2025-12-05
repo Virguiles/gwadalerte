@@ -21,8 +21,8 @@ import {
 } from '@/lib/api-clients';
 import JSZip from 'jszip';
 
-// Configuration ISR - 5 minutes
-export const revalidate = 300;
+// Configuration ISR - 10 minutes (aligné avec CACHE_TTL)
+export const revalidate = 600;
 
 // Note: On ne peut pas utiliser runtime='edge' car JSZip n'est pas compatible
 
@@ -233,7 +233,8 @@ export async function GET() {
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': `public, s-maxage=${CACHE_TTL.VIGILANCE}, stale-while-revalidate=${CACHE_TTL.VIGILANCE * 2}`,
+        // Cache agressif : CDN garde 10min, stale pendant 30min, navigateur garde 5min
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.VIGILANCE}, stale-while-revalidate=${CACHE_TTL.VIGILANCE * 3}, max-age=300`,
       },
     });
   } catch (error) {

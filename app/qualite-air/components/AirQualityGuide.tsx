@@ -1,5 +1,7 @@
 import { ShieldCheck, Leaf, Info, AlertTriangle, AlertOctagon, Activity, HeartPulse, BookOpen } from 'lucide-react';
 import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
+import { AirData } from '../../components/GuadeloupeMap';
+import { useMemo } from 'react';
 
 // Données des niveaux ATMO
 const ATMO_LEVELS_DATA = [
@@ -53,13 +55,75 @@ const ATMO_LEVELS_DATA = [
   }
 ];
 
-export const AirQualityGuide = () => {
+// Mapping des labels de qualité vers les niveaux ATMO
+const LABEL_TO_LEVEL: Record<string, number> = {
+  'Bon': 1,
+  'Moyen': 2,
+  'Dégradé': 3,
+  'Mauvais': 4,
+  'Très Mauvais': 5,
+  'Extrêmement Mauvais': 6,
+  // Variantes possibles
+  'Très bon': 1,
+  'Médiocre': 4,
+  'Très mauvais': 5,
+};
+
+interface AirQualityGuideProps {
+  airData?: AirData;
+  selectedCommune?: string;
+}
+
+export const AirQualityGuide = ({ airData = {}, selectedCommune = '' }: AirQualityGuideProps) => {
+  // Calcul du niveau ATMO actuel
+  const currentLevel = useMemo(() => {
+    if (!airData || Object.keys(airData).length === 0) {
+      return null;
+    }
+
+    // Si une commune est sélectionnée, utiliser ses données
+    if (selectedCommune && airData[selectedCommune]) {
+      const communeData = airData[selectedCommune];
+      const libQual = communeData.lib_qual;
+      if (libQual && LABEL_TO_LEVEL[libQual]) {
+        return LABEL_TO_LEVEL[libQual];
+      }
+    }
+
+    // Sinon, calculer une moyenne pour l'archipel
+    const levels: number[] = [];
+    Object.values(airData).forEach(commune => {
+      const libQual = commune.lib_qual;
+      if (libQual && LABEL_TO_LEVEL[libQual]) {
+        levels.push(LABEL_TO_LEVEL[libQual]);
+      }
+    });
+
+    if (levels.length === 0) {
+      return null;
+    }
+
+    // Calculer la moyenne arrondie (arrondi vers le haut pour être prudent)
+    const average = levels.reduce((sum, level) => sum + level, 0) / levels.length;
+    return Math.ceil(average);
+  }, [airData, selectedCommune]);
+
+  // Obtenir le nom de la zone (commune ou archipel)
+  const zoneName = useMemo(() => {
+    if (selectedCommune && airData[selectedCommune]) {
+      return airData[selectedCommune].lib_zone || 'Commune sélectionnée';
+    }
+    return "Archipel";
+  }, [airData, selectedCommune]);
+
   const guideItems: GuideItem[] = ATMO_LEVELS_DATA.map(item => ({
     id: item.level,
     label: item.label,
     color: item.color,
     icon: item.icon,
     headerDescription: item.description,
+    isCurrent: currentLevel === item.level,
+    subLabel: currentLevel === item.level ? zoneName : undefined,
     sections: [
       {
         title: "Description",
@@ -76,13 +140,18 @@ export const AirQualityGuide = () => {
     ]
   }));
 
+  const description = currentLevel
+    ? `L'échelle de qualité de l'air et les recommandations sanitaires associées pour la Guadeloupe. Qualité actuelle : ${ATMO_LEVELS_DATA.find(item => item.level === currentLevel)?.label || 'N/A'} sur ${zoneName}.`
+    : "L'échelle de qualité de l'air et les recommandations sanitaires associées pour la Guadeloupe.";
+
   return (
     <InteractiveGuide
       title="Comprendre l'indice ATMO"
-      description="L'échelle de qualité de l'air et les recommandations sanitaires associées pour la Guadeloupe."
+      description={description}
       mainIcon={BookOpen}
       mainIconColorClass="text-teal-500"
       items={guideItems}
+      defaultSelectedId={currentLevel || undefined}
     />
   );
 };

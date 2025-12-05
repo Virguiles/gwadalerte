@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { WeatherDataMap, VigilanceData } from '../types';
 
-const WEATHER_CACHE_KEY = 'gwada_weather_cache_v2'; // v2 pour Open-Meteo
-const VIGILANCE_CACHE_KEY = 'gwada_vigilance_cache';
-const WEATHER_CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp_v2';
-const VIGILANCE_CACHE_TIMESTAMP_KEY = 'gwada_vigilance_cache_timestamp';
-const WEATHER_CACHE_VALIDITY_MS = 15 * 60 * 1000; // 15 minutes (aligné avec le cache backend Open-Meteo)
-const VIGILANCE_CACHE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes (vigilance Météo-France)
-const VIGILANCE_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (vigilance Météo-France)
+const WEATHER_CACHE_KEY = 'gwada_weather_cache_v3'; // v3 pour cache optimisé
+const VIGILANCE_CACHE_KEY = 'gwada_vigilance_cache_v2';
+const WEATHER_CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp_v3';
+const VIGILANCE_CACHE_TIMESTAMP_KEY = 'gwada_vigilance_cache_timestamp_v2';
+const WEATHER_CACHE_VALIDITY_MS = 30 * 60 * 1000; // 30 minutes (aligné avec le cache backend optimisé)
+const VIGILANCE_CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France optimisé)
+const VIGILANCE_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France, réduit pour éviter surcharge)
 
 export function useMeteoData() {
   const [mounted, setMounted] = useState(false);
@@ -316,14 +316,26 @@ export function useMeteoData() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Chargement initial
-    fetchData();
+    // Vérifier si le cache est valide avant de charger
+    const cached = loadFromCache();
+    const now = Date.now();
+
+    const weatherValid = cached?.weatherTimestamp && isWeatherCacheValid(cached.weatherTimestamp);
+    const vigilanceValid = cached?.vigilanceTimestamp && isVigilanceCacheValid(cached.vigilanceTimestamp);
+
+    // Chargement initial seulement si nécessaire
+    if (!weatherValid || !vigilanceValid) {
+      console.log('[Init] Chargement des données manquantes...');
+      fetchData();
+    } else {
+      console.log('[Init] Cache valide, pas de chargement initial');
+    }
 
     // Rafraîchissement périodique de la vigilance (toutes les 10 minutes)
     // On rafraîchit uniquement la vigilance pour éviter de surcharger l'API météo
     intervalRef.current = setInterval(() => {
       console.log('[Vigilance] Rafraîchissement périodique...');
-      fetchVigilanceOnly(true); // Force le rafraîchissement même si le cache est valide
+      fetchVigilanceOnly(false); // Utiliser la logique de cache normale, pas de force
     }, VIGILANCE_REFRESH_INTERVAL_MS);
 
     // Nettoyage de l'intervalle au démontage

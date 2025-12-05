@@ -22,6 +22,7 @@ import { formatDate as formatDateUtil, getDayName as getDayNameUtil } from '@/li
 
 // Configuration dynamique - cette route utilise des paramètres de requête
 export const dynamic = 'force-dynamic';
+// Note: Edge Runtime non utilisé car CacheManager utilise @vercel/kv qui nécessite Node.js runtime
 
 // ============================================================================
 // CONFIGURATION OPEN-METEO
@@ -340,8 +341,8 @@ async function fetchAllForecastsSummary(): Promise<Record<string, ForecastData>>
   const entries = Object.entries(COMMUNE_COORDINATES);
   const forecasts: Record<string, ForecastData> = {};
 
-  // Diviser en lots de 5 pour les prévisions (plus de données par requête)
-  const batchSize = 5;
+  // Diviser en lots de 8 pour les prévisions (optimisé pour la vitesse)
+  const batchSize = 8;
   const batches = [];
 
   for (let i = 0; i < entries.length; i += batchSize) {
@@ -369,10 +370,11 @@ async function fetchAllForecastsSummary(): Promise<Record<string, ForecastData>>
       }
     }
 
-    // Délai augmenté entre les lots (500ms) pour respecter les limites de l'API gratuite
+    // Délai optimisé entre les lots (150ms) pour respecter les limites de l'API gratuite
     // Open-Meteo recommande de ne pas dépasser 10 requêtes/seconde
+    // 8 requêtes par batch + 150ms = temps de réponse optimal
     if (batchIndex < batches.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
   }
 
@@ -413,7 +415,8 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(data, {
         headers: {
-          'Cache-Control': `public, s-maxage=${CACHE_TTL.FORECAST}, stale-while-revalidate=${CACHE_TTL.FORECAST * 2}`,
+          // Cache très agressif : CDN garde 4h, stale pendant 8h, navigateur garde 30min
+          'Cache-Control': `public, s-maxage=${CACHE_TTL.FORECAST}, stale-while-revalidate=${CACHE_TTL.FORECAST * 2}, max-age=1800`,
         },
       });
     }
@@ -429,7 +432,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': `public, s-maxage=${CACHE_TTL.FORECAST}, stale-while-revalidate=${CACHE_TTL.FORECAST * 2}`,
+        // Cache très agressif : CDN garde 4h, stale pendant 8h, navigateur garde 30min
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.FORECAST}, stale-while-revalidate=${CACHE_TTL.FORECAST * 2}, max-age=1800`,
       },
     });
   } catch (error) {
