@@ -63,7 +63,7 @@ export function useAirData() {
         const now = new Date();
         const diffMinutes = (now.getTime() - lastUpdateDate.getTime()) / (1000 * 60);
 
-        if (isSameDay(lastUpdateDate, now) && diffMinutes < 30) { // Cache valide 30 min ici pour l'exemple
+        if (isSameDay(lastUpdateDate, now) && diffMinutes < 5) { // Cache valide 5 minutes (synchronisé avec le serveur)
           shouldFetch = false;
         }
       }

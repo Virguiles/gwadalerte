@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { WeatherDataMap, VigilanceData } from '../types';
 
-const WEATHER_CACHE_KEY = 'gwada_weather_cache_v3'; // v3 pour cache optimisé
-const VIGILANCE_CACHE_KEY = 'gwada_vigilance_cache_v2';
-const WEATHER_CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp_v3';
-const VIGILANCE_CACHE_TIMESTAMP_KEY = 'gwada_vigilance_cache_timestamp_v2';
-const WEATHER_CACHE_VALIDITY_MS = 30 * 60 * 1000; // 30 minutes (aligné avec le cache backend optimisé)
+const WEATHER_CACHE_KEY = 'gwada_weather_cache_v4'; // v4 pour cache ultra-optimisé
+const VIGILANCE_CACHE_KEY = 'gwada_vigilance_cache_v3'; // v3 pour synchronisation
+const WEATHER_CACHE_TIMESTAMP_KEY = 'gwada_meteo_cache_timestamp_v4';
+const VIGILANCE_CACHE_TIMESTAMP_KEY = 'gwada_vigilance_cache_timestamp_v3';
+const WEATHER_CACHE_VALIDITY_MS = 45 * 60 * 1000; // 45 minutes (synchronisé avec le cache backend optimisé)
 const VIGILANCE_CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France optimisé)
 const VIGILANCE_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France, réduit pour éviter surcharge)
 

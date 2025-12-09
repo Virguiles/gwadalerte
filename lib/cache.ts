@@ -10,11 +10,11 @@ import { kv } from '@vercel/kv';
 
 // TTL (Time To Live) en secondes
 // Optimisé pour Open-Meteo (API gratuite avec limites)
-// TTL agressifs pour réduire la latence au chargement
+// TTL plus agressifs pour réduire drastiquement la latence au chargement
 export const CACHE_TTL = {
   AIR_QUALITY: 300,        // 5 minutes - données qualité de l'air (augmenté pour réduire les appels)
-  CURRENT_WEATHER: 1800,   // 30 minutes - météo actuelle Open-Meteo (changements lents en Guadeloupe)
-  WEATHER: 1800,           // 30 minutes - alias pour compatibilité
+  CURRENT_WEATHER: 2700,   // 45 minutes - météo actuelle Open-Meteo (changements lents en Guadeloupe, optimisé pour performance)
+  WEATHER: 2700,           // 45 minutes - alias pour compatibilité
   FORECAST: 14400,         // 4 heures - prévisions météo (très stables, mise à jour 2x/jour)
   VIGILANCE: 600,          // 10 minutes - vigilance Météo-France (changements rares, mise à jour fréquente inutile)
   WATER_CUTS: 86400,       // 24 heures - planning tours d'eau (données statiques)

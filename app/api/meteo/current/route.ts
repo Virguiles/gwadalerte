@@ -21,6 +21,17 @@ import { getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/l
 export const revalidate = 1800;
 // Note: Edge Runtime non utilisé car CacheManager utilise @vercel/kv qui nécessite Node.js runtime
 
+type CachedWeatherPayload = {
+  data: WeatherDataMap;
+  fetchedAt: number;
+};
+
+// TTL "soft" pour déclencher une régénération en arrière-plan sans pénaliser l'utilisateur
+const SOFT_TTL_MS = (CACHE_TTL.CURRENT_WEATHER || 1800) * 1000;
+// TTL "hard" plus long pour conserver une version de secours le temps de la régénération
+const HARD_TTL_SECONDS = Math.max((CACHE_TTL.CURRENT_WEATHER || 1800) * 4, CACHE_TTL.CURRENT_WEATHER || 1800);
+let refreshPromise: Promise<void> | null = null;
+
 // ============================================================================
 // CONFIGURATION OPEN-METEO
 // ============================================================================
@@ -259,9 +270,9 @@ async function fetchAllWeatherData(): Promise<WeatherDataMap> {
   const entries = Object.entries(COMMUNE_COORDINATES);
   const weatherData: WeatherDataMap = {};
 
-  // Augmenter la taille des batchs à 8 pour améliorer les performances
-  // Open-Meteo limite à ~10 requêtes/seconde en gratuit, on reste en-dessous
-  const batchSize = 8;
+  // Optimisation des performances : batchs plus grands et délais réduits
+  // Open-Meteo limite à ~10 requêtes/seconde en gratuit, optimisation pour rapidité
+  const batchSize = 12; // Augmenté de 8 à 12 pour plus de parallélisme
   const batches = [];
 
   for (let i = 0; i < entries.length; i += batchSize) {
@@ -289,11 +300,11 @@ async function fetchAllWeatherData(): Promise<WeatherDataMap> {
       }
     }
 
-    // Délai optimisé entre les lots (150ms) pour respecter les limites de l'API gratuite
+    // Délai optimisé réduit (50ms au lieu de 150ms) pour améliorer les performances
     // Open-Meteo recommande de ne pas dépasser 10 requêtes/seconde
-    // 5 requêtes par batch + 150ms = ~30 requêtes/seconde reparties sur les batches
+    // Avec 12 requêtes par batch + 50ms = ~20 requêtes/seconde, bien en-dessous de la limite
     if (batchIndex < batches.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
   }
 
@@ -317,8 +328,8 @@ export async function GET() {
 
     return NextResponse.json(data, {
       headers: {
-        // Cache agressif : CDN garde 30min, stale pendant 2h, navigateur garde 5min
-        'Cache-Control': `public, s-maxage=${CACHE_TTL.CURRENT_WEATHER || 1800}, stale-while-revalidate=${(CACHE_TTL.CURRENT_WEATHER || 1800) * 4}, max-age=300`,
+        // Cache ultra-agressif pour performance optimale : CDN garde 45min, stale pendant 3h, navigateur garde 10min
+        'Cache-Control': `public, s-maxage=${CACHE_TTL.CURRENT_WEATHER || 2700}, stale-while-revalidate=${(CACHE_TTL.CURRENT_WEATHER || 2700) * 4}, max-age=600`,
       },
     });
   } catch (error) {

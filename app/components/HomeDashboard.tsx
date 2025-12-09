@@ -19,10 +19,22 @@ import {
 
 type TabType = 'meteo' | 'air' | 'water';
 
-const TABS: { id: TabType; label: string; icon: React.ReactNode }[] = [
-  { id: 'meteo', label: 'Météo', icon: <CloudSun size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
-  { id: 'water', label: 'Eau', icon: <Droplet size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
-  { id: 'air', label: 'Air', icon: <Wind size={16} className="-ms-0.5 me-1.5 opacity-60" /> },
+const TABS: { id: TabType; label: string; getIcon: (isActive: boolean) => React.ReactNode }[] = [
+  {
+    id: 'meteo',
+    label: 'Météo',
+    getIcon: (isActive) => <CloudSun size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'opacity-60'}`} />
+  },
+  {
+    id: 'water',
+    label: 'Eau',
+    getIcon: (isActive) => <Droplet size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-cyan-500 dark:text-cyan-400' : 'opacity-60'}`} />
+  },
+  {
+    id: 'air',
+    label: 'Air',
+    getIcon: (isActive) => <Wind size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'opacity-60'}`} />
+  },
 ];
 
 export default function HomeDashboard() {
@@ -523,7 +535,7 @@ export default function HomeDashboard() {
                 value={tab.id}
                 className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
               >
-                {tab.icon}
+                {tab.getIcon(activeTab === tab.id)}
                 {tab.label}
               </TabsTrigger>
             ))}

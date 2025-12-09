@@ -1,3 +1,30 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Mentions Légales - Gwad'Alerte",
+  description: "Mentions légales du site Gwad'Alerte. Éditeur, hébergement, propriété intellectuelle et avertissement sur l'utilisation des données environnementales.",
+  keywords: ["mentions légales", "Gwad'Alerte", "éditeur", "hébergement", "RGPD", "données personnelles", "responsabilité"],
+  authors: [{ name: "Virgile" }],
+  creator: "Virgile",
+  publisher: "Gwad'Alerte",
+  openGraph: {
+    title: "Mentions Légales - Gwad'Alerte",
+    description: "Informations légales sur l'utilisation du site Gwad'Alerte et des données environnementales.",
+    url: "https://gwadalerte.com/mentions-legales",
+    siteName: "Gwad'Alerte",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Mentions Légales - Gwad'Alerte",
+    description: "Informations légales sur Gwad'Alerte.",
+  },
+  alternates: {
+    canonical: "https://gwadalerte.com/mentions-legales",
+  },
+};
+
 export default function MentionsLegales() {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">

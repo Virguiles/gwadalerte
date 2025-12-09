@@ -1,3 +1,30 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Crédits & Sources - Gwad'Alerte",
+  description: "Découvrez les sources de données officielles utilisées par Gwad'Alerte : Météo-France, Gwad'Air, SMGEAG et Open-Meteo. Transparence sur les ressources et licences.",
+  keywords: ["crédits Gwad'Alerte", "sources données", "Météo-France", "Gwad'Air", "SMGEAG", "Open-Meteo", "licences", "transparence"],
+  authors: [{ name: "Virgile" }],
+  creator: "Virgile",
+  publisher: "Gwad'Alerte",
+  openGraph: {
+    title: "Crédits & Sources - Gwad'Alerte",
+    description: "Sources officielles et ressources utilisées pour les données environnementales de Guadeloupe.",
+    url: "https://gwadalerte.com/credits",
+    siteName: "Gwad'Alerte",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Crédits & Sources - Gwad'Alerte",
+    description: "Sources de données officielles pour Gwad'Alerte.",
+  },
+  alternates: {
+    canonical: "https://gwadalerte.com/credits",
+  },
+};
+
 export default function Credits() {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
