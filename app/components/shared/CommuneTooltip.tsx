@@ -10,20 +10,24 @@ interface CommuneTooltipProps {
 export const CommuneTooltip: React.FC<CommuneTooltipProps> = ({ hoveredInfo }) => {
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
-  const updatePositionRef = useRef<() => void>();
+  const updatePositionRef = useRef<(() => void) | undefined>(undefined);
   const initialRelativePositionRef = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!hoveredInfo || typeof document === 'undefined') {
-      setPosition(null);
-      setContainer(null);
-      initialRelativePositionRef.current = null;
-      containerRef.current = null;
+      // Nettoyer les event listeners
       if (updatePositionRef.current) {
         window.removeEventListener('scroll', updatePositionRef.current, true);
         window.removeEventListener('resize', updatePositionRef.current);
       }
+      initialRelativePositionRef.current = null;
+      containerRef.current = null;
+      // Réinitialiser l'état de manière asynchrone pour éviter les rendus en cascade
+      requestAnimationFrame(() => {
+        setPosition(null);
+        setContainer(null);
+      });
       return;
     }
 
@@ -38,7 +42,7 @@ export const CommuneTooltip: React.FC<CommuneTooltipProps> = ({ hoveredInfo }) =
 
       if (svgElement && svgElement.parentElement) {
         // Chercher le conteneur parent qui a position relative ou qui est le conteneur de la carte
-        let parent = svgElement.parentElement;
+        let parent: HTMLElement | null = svgElement.parentElement;
         while (parent && parent !== document.body) {
           const style = window.getComputedStyle(parent);
           // Chercher un conteneur avec position relative ou qui contient la carte
@@ -68,7 +72,6 @@ export const CommuneTooltip: React.FC<CommuneTooltipProps> = ({ hoveredInfo }) =
 
     if (mapContainer) {
       containerRef.current = mapContainer;
-      setContainer(mapContainer);
 
       // Calculer la position relative au conteneur au moment du clic
       const containerRect = mapContainer.getBoundingClientRect();
@@ -77,7 +80,12 @@ export const CommuneTooltip: React.FC<CommuneTooltipProps> = ({ hoveredInfo }) =
 
       // Stocker la position relative initiale
       initialRelativePositionRef.current = { x: relativeX, y: relativeY };
-      setPosition({ left: relativeX, top: relativeY - 10 });
+
+      // Mettre à jour l'état de manière asynchrone pour éviter les rendus en cascade
+      requestAnimationFrame(() => {
+        setContainer(mapContainer);
+        setPosition({ left: relativeX, top: relativeY - 10 });
+      });
 
       // Fonction pour mettre à jour la position lors du scroll
       // La position relative ne change pas, donc on la garde constante
@@ -99,10 +107,13 @@ export const CommuneTooltip: React.FC<CommuneTooltipProps> = ({ hoveredInfo }) =
       window.addEventListener('resize', updatePosition);
     } else {
       // Fallback: utiliser position fixed si on ne trouve pas le conteneur
-      setPosition({ left: hoveredInfo.x, top: hoveredInfo.y - 10 });
-      setContainer(document.body);
       initialRelativePositionRef.current = null;
       containerRef.current = null;
+      // Mettre à jour l'état de manière asynchrone pour éviter les rendus en cascade
+      requestAnimationFrame(() => {
+        setPosition({ left: hoveredInfo.x, top: hoveredInfo.y - 10 });
+        setContainer(document.body);
+      });
     }
 
     return () => {
