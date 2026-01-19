@@ -47,10 +47,12 @@ GwadaSVG/
 Dans le dashboard Vercel → Settings → Environment Variables :
 
 ```env
-OPENWEATHER_API_KEY=votre_cle_api
 METEOFRANCE_CLIENT_ID=votre_client_id
 METEOFRANCE_CLIENT_SECRET=votre_client_secret
+METEOFRANCE_TOKEN_URL=votre_token_url
 ```
+
+**Note** : Open-Meteo (utilisé pour les données météo) ne nécessite PAS de clé API ! 🎉
 
 ### 2. Ajouter Vercel KV (recommandé pour la production)
 
@@ -153,10 +155,6 @@ const data = await CacheManager.getOrFetch(
 | Appels parallèles | `asyncio.gather()` | `Promise.all()` |
 
 ## 🐛 Dépannage
-
-### Erreur "OPENWEATHER_API_KEY non configurée"
-
-Vérifier que la variable d'environnement est bien configurée dans Vercel ou `.env.local`.
 
 ### Erreur "Credentials Météo-France non configurés"
 
