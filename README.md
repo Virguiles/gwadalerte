@@ -27,9 +27,12 @@ GwadaSVG/
 │   └── tours-deau/    # Page tours d'eau
 ├── lib/               # Utilitaires et clients API
 │   ├── weather-codes.ts  # Mapping codes météo WMO
-│   └── cache.ts          # Système de cache
+│   ├── cache.ts          # Système de cache
+│   ├── api-clients.ts    # Clients API partagés
+│   └── data/             # Données statiques (tours-deau.json)
 ├── public/            # Assets statiques (cartes SVG)
-└── docs/              # Documentation technique
+├── components/        # Composants UI réutilisables (Radix UI)
+└── CHANGELOG_METEO.md # Historique des améliorations météo
 ```
 
 ## 🚀 Déploiement sur Vercel
@@ -138,12 +141,14 @@ L'application sera disponible sur `http://localhost:3000`
 
 ### 🌤️ Météo & Vigilance
 - **Carte météo interactive** : Températures, conditions par commune
-- **Prévisions 3 jours** : Onglets Aujourd'hui / Demain / 3 jours 🆕
-- **Détails horaires** : Température, précipitations, vent heure par heure
+- **Prévisions 3 jours** : Onglets Aujourd'hui / Demain / 3 jours
+- **Prévisions horaires détaillées** : 9 métriques par heure (température, ressenti, précipitations, vent, humidité, nébulosité, etc.)
+- **Scroll horizontal** : Navigation fluide des prévisions horaires (mobile & desktop)
 - **Vigilance météo** : Niveaux officiels (Vert, Jaune, Orange, Rouge, Violet, Gris)
 - **Alertes cycloniques** : Guide éducatif sur la vigilance cyclonique
 - **Données multi-sources** : Open-Meteo (météo) + Météo-France (vigilance)
 - **Micro-climats** : Adaptation au relief guadeloupéen
+- **Design uniformisé** : Interface cohérente entre vue Archipel et Commune
 
 ### 💧 Tours d'eau
 - **Planning interactif** : Carte des coupures programmées
@@ -157,19 +162,33 @@ L'application sera disponible sur `http://localhost:3000`
 - **Cartes SVG interactives** : Survol et sélection des communes
 - **Sidebars contextuelles** : Informations détaillées selon la sélection
 - **Animations fluides** : Expérience utilisateur soignée
+- **Accessibilité** : Conforme WCAG 2.1 AA (attributs ARIA, navigation clavier)
 
 ## 🔧 Développement
 
 ### Structure des composants
 
-- `components/GuadeloupeMap.tsx` - Carte SVG principale
-- `components/HomeDashboard.tsx` - Dashboard d'accueil
-- `components/Navbar.tsx` - Navigation principale
-- `components/Footer.tsx` - Pied de page
-- `hooks/useAirData.ts` - Hook pour les données qualité de l'air
-- `hooks/useMeteoData.ts` - Hook pour les données météo (Open-Meteo)
-- `hooks/useMeteoForecast.ts` - Hook pour les prévisions 3 jours 🆕
-- `hooks/useWaterData.ts` - Hook pour les tours d'eau
+**Composants principaux :**
+- `app/components/GuadeloupeMap.tsx` - Carte SVG principale
+- `app/components/HomeDashboard.tsx` - Dashboard d'accueil
+- `app/components/Navbar.tsx` - Navigation principale avec widget vigilance
+- `app/components/Footer.tsx` - Pied de page
+- `app/components/BackgroundSlider.tsx` - Carrousel d'images de fond
+
+**Composants météo :**
+- `app/meteo/components/HourlyForecastCard.tsx` - Carte de prévision horaire détaillée
+- `app/meteo/components/ForecastDayView.tsx` - Vue des prévisions par jour
+- `app/meteo/components/MeteoCommuneView.tsx` - Vue météo par commune
+- `app/meteo/components/MeteoGlobalView.tsx` - Vue météo globale (Archipel)
+- `app/meteo/components/VigilanceSection.tsx` - Section vigilance météo
+- `app/meteo/components/CyclonicVigilanceGuide.tsx` - Guide vigilance cyclonique
+
+**Hooks de données :**
+- `app/hooks/useAirData.ts` - Hook pour les données qualité de l'air
+- `app/meteo/hooks/useMeteoData.ts` - Hook pour les données météo actuelles (Open-Meteo)
+- `app/meteo/hooks/useMeteoForecast.ts` - Hook pour les prévisions 3 jours
+- `app/meteo/hooks/useForecastLogic.ts` - Logique de filtrage des prévisions
+- `app/hooks/useWaterData.ts` - Hook pour les tours d'eau
 
 ### Cache et performance
 
@@ -190,13 +209,11 @@ Les conditions météo sont basées sur les codes WMO (World Meteorological Orga
 
 ## 📚 Documentation
 
-Vous trouverez la documentation détaillée dans le dossier `docs/` :
-
-- [Guide Météo](docs/README_METEO.md) - Documentation complète de la page météo
-- [Améliorations Météo](docs/AMELIORATIONS_METEO.md) - Évolutions et améliorations
-- [API Météo France](docs/INFORMATIONS_API_METEOFRANCE.md) - Intégration Météo-France
-- [Vigilance Météo France](docs/VIGILANCE_METEOFRANCE.md) - Système de vigilance
-- [API Gwad'Air](docs/DOCUMENTATION_API_GWADAIR.md) - Documentation API qualité de l'air
+**Fichiers de documentation disponibles :**
+- [CHANGELOG_METEO.md](CHANGELOG_METEO.md) - Historique des améliorations de la page météo
+- [MIGRATION.md](MIGRATION.md) - Guide de migration FastAPI → Next.js API Routes
+- [DEPLOIEMENT_VERCEL.md](DEPLOIEMENT_VERCEL.md) - Guide de déploiement sur Vercel
+- [DEPLOIEMENT_NETLIFY.md](DEPLOIEMENT_NETLIFY.md) - Guide de déploiement sur Netlify
 
 ## 🌐 Sources de données
 
@@ -211,10 +228,18 @@ Vous trouverez la documentation détaillée dans le dossier `docs/` :
 
 Ce projet est en cours de développement. Les fonctionnalités sont ajoutées progressivement.
 
-## 🤝 Contribution
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+## 🎯 Dernières améliorations
+
+### Décembre 2024
+- ✅ **Prévisions horaires enrichies** : 9 métriques par heure (température, ressenti, précipitations, vent, humidité, nébulosité)
+- ✅ **Design uniformisé** : Interface cohérente entre vue Archipel et Commune
+- ✅ **Correction onglet "3 jours"** : Affiche maintenant uniquement les prévisions de J+3
+- ✅ **Accessibilité améliorée** : Conformité WCAG 2.1 AA avec attributs ARIA et navigation clavier
+- ✅ **Scroll horizontal optimisé** : Navigation fluide des prévisions horaires sur mobile et desktop
+
+Pour plus de détails, consultez [CHANGELOG_METEO.md](CHANGELOG_METEO.md).
 
 ---
 
-*Dernière mise à jour : Migration vers Open-Meteo (gratuit, sans clé API) - Décembre 2025*
+*Dernière mise à jour : Décembre 2024 - Prévisions horaires enrichies et améliorations UX*
