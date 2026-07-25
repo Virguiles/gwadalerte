@@ -4,15 +4,11 @@
     "details": [
       {
         "secteur": "Secteur 1 (Petit-Pérou, Morne Caruel, Morne Vergain, Cour Ferrand, Dugazon, Dugazon de Bourgogne, Salle d'Asile, Vieux-Bourg, Anquetil 2 et 3, Pages, Cour Tony, RN5, Hibiscus, Morne Mamiel, Chemin de Carrère, Cité Fléret)",
-        "horaires": "Mardi / jeudi / samedi de 20H à 7H"
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       },
       {
-        "secteur": "Secteur 2 (GRANDS-FONDS ABYMES, Bouliqui, Boisvin, Desravaniére, Bozon, Caraque, Chazeau, Coma, Tertulien, Azéde, Pavé, Beausoleil, Fonds Bambou, Blanchard, Papin, Desravinières, Terrasson, Bois de Rose, Jaspard, Belle Fontaine, Céligny)",
-        "horaires": "Lundi / mercredi / vendredi / dimanche de 18h à 8h"
-      },
-      {
-        "secteur": "Secteur 3 (Chauffour, Carenage, Duthau, Marina, Tonelle, Bezon, Université, Morne Bernus, Morne Torudu, Timothée, Gendrey, Louisy Mathieu)",
-        "horaires": "Lundi / mercredi / vendredi / dimanche de 18h à 8h"
+        "secteur": "Secteur 2 & 3 (Grands-Fonds Abymes, Bouliqui, Boisvin, Desravaniére, Bozon, Caraque, Chazeau, Coma, Tertulien, Azéde, Pavé, Beausoleil, Fonds Bambou, Blanchard, Papin, Desravinières, Terrasson, Bois de Rose, Jaspard, Belle Fontaine, Céligny, Chauffour, Carenage, Duthau, Marina, Tonelle, Bezon, Université, Morne Bernus, Morne Torudu, Timothée Gendrey, Louisy Mathieu)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -20,13 +16,9 @@
     "commune": "SAINTE-ANNE",
     "details": [
       {
-        "secteur": "Secteur 'Le Bourg' (Le Bourg, Geta, Brest, Cité des Sources...)",
-        "horaires": "Mardi / jeudi / samedi de 20H à 7H"
-      },
-      {
-        "secteur": "Secteur 3 (Bois Jolan, Castaing, Chateaubrun, Surgy, Gissac, French, Le Helleux, Hauteurs Dubellay, Hauteurs Dupré, Boulevard Ibéné, Durivage, Fond Thézan, Morne Jacques, Poirier, Fond Vapeur, Douville, Berard Belcourt, Gentilly, Cinq Etang, Bois Lomard, Loery)",
+        "secteur": "Sainte-Anne 3 (Bois Jolan, Castaing, Chateaubrun, Surgy, Gissac, French, Le Helleux, Hauteurs Dubellay, Hauteurs Dupré, Boulevard Ibéné, Durivage, Fond Thézan, Morne Jacques, Poirier, Fond Vapeur, Douville, Berard Belcourt, Gentilly, Cinq Etang, Bois Lomard, Loery)",
         "horaires": "Lundi / mercredi / vendredi / dimanche de 20h à 6h",
-        "zones_alimentation_favorables": "Richeplaine, Courcelles, Marly, Petit moulin, Surgy, Celcourt"
+        "zones_alimentation_favorables": "Richeplaine, Courcelles, Marly, Petit Moulin, Surgy, Celcourt"
       }
     ]
   },
@@ -34,9 +26,9 @@
     "commune": "SAINT-FRANÇOIS",
     "details": [
       {
-        "secteur": "Tous secteurs (Haut du Bourg, Le Bourg, Morne à Cayes, Pradel, Meudon, Salline Est, Saline Ouest, Anse à la Barque, Belle Allée, Bellevue, Séze William, Blonval, Souquet, Anse des Rochers, Route Touristique, Belloc, Bois Euzébe, Claret, Cours des Braves, Demeuille, Desvarieux, Labarthe, Diochot, Anse à l'Eau, L'Etaye, Prince, Zami, Zévallos, La Baie Boisvin, Roche, La Baie Palmiste, Daube, Chemin des Donneuses d'Eau, Roche)",
+        "secteur": "Tous secteurs (Haut du Bourg, le Bourg, Morne à Cayes, Pradel, Meudon, Saline Est, Saline Ouest, Anse à la Barque, Belle Allée, Bellevue, Séze William, Blonval, Souquet, Anse des Rochers, Route Touristique, Belloc, Bois Euzébe, Claret, Cours des Braves, Demeuille, Desvarieux, Labarthe, Diochot, Anse à l'Eau, L'Etaye, Prince, Zami, Zévallos, la Baie Boisvin, Roche, la Baie Palmiste, Daube, Chemin des Donneuses d'Eau)",
         "horaires": "Lundi / mercredi / vendredi / dimanche de 20h à 6h",
-        "zones_alimentation_favorables": "Bien désiré, Pombiray, Bragelogne, Bois Vipart, La Simonière, Saint Charles, Saint Jacques, Desvarieux, Cayenne, Sainte Marthe, Bébet, La Baie Olive, Anse à la Baie, Frontin, Cocoyer, Pointe des Châteaux, Labarthe, Dubédou, Princesse, Desbonnes, Lotissement Roche, Zamy, Belloc, Loyette, Deumeuille, Vézoux, Bourg, Pradel, Marina, Chaboux, La Voûte"
+        "zones_alimentation_favorables": "Bien Désiré, Pombiray, Bragelogne, Bois Vipart, La Simonière, Saint Charles, Saint Jacques, Desvarieux, Cayenne, Sainte Marthe, Bébet, La Baie Olive, Anse à la Baie, Frontin, Cocoyer, Pointe des Châteaux, Labarthe, Dubédou, Princesse, Desbonnes, Lotissement Roche, Zamy, Belloc, Loyette, Deumeuille, Vézoux, Bourg, Pradel, Marina, Chaboux, La Voûte"
       }
     ]
   },
@@ -48,12 +40,12 @@
     "commune": "LE GOSIER",
     "details": [
       {
-        "secteur": "Secteur 1 (Brindeau, Petit-Havre, Morne Jacques, Vercino, Rte de la Mutuelle, Providence, Pliane Vercino, Rue de la Chapelle, Salines, Plateau Joab, Béline, Mare-Gaillard, Fonds Thézan (Sainte-Anne), Flibustier, Bernard, Simonet, Le Bourg du Gosier, Belle Plaine, Riviera, Bas du Fort, Montauban, Route des Hotels, Pointe de la Verdure)",
-        "horaires": "Lundi / mercredi / vendredi / dimanche de 20H à 7H"
+        "secteur": "Secteur 1 (Brindeau, Petit-Havre, Morne Jacques, Vercino, Rte de la Mutuelle, Providence, Pliane Vercino, Rue de la Chapelle, Salines, Plateau Joab, Béline, Mare-Gaillard, Fonds Thézan (Sainte-Anne), Flibustier, Bernard, Simonet, le Bourg du Gosier, Belle Plaine, Riviera, Bas du Fort, Montauban, Route des Hôtels, Pointe de la Verdure)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       },
       {
-        "secteur": "Secteur 2 (Bois de Rose, Route de Cocoyer, Champagne, Leroux, Impasse Leroux, Tambeau, Mare à Bwe, Goyave, Besson, Morne Diavet, Grande Ravine, Impasse Nocente, Chemin de Labouaye, Barbes, Lotissement Cannelle, Lotissement Vanille, Guiampo, Beaumanoir, Michaux 1, Michaux 2, Maudette Gros Monbin)",
-        "horaires": "Lundi / mercredi / vendredi / dimanche de 20H à 7H"
+        "secteur": "Secteur 2 (Bois de Rose, Route de Cocoyer, Champagne, Leroux, Impasse Leroux, Tambeau, Mare à Bwè, Goyave, Besson, Morne Diavet, Grande Ravine, Impasse Nocente, Chemin de Labouaye, Barbès, Lotissement Cannelle, Lotissement Vanille, Guiampo, Beaumanoir, Michaux 1, Michaux 2, Maudette, Gros Monbin, Grands-Bois, Moreau)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -62,7 +54,7 @@
     "details": [
       {
         "secteur": "Tous secteurs (Nesty, le Bourg Goyave, Monplaisir, Christophe Ouest, l'Aiguille, Morne Rouge, Sainte Claire)",
-        "horaires": "Mardi / jeudi / samedi de 20H à 7H"
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -70,8 +62,16 @@
     "commune": "SAINTE-ROSE",
     "details": [
       {
-        "secteur": "Secteur 'Cadet' (Cadet, Cacao, Duportail, Bis, La Boucan, Belle Plaine, Belle Rivière, Béron, Bonne)",
-        "horaires": "Mardi de 19H à 14H"
+        "secteur": "Secteur 1 (Sofaia, Bellevue, Ravine Bleue, Viard, Lachaise, Pont Canal, Jobeti, Moustique, Galbas, Morne Rouge, Zone de Nolivier, Déboché, Enseno, Lot Perenus, Conodor, Belcito, le Boyer)",
+        "horaires": "Lundi / samedi de 17h à 9h"
+      },
+      {
+        "secteur": "Secteur 2 (Cadet, Cacao, Duportail, Bis, La Boucan, Belle Plaine, Belle Rivière, Béron, Bonne)",
+        "horaires": "Mardi de 19h à 8h"
+      },
+      {
+        "secteur": "Secteur 3 (Solitude, Desbonnes, Daubin, Duzer, Davidon, Bachelier, Vinty, Nogent, Cluny, Madame, Comté, La Ramée, Saint-Marie, Gonon, Espérance, Saint-Denis)",
+        "horaires": "Jeudi de 18h à 6h"
       }
     ]
   },
@@ -83,12 +83,16 @@
     "commune": "CAPESTERRE-BELLE-EAU",
     "details": [
       {
-        "secteur": "Secteur 1 (Le Bourg, Geta, Brest, Cité des Sources, Les Flambyants)",
-        "horaires": "Mardi / jeudi / samedi de 20H à 7H"
+        "secteur": "Capesterre Belle-Eau 1 (le Bourg, Geta, Brest, Cité des Sources, Doyon, Grand Bassin)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 11h"
       },
       {
-        "secteur": "Secteur 2 & 3 (Bananier, Trou aux chiens, Trou aux chats, Morne cinq jours, Haute Plaine, Monplaisir)",
-        "horaires": "Mardi / jeudi / samedi de 20H à 7H"
+        "secteur": "Capesterre Belle-Eau 2 & 3 (Bananier, Trou aux Chiens, Trou aux Chats, Morne Cinq Jours, Haute Plaine, Monplaisir, Moulin à Eau, Routhiers, Fonds Cacao, Bord Bois, Cabet, Cacoville, Saint-Denis, Cacador, Petit Marquisat) — zone commune avec Les Saintes et Trois-Rivières",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
+      },
+      {
+        "secteur": "Capesterre Belle-Eau 4 (Ilet Pérou, Morne d'Or, Les Flamboyants, Sarlassone, Petit Pérou)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -96,8 +100,8 @@
     "commune": "TERRE-DE-HAUT (LES SAINTES)",
     "details": [
       {
-        "secteur": "Toute l'île",
-        "horaires": "Mardi / Jeudi / samedi de 20H à 7H"
+        "secteur": "Toute l'île — zone commune avec Capesterre Belle-Eau 2 & 3 et Trois-Rivières",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -105,8 +109,8 @@
     "commune": "TERRE-DE-BAS (LES SAINTES)",
     "details": [
       {
-        "secteur": "Toute l'île",
-        "horaires": "Mardi / Jeudi / samedi de 20H à 7H"
+        "secteur": "Toute l'île — zone commune avec Capesterre Belle-Eau 2 & 3 et Trois-Rivières",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -118,19 +122,15 @@
     "commune": "TROIS-RIVIÈRES",
     "details": [
       {
-        "secteur": "Secteurs (Bord de mer, Poterie, Robin)",
-        "horaires": "Mardi / Jeudi / samedi de 20H à 7H (Secteurs 2&3)"
+        "secteur": "Secteurs (Bord de mer, Poterie, Robin, Carbet, Lotissement Belmont) — zone commune avec Capesterre Belle-Eau 2 & 3 et Les Saintes",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       },
       {
-        "secteur": "Secteur 3 (La Regrettée, Lot. Desplan, Lot. Peduran, Lot. Tolbiac 1 et 2, Lovelace, La Violette et de Cardonnet, Les lotissements Dugommier, Coquille Dugommier, Grand-Fond)",
-        "horaires": "Tous les jours de 18h à 5h"
+        "secteur": "Secteur 5 (Bord de mer, Route de la Plage, Cocoyer, Grand-Anse)",
+        "horaires": "Mardi / jeudi / samedi de 18h à 8h"
       },
       {
-        "secteur": "Secteur 5 (Bord de mer, Route de la Plage, Cocoyer, Grande Anse)",
-        "horaires": "Mardi / Jeudi / Samedi de 18h à 8h"
-      },
-      {
-        "secteur": "Secteur 6 (Bellemont, Rue Général Lacroix, Bourg)",
+        "secteur": "Secteur 6 (Bellemont, Rue Général Lacroix, Aloua Touna, Résidence La Regrettée, Schoelcher, Bas Schoelcher, Louisville, Grand et Petit Carbet, Galbas, Savane, Grand-Fond, Violette, Cardonnet)",
         "horaires": "Tous les jours de 18h à 7h"
       }
     ]
@@ -139,7 +139,7 @@
     "commune": "GOURBEYRE",
     "details": [
       {
-        "secteur": "Tous secteurs (Vieux Chemin, Champ Fleury, Gillardin, Saint-Charles, Blanchet, Bisdary, Bas de Grand Camp)",
+        "secteur": "Tous secteurs (Vieux Chemin, Champ Fleury, Saint-Charles, Blanchet, Bisdary, Bas de Grand-Camp, Gillardin)",
         "horaires": "Lundi / mercredi / vendredi de 17h à 7h"
       }
     ]
@@ -148,8 +148,8 @@
     "commune": "SAINT-CLAUDE",
     "details": [
       {
-        "secteur": "Secteurs (Ducharmoy, La Batterie)",
-        "horaires": "Tous les jours de 20H à 6H"
+        "secteur": "Secteurs (Batterie, Ducharmoy)",
+        "horaires": "Tous les jours de 18h à 6h"
       }
     ]
   },
@@ -187,15 +187,34 @@
   },
   "97120": {
     "commune": "POINTE-À-PITRE",
-    "details": []
+    "details": [
+      {
+        "secteur": "Pointe-à-Pitre / Abymes (Massabielle, Chemin des Petites Abymes, Boulevard de l'Hôpital, Résidence Raphaël Cipolin, Lafont, Boissard, Résidence Vatable, Mortenol, Morne Jolivière, Morne Boissard, Monmartre, Grand Camp, Chauvel, Route Jean Ignace, Besson, Dugazon, Baimbridge, Anquetil, Lacroix, Résidence Alizéa, Route de la Piscine, Terrain Cayol, Voie Ferrée, Résidence Marguerite, Sonis, Morne la Loge, Morne Bernus, Bergevin, Lauricisque, Gabarre, Fonds Laugier)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
+      }
+    ]
   },
   "97116": {
     "commune": "MORNE-À-L'EAU",
-    "details": []
+    "details": [
+      {
+        "secteur": "Morne-à-l'Eau 1 (Monpierre, Lorger, Dessales, Lot. Les Hauts de Jabrun, Croustère, Gensolin, Brion, Lebraire, Citronniers, Dhartre, Espérance)",
+        "horaires": "Lundi / mercredi de 20h à 5h, vendredi de 20h à 9h"
+      },
+      {
+        "secteur": "Morne-à-l'Eau 2 (Jabrun Saint-Cyr, Morne Lolo, Labathe, Lot. Jabrun, Dubisquet, Lapalin)",
+        "horaires": "Mardi / jeudi de 20h à 5h"
+      }
+    ]
   },
   "97117": {
     "commune": "LE MOULE",
-    "details": []
+    "details": [
+      {
+        "secteur": "Tous secteurs (Gascon, Lamineur, Bori, Saint-Guillaume, Cocoyer, Bartel)",
+        "horaires": "Lundi / mercredi de 20h à 5h, vendredi de 20h à 9h"
+      }
+    ]
   },
   "97102": {
     "commune": "ANSE-BERTRAND",
@@ -203,7 +222,12 @@
   },
   "97122": {
     "commune": "PORT-LOUIS",
-    "details": []
+    "details": [
+      {
+        "secteur": "Tous secteurs (Belin, Barboteau, Brument, Bourg, Beauport, Lalanne, Paul Mado)",
+        "horaires": "Mardi / jeudi de 20h à 5h"
+      }
+    ]
   },
   "97119": {
     "commune": "PETIT-CANAL",
@@ -214,7 +238,7 @@
     "details": [
       {
         "secteur": "Ensemble de l'île",
-        "horaires": "Planning non spécifié dans ce document (mentionné en P1 mais non détaillé)",
+        "horaires": "Alimentation favorable maintenue durant la période des tours d'eau",
         "zones_alimentation_favorables": "Ensemble de l'île"
       }
     ]
