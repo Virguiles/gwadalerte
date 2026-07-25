@@ -129,7 +129,12 @@ export const WaterTooltip: React.FC<WaterTooltipProps> = ({
       <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 rounded-b-xl flex justify-between items-center text-[10px] text-gray-500">
          <div className="flex items-center gap-1.5">
             <CheckCircle className="w-3 h-3 text-green-500" />
-            <span>Données SMGEAG</span>
+            <span
+              className="cursor-help underline decoration-dotted"
+              title="SMGEAG - Syndicat Mixte de Gestion de l'Eau et de l'Assainissement de la Guadeloupe"
+            >
+              Données SMGEAG
+            </span>
          </div>
          <div className="flex items-center gap-1">
             <RefreshCw className="w-3 h-3" />

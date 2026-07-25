@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AirData } from '../components/GuadeloupeMap';
 
 const CACHE_KEY = 'gwada_air_quality_cache';
 const CACHE_TIMESTAMP_KEY = 'gwada_air_quality_cache_timestamp';
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
 export function useAirData() {
   const [data, setData] = useState<AirData>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const loadFromCache = (): { data: AirData; timestamp: number } | null => {
@@ -15,7 +17,7 @@ export function useAirData() {
       const cachedData = localStorage.getItem(CACHE_KEY);
       const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
 
-      if (cachedData && cachedTimestamp) {
+      if (cachedData && cachedData.trim() !== '' && cachedTimestamp) {
         return {
           data: JSON.parse(cachedData),
           timestamp: parseInt(cachedTimestamp, 10)
@@ -38,55 +40,49 @@ export function useAirData() {
     }
   };
 
-  const isSameDay = (date1: Date, date2: Date): boolean => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
-  };
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch('/api/air-quality');
+      if (!res.ok) throw new Error('Impossible de récupérer les données de qualité de l\'air');
+      const newData = await res.json();
+      setData(newData);
+      saveToCache(newData);
+    } catch (err) {
+      setError(err as Error);
+      console.error('Erreur lors du refresh air data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const retry = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     const checkAndFetch = async () => {
-      // 1. Tenter de charger le cache
+      // Load from cache first
       const cached = loadFromCache();
       if (cached) {
         setData(cached.data);
         setLastUpdate(new Date(cached.timestamp));
-        setLoading(false); // On affiche immédiatement les données du cache
-      }
+        setLoading(false);
 
-      // 2. Vérifier si on doit refresh
-      let shouldFetch = true;
-      if (cached) {
-        const lastUpdateDate = new Date(cached.timestamp);
-        const now = new Date();
-        const diffMinutes = (now.getTime() - lastUpdateDate.getTime()) / (1000 * 60);
-
-        if (isSameDay(lastUpdateDate, now) && diffMinutes < 5) { // Cache valide 5 minutes (synchronisé avec le serveur)
-          shouldFetch = false;
+        // Check if cache is still valid
+        const now = Date.now();
+        if (now - cached.timestamp < CACHE_DURATION_MS) {
+          return; // Cache is fresh, no need to fetch
         }
       }
 
-      if (shouldFetch) {
-        try {
-          // Utiliser les API Routes Next.js locales (plus besoin de NEXT_PUBLIC_API_URL)
-          const res = await fetch('/api/air-quality');
-          if (!res.ok) throw new Error('Erreur fetch air quality');
-          const newData = await res.json();
-          setData(newData);
-          saveToCache(newData);
-        } catch (error) {
-          console.error('Erreur lors du refresh air data:', error);
-          // Si on avait un cache, on garde les vieilles données, sinon tant pis
-        } finally {
-          setLoading(false);
-        }
-      }
+      // Fetch fresh data
+      await fetchData();
     };
 
     checkAndFetch();
-  }, []);
+  }, [fetchData]);
 
-  return { data, loading, lastUpdate };
+  return { data, loading, error, lastUpdate, retry };
 }

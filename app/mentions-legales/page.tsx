@@ -39,7 +39,7 @@ export default function MentionsLegales() {
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
               Le site <strong>Gwad&apos;Alerte</strong> est édité à titre personnel par <strong>Virgile</strong>, développeur web indépendant.
               <br />
-              Site web : <a href="https://virgile.site/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://virgile.site/</a>
+              Site web : <a href="https://virgile.site/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">https://virgile.site/</a>
               <br />
               <br />
               <strong>Contact :</strong> Pour toute question ou réclamation, veuillez utiliser l&apos;adresse e-mail suivante : [votre-email-de-contact]@exemple.com
@@ -53,7 +53,7 @@ export default function MentionsLegales() {
               <br />
               Adresse : 340 S Lemon Ave #4133 Walnut, CA 91789, USA.
               <br />
-              Site web : <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://vercel.com</a>
+              Site web : <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">https://vercel.com</a>
             </p>
           </section>
 <br />
@@ -85,10 +85,10 @@ export default function MentionsLegales() {
               Ce site agrège et affiche des données provenant des organismes suivants, qui en conservent la pleine propriété intellectuelle et la responsabilité de leur exactitude :
             </p>
             <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
-              <li><strong>Qualité de l&apos;Air :</strong> Données fournies par <a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Gwad&apos;Air</a> .</li>
-              <li><strong>Météo et Prévisions :</strong> Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Open Meteo</a> .</li>
-              <li><strong>Vigilance Météo :</strong> Données officielles fournies par <a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Météo-France</a>.</li>
-              <li><strong>Tours d&apos;eau :</strong> Planning fourni par la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">SMGEAG</a>.</li>
+              <li><strong>Qualité de l&apos;Air :</strong> Données fournies par <a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Gwad&apos;Air</a> .</li>
+              <li><strong>Météo et Prévisions :</strong> Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Open Meteo</a> .</li>
+              <li><strong>Vigilance Météo :</strong> Données officielles fournies par <a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Météo-France</a>.</li>
+              <li><strong>Tours d&apos;eau :</strong> Planning fourni par la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">SMGEAG</a>.</li>
             </ul>
           </section>
 <br />

@@ -67,9 +67,10 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
 
   return (
     <div className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-2 sm:mb-6 px-2 sm:px-4">
-      {/* Instructions simplifiées */}
+      {/* Instructions adaptées par taille d'écran */}
       <p className="text-left text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 px-2">
-        Choisir une commune dans la liste ou toucher la carte
+        <span className="hidden sm:inline">Choisir une commune dans la liste ou cliquer sur la carte</span>
+        <span className="sm:hidden">📱 Mode liste : Rechercher et sélectionner une commune facilement</span>
       </p>
 
       {/* Sélecteur principal */}

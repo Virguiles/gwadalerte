@@ -150,6 +150,11 @@ async function fetchVigilanceData(): Promise<VigilanceData> {
 
   // Lire et parser le JSON
   const vigilanceContent = await vigilanceFile.async('text');
+
+  if (!vigilanceContent || vigilanceContent.trim() === '') {
+    throw new Error('Le fichier de vigilance est vide');
+  }
+
   const vigilanceJson: MeteoFranceVigilanceData = JSON.parse(vigilanceContent);
 
   // Extraire les données pour la Guadeloupe (VIGI971)

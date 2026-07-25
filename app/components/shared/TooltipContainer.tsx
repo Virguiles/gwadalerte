@@ -53,12 +53,12 @@ export const TooltipContainer = forwardRef<HTMLDivElement, TooltipContainerProps
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const backgroundClass = transparent ? '' : 'bg-white/95 backdrop-blur-md';
+  const backgroundClass = transparent ? '' : 'bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-gray-200 dark:border-gray-700';
 
   return (
     <div
       ref={internalRef}
-      className={`fixed z-50 flex flex-col ${backgroundClass} rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border transition-all duration-200 pointer-events-auto ${className}`}
+      className={`fixed z-50 flex flex-col ${backgroundClass} rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border transition-all duration-200 pointer-events-auto ${className}`}
       style={{
         left: `${position.left}px`,
         top: `${position.top}px`,

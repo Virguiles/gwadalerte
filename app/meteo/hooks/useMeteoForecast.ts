@@ -49,7 +49,7 @@ export function useMeteoForecast(options: UseForecastOptions = {}): UseForecastR
       const cachedData = localStorage.getItem(getCacheKey());
       const cachedTimestamp = localStorage.getItem(getTimestampKey());
 
-      if (cachedData && cachedTimestamp) {
+      if (cachedData && cachedData.trim() !== '' && cachedTimestamp) {
         const timestamp = parseInt(cachedTimestamp, 10);
         const age = Date.now() - timestamp;
 
@@ -108,7 +108,19 @@ export function useMeteoForecast(options: UseForecastOptions = {}): UseForecastR
         throw new Error(`Erreur HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      // Vérifier que la réponse contient du contenu avant de parser
+      const responseText = await response.text();
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Réponse API vide');
+      }
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('[Forecast] Erreur parsing JSON:', parseError);
+        throw new Error('Réponse API invalide (JSON invalide)');
+      }
 
       if (codeZone) {
         setForecast(data as ForecastData);

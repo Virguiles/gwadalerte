@@ -91,7 +91,9 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
   const airGlobalStatus = airAlertCount > 0
     ? `${airAlertCount} commune${airAlertCount > 1 ? 's' : ''} en mauvaise qualité`
     : "Qualité globale bonne à moyenne";
-  const airColorClass = airAlertCount > 0 ? "text-orange-600 bg-orange-50" : "text-teal-600 bg-teal-50";
+  const airColorClass = airAlertCount > 0
+    ? "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30"
+    : "text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30";
 
   // --- Calcul Eau ---
   const today = new Date();
@@ -103,13 +105,15 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
   const waterStatus = waterCutsCount > 0
     ? `${waterCutsCount} commune${waterCutsCount > 1 ? 's' : ''} avec tours d'eau`
     : "Aucun tour d'eau signalé aujourd'hui";
-  const waterColorClass = waterCutsCount > 0 ? "text-blue-600 bg-blue-50" : "text-gray-600 bg-gray-50";
+  const waterColorClass = waterCutsCount > 0
+    ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30"
+    : "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl mx-auto mb-10">
       {/* Card Météo */}
       <div
-        className="bg-white rounded-xl p-6 shadow-md border flex items-center gap-4"
+        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors"
         style={{ borderColor: vigilanceBadgeBg }}
       >
         <div
@@ -119,7 +123,7 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
            <AlertTriangle className="w-6 h-6" style={{ color: vigilanceIconTextColor }} />
         </div>
         <div className="space-y-1.5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Vigilance Météo</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Vigilance Météo</p>
           <span
             className="inline-flex w-fit items-center px-2.5 py-1 text-xs font-semibold rounded-full border"
             style={{
@@ -131,32 +135,32 @@ export const GlobalOverview: React.FC<GlobalOverviewProps> = ({
             {vigilanceLabel}
           </span>
           {vigilance?.department_name && (
-            <p className="text-xs text-gray-500">{vigilance.department_name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{vigilance.department_name}</p>
           )}
         </div>
       </div>
 
       {/* Card Air */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 flex items-center gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors">
         <div className={`p-3 rounded-full ${airColorClass} shadow-sm`}>
            <Wind className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Qualité de l'Air</p>
-          <p className="text-lg font-bold text-gray-800">{airGlobalStatus}</p>
-          <p className="text-xs text-gray-500">Sur l'ensemble de l'archipel</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Qualité de l&apos;Air</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-white">{airGlobalStatus}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Sur l&apos;ensemble de l&apos;archipel</p>
         </div>
       </div>
 
       {/* Card Eau */}
-      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 flex items-center gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors">
         <div className={`p-3 rounded-full ${waterColorClass} shadow-sm`}>
            <Droplets className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Eau Potable</p>
-          <p className="text-lg font-bold text-gray-800">{waterStatus}</p>
-          <p className="text-xs text-gray-500">Coupures programmées ce jour</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Eau Potable</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-white">{waterStatus}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Coupures programmées ce jour</p>
         </div>
       </div>
     </div>

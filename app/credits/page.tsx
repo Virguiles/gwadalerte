@@ -41,10 +41,10 @@ export default function Credits() {
               Ce site agrège et affiche des données provenant des organismes suivants, qui en conservent la pleine propriété intellectuelle et la responsabilité de leur exactitude :
             </p>
             <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
-              <li><strong>Météo-France :</strong> Données officielles de vigilance météorologique et bulletins publics (<a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">meteofrance.fr</a> via leur API).</li>
-              <li><strong>Gwad&apos;Air :</strong> Indices de qualité de l&apos;air (ATMO) fournis par l&apos;association agréée de surveillance de la qualité de l&apos;air en Guadeloupe (<a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">gwadair.fr</a> via leur API).</li>
-              <li><strong>Open Meteo :</strong> Données météorologiques et prévisions complémentaires (<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">open-meteo.com</a>).</li>
-              <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">smgeag.fr</a>).</li>
+              <li><strong>Météo-France :</strong> Données officielles de vigilance météorologique et bulletins publics (<a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">meteofrance.fr</a> via leur API).</li>
+              <li><strong>Gwad&apos;Air :</strong> Indices de qualité de l&apos;air (ATMO) fournis par l&apos;association agréée de surveillance de la qualité de l&apos;air en Guadeloupe (<a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">gwadair.fr</a> via leur API).</li>
+              <li><strong>Open Meteo :</strong> Données météorologiques et prévisions complémentaires (<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">open-meteo.com</a>).</li>
+              <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">smgeag.fr</a>).</li>
             </ul>
           </section>
 <br />
@@ -54,8 +54,8 @@ export default function Credits() {
               Les ressources visuelles utilisées sur ce site proviennent des sources suivantes :
             </p>
             <ul className="list-disc ml-6 text-slate-600 dark:text-gray-300 leading-relaxed space-y-2">
-              <li><strong>Photographies :</strong> Les images d&apos;illustration proviennent de banques d&apos;images libres de droits : <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pexels</a> et <a href="https://unsplash.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash</a>.</li>
-              <li><strong>Icônes :</strong> Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lucide</a>.</li>
+              <li><strong>Photographies :</strong> Les images d&apos;illustration proviennent de banques d&apos;images libres de droits : <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Pexels</a> et <a href="https://unsplash.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Unsplash</a>.</li>
+              <li><strong>Icônes :</strong> Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Lucide</a>.</li>
             </ul>
           </section>
 <br />

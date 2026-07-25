@@ -39,8 +39,17 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
   defaultSelectedId,
   onSelectionChange
 }) => {
+  // Trier les items pour mettre le niveau actuel en premier
+  const sortedItems = React.useMemo(() => {
+    const currentItem = items.find(item => item.isCurrent);
+    if (currentItem) {
+      return [currentItem, ...items.filter(item => !item.isCurrent)];
+    }
+    return items;
+  }, [items]);
+
   const [selectedId, setSelectedId] = useState<string | number>(
-    defaultSelectedId ?? (items[0]?.id)
+    defaultSelectedId ?? (sortedItems[0]?.id)
   );
 
   // Update internal state if defaultSelectedId changes (useful for Cyclonic guide initialization)
@@ -57,7 +66,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
     }
   };
 
-  const selectedInfo = items.find(i => i.id === selectedId) || items[0];
+  const selectedInfo = sortedItems.find(i => i.id === selectedId) || sortedItems[0];
   if (!selectedInfo) return null;
 
   const Icon = selectedInfo.icon;
@@ -74,14 +83,103 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+      {/* Version Mobile : Accordion */}
+      <div className="lg:hidden space-y-3">
+        {sortedItems.map((info) => {
+          const isExpanded = selectedId === info.id;
+          const InfoIcon = info.icon;
+
+          return (
+            <div
+              key={info.id}
+              className="bg-white dark:bg-slate-800 rounded-2xl border-2 overflow-hidden transition-all duration-150"
+              style={{
+                borderColor: isExpanded ? info.color : 'transparent'
+              }}
+            >
+              {/* Accordion Header */}
+              <button
+                onClick={() => handleSelect(info.id)}
+                className="w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg shadow-sm flex items-center justify-center transition-transform duration-150"
+                    style={{ backgroundColor: `${info.color}20`, color: info.color }}
+                  >
+                    <InfoIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-base text-slate-900 dark:text-white block">
+                      {info.label}
+                    </span>
+                    {info.isCurrent && (
+                      <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                        Actuel
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <svg
+                  className={`w-5 h-5 text-slate-400 transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Accordion Content */}
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="border-t border-slate-100 dark:border-slate-700"
+                >
+                  <div className="p-4 space-y-4">
+                    {info.headerDescription && (
+                      <p className="text-base text-slate-600 dark:text-slate-400 font-medium">
+                        {info.headerDescription}
+                      </p>
+                    )}
+                    {info.sections.map((section, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
+                          <section.icon className={`w-4 h-4 ${section.iconColorClass || 'text-blue-500'}`} />
+                          {section.title}
+                        </h4>
+                        <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/50 text-sm">
+                          {typeof section.content === 'string' ? (
+                            <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                              {section.content}
+                            </p>
+                          ) : (
+                            section.content
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Version Desktop : Grid */}
+      <div className="hidden lg:grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
         {/* Left: List of Items */}
         <div className="lg:col-span-4 flex flex-col gap-3">
-          {items.map((info) => (
+          {sortedItems.map((info) => (
             <button
               key={info.id}
               onClick={() => handleSelect(info.id)}
-              className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+              className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-150 text-left ${
                 selectedId === info.id
                   ? 'bg-white dark:bg-slate-800 shadow-lg scale-[1.02] z-10'
                   : 'bg-white/50 dark:bg-slate-800/50 border-transparent hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm'
@@ -92,7 +190,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-10 h-10 rounded-lg shadow-sm transition-transform duration-300 flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-lg shadow-sm transition-transform duration-150 flex items-center justify-center ${
                     selectedId === info.id ? 'scale-110' : 'group-hover:scale-105'
                   }`}
                   style={{ backgroundColor: `${info.color}20`, color: info.color }}
@@ -115,8 +213,9 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
                     </span>
                   )}
                   {info.isCurrent && (
-                    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 block mt-0.5">
-                      Niveau actuel
+                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                      Actuel
                     </span>
                   )}
                 </div>
@@ -133,7 +232,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative min-h-[400px] flex flex-col"
             >
               {/* Decorative background element */}

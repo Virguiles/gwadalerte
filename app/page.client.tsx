@@ -102,7 +102,7 @@ function HomeClient({ initialAirData, initialLastUpdate }: { initialAirData: Air
       const cachedData = localStorage.getItem(CACHE_KEY);
       const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
 
-      if (cachedData && cachedTimestamp) {
+      if (cachedData && cachedData.trim() !== '' && cachedTimestamp) {
         const timestamp = parseInt(cachedTimestamp, 10);
         // Vérifier si le cache local est plus récent que les données serveur
         if (!initialLastUpdate || timestamp > initialLastUpdate) {

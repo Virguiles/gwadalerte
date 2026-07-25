@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import GuadeloupeMap, { HoverInfo } from './GuadeloupeMap';
 import { useWaterData } from '../hooks/useWaterData';
 import { useAirData } from '../hooks/useAirData';
@@ -9,8 +10,13 @@ import { getCommuneColors, hasCutsOnDay, formatCommuneName } from '../tours-deau
 import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '../meteo/constants';
 import { CommuneSelector } from './shared/CommuneSelector';
 import { CommuneTooltip } from './shared/CommuneTooltip';
+import { CommuneDetailsSkeleton } from './shared/SkeletonLoader';
+import { ErrorDisplay } from './shared/ErrorDisplay';
+import { DataFreshnessIndicator } from './shared/DataFreshnessIndicator';
+import { HelpButton } from './shared/HelpButton';
+import { OnboardingTour } from './shared/OnboardingTour';
 
-import { CloudSun, Droplet, DropletOff, Wind } from 'lucide-react';
+import { CloudSun, Droplet, DropletOff, Wind, X, ArrowRight, Database } from 'lucide-react';
 import {
   Tabs,
   TabsList,
@@ -23,29 +29,47 @@ const TABS: { id: TabType; label: string; getIcon: (isActive: boolean) => React.
   {
     id: 'meteo',
     label: 'Météo',
-    getIcon: (isActive) => <CloudSun size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'opacity-60'}`} />
+    getIcon: (isActive) => <CloudSun size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-blue-500 dark:text-blue-400' : 'opacity-60'}`} aria-hidden="true" />
   },
   {
     id: 'water',
     label: 'Eau',
-    getIcon: (isActive) => <Droplet size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-cyan-500 dark:text-cyan-400' : 'opacity-60'}`} />
+    getIcon: (isActive) => <Droplet size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-cyan-500 dark:text-cyan-400' : 'opacity-60'}`} aria-hidden="true" />
   },
   {
     id: 'air',
     label: 'Air',
-    getIcon: (isActive) => <Wind size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'opacity-60'}`} />
+    getIcon: (isActive) => <Wind size={16} className={`-ms-0.5 me-1.5 ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'opacity-60'}`} aria-hidden="true" />
   },
 ];
 
 export default function HomeDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('meteo');
   const [selectedCommune, setSelectedCommune] = useState<string | null>(null);
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    return false;
+  });
 
   // Chargement des données
-  const { data: waterData, loading: waterLoading } = useWaterData();
-  const { data: airData, loading: airLoading } = useAirData();
+  const { data: waterData, loading: waterLoading, error: waterError, lastUpdate: waterLastUpdate, retry: retryWater } = useWaterData();
+  const { data: airData, loading: airLoading, error: airError, lastUpdate: airLastUpdate, retry: retryAir } = useAirData();
   const { weatherData, vigilanceData, loading: meteoLoading, mounted: meteoMounted } = useMeteoData();
+
+  // Detect prefers-reduced-motion changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   // --- Logique de couleur de la carte ---
   const getFillColor = (communeId: string): string => {
@@ -122,26 +146,42 @@ export default function HomeDashboard() {
       return (
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-              <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
-              Vue d&apos;ensemble
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <span className="w-2 h-6 bg-blue-500 rounded-full" aria-hidden="true"></span>
+                Vue d&apos;ensemble
+              </h2>
+              <HelpButton
+                title="À propos de ce dashboard"
+                content="Cette vue vous donne un aperçu rapide de la situation en Guadeloupe : vigilance météo, coupures d'eau et qualité de l'air. Cliquez sur un widget pour explorer les détails."
+              />
+            </div>
 
             <div className="grid grid-cols-1 gap-4">
               {/* Météo Widget */}
               <div
                 onClick={() => setActiveTab('meteo')}
-                className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-blue-200 dark:hover:border-blue-700 transition-all cursor-pointer"
+                className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 ${
+                  prefersReducedMotion ? '' : 'hover:scale-[1.02] transition-all duration-300'
+                }`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('meteo'); }}}
+                aria-label="Voir les détails de la vigilance météo"
               >
-                <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <div className={`absolute top-2 right-2 opacity-5 ${prefersReducedMotion ? '' : 'group-hover:opacity-10 transition-opacity'}`} aria-hidden="true">
                   <CloudSun className="w-10 h-10" />
                 </div>
                 <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <CloudSun className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                  <CloudSun className="w-4 h-4 text-blue-500 dark:text-blue-400" aria-hidden="true" />
                   Vigilance Météo
                 </h3>
                 {!meteoMounted || meteoLoading ? (
-                  <div className="h-8 w-24 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="space-y-3">
+                    <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                    <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </div>
                 ) : (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
@@ -152,6 +192,8 @@ export default function HomeDashboard() {
                           color: vigilanceData?.color || '#3b82f6',
                           borderColor: vigilanceData?.color || '#3b82f6'
                         }}
+                        role="status"
+                        aria-label={`Niveau de vigilance: ${vigilanceData?.label || 'Normal'}`}
                       >
                         {vigilanceData?.label || 'Normal'}
                       </span>
@@ -217,23 +259,58 @@ export default function HomeDashboard() {
                     )}
                   </div>
                 )}
+
+                {/* Indicateur de cliquabilité */}
+                <div className={`mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-blue-600 dark:text-blue-400 font-medium text-sm opacity-0 ${prefersReducedMotion ? 'group-hover:opacity-100' : 'group-hover:opacity-100 transition-opacity duration-300'}`} aria-hidden="true">
+                  <span>Voir détails</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Eau Widget */}
-                <div
-                  onClick={() => setActiveTab('water')}
-                  className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-cyan-200 dark:hover:border-cyan-700 transition-all cursor-pointer"
-                >
-                  <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                {waterError ? (
+                  <div className="col-span-2">
+                    <ErrorDisplay
+                      variant="inline"
+                      title="Erreur tours d'eau"
+                      message={waterError.message}
+                      onRetry={retryWater}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => setActiveTab('water')}
+                    className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:border-cyan-300 dark:hover:border-cyan-600 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-cyan-500 focus-within:ring-offset-2 ${
+                      prefersReducedMotion ? '' : 'hover:scale-[1.02] transition-all duration-300'
+                    }`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('water'); }}}
+                    aria-label="Voir les détails des tours d'eau"
+                  >
+                  <div className={`absolute top-2 right-2 opacity-5 ${prefersReducedMotion ? '' : 'group-hover:opacity-10 transition-opacity'}`} aria-hidden="true">
                     <DropletOff className="w-10 h-10" />
                   </div>
                   <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <DropletOff className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-                    Tours d&apos;eau
+                    <DropletOff className="w-4 h-4 text-cyan-500 dark:text-cyan-400" aria-hidden="true" />
+                    <div className="flex flex-col">
+                      <span>Tours d&apos;eau</span>
+                      <span className="text-[10px] font-normal text-gray-400 dark:text-gray-500 normal-case tracking-normal">
+                        Coupures d&apos;eau planifiées
+                      </span>
+                    </div>
                   </h3>
                   {waterLoading ? (
-                    <div className="h-8 w-16 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ) : Object.keys(waterData).length === 0 ? (
+                    <div className="text-center py-2">
+                      <Database className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Aucune donnée</p>
+                    </div>
                   ) : (
                     <div>
                       {(() => {
@@ -247,12 +324,15 @@ export default function HomeDashboard() {
 
                         return (
                           <>
-                            <div className={`text-2xl font-bold mb-1 ${count > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                            <div className={`text-2xl font-bold mb-1 ${count > 0 ? 'text-red-500' : 'text-emerald-500'}`} role="status" aria-label={`${count} communes avec coupures d'eau`}>
                               {count > 0 ? count : 'OK'}
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight mb-2">
                               {count > 0 ? 'communes touchées' : 'Réseau stable'}
                             </p>
+                            {waterLastUpdate && (
+                              <DataFreshnessIndicator lastUpdated={waterLastUpdate} className="mb-2" />
+                            )}
                             {count > 0 && (
                               <div>
                                 <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
@@ -267,22 +347,53 @@ export default function HomeDashboard() {
                       })()}
                     </div>
                   )}
-                </div>
 
-                {/* Air Widget */}
+                  {/* Indicateur de cliquabilité */}
+                  <div className={`mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-cyan-600 dark:text-cyan-400 font-medium text-xs opacity-0 ${prefersReducedMotion ? 'group-hover:opacity-100' : 'group-hover:opacity-100 transition-opacity duration-300'}`} aria-hidden="true">
+                    <span>Voir le planning</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              )}
+
+              {/* Air Widget */}
+              {airError ? (
+                <div className="col-span-2">
+                  <ErrorDisplay
+                    variant="inline"
+                    title="Erreur qualité de l'air"
+                    message={airError.message}
+                    onRetry={retryAir}
+                  />
+                </div>
+              ) : (
                 <div
-                  onClick={() => setActiveTab('air')}
-                  className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-700 transition-all cursor-pointer"
+                  onClick={() => router.push('/qualite-air#polluants')}
+                  className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:border-emerald-300 dark:hover:border-emerald-600 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-emerald-500 focus-within:ring-offset-2 ${
+                    prefersReducedMotion ? '' : 'hover:scale-[1.02] transition-all duration-300'
+                  }`}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push('/qualite-air#polluants'); }}}
+                  aria-label="Voir les détails de la qualité de l'air et les polluants"
                 >
-                  <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <div className={`absolute top-2 right-2 opacity-5 ${prefersReducedMotion ? '' : 'group-hover:opacity-10 transition-opacity'}`} aria-hidden="true">
                     <Wind className="w-10 h-10" />
                   </div>
                   <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Wind className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                    <Wind className="w-4 h-4 text-emerald-500 dark:text-emerald-400" aria-hidden="true" />
                     Qualité de l&apos;Air
                   </h3>
                   {airLoading ? (
-                    <div className="h-8 w-24 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ) : Object.keys(airData).length === 0 ? (
+                    <div className="text-center py-2">
+                      <Database className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Aucune donnée</p>
+                    </div>
                   ) : (
                     <div>
                       {(() => {
@@ -330,17 +441,28 @@ export default function HomeDashboard() {
 
                         return (
                           <>
-                            <div className="flex items-center gap-2 mb-3">
-                              <span
-                                className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
-                                style={{
-                                  backgroundColor: highlightColor,
-                                  color: globalColor,
-                                  borderColor: globalColor
-                                }}
-                              >
-                                {globalQuality}
-                              </span>
+                            <div className="flex flex-col gap-1.5 mb-3">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                                  style={{
+                                    backgroundColor: highlightColor,
+                                    color: globalColor,
+                                    borderColor: globalColor
+                                  }}
+                                  title="Indice ATMO"
+                                  role="status"
+                                  aria-label={`Qualité de l'air: ${globalQuality}`}
+                                >
+                                  {globalQuality}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                                Échelle ATMO : 1=Bon → 6=Critique
+                              </p>
+                              {airLastUpdate && (
+                                <DataFreshnessIndicator lastUpdated={airLastUpdate} />
+                              )}
                             </div>
 
                             {count > 0 ? (
@@ -371,11 +493,18 @@ export default function HomeDashboard() {
                       })()}
                     </div>
                   )}
+
+                  {/* Indicateur de cliquabilité */}
+                  <div className={`mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-medium text-xs opacity-0 ${prefersReducedMotion ? 'group-hover:opacity-100' : 'group-hover:opacity-100 transition-opacity duration-300'}`} aria-hidden="true">
+                    <span>Voir les polluants</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
+      </div>
       );
     }
 
@@ -388,29 +517,50 @@ export default function HomeDashboard() {
       weatherData[communeCode]?.lib_zone ||
       communeCode; // Fallback
 
+    // Si toutes les données sont en chargement
+    if (waterLoading && airLoading && meteoLoading) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-full overflow-y-auto">
+          <CommuneDetailsSkeleton />
+        </div>
+      );
+    }
+
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{communeName}</h2>
           <button
             onClick={() => setSelectedCommune(null)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+            className={`p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
+              prefersReducedMotion ? '' : 'transition-all duration-200 hover:scale-110'
+            }`}
+            aria-label={`Fermer les détails de ${communeName}`}
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="space-y-6">
           {/* Section Météo Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-100 dark:border-blue-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3 gap-2">
-              <CloudSun className="w-6 h-6" /> Météo
-              {!meteoLoading && weatherData[communeCode] && (
-                <span className="text-4xl font-bold ml-auto">{weatherData[communeCode].temperature}°</span>
-              )}
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center text-lg font-semibold text-blue-900 dark:text-blue-300 gap-2">
+                <CloudSun className="w-6 h-6" aria-hidden="true" /> Météo
+                {!meteoLoading && weatherData[communeCode] && (
+                  <span className="text-4xl font-bold ml-4" aria-label={`Température: ${weatherData[communeCode].temperature} degrés`}>{weatherData[communeCode].temperature}°</span>
+                )}
+              </h3>
+              <HelpButton
+                title="Données météo"
+                content="Température actuelle, conditions météorologiques, humidité et vitesse du vent pour cette commune."
+              />
+            </div>
             {meteoLoading ? (
-              <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
+              <div className="space-y-3">
+                <div className="h-4 w-full bg-blue-200 dark:bg-blue-800 rounded animate-pulse"></div>
+                <div className="h-4 w-3/4 bg-blue-200 dark:bg-blue-800 rounded animate-pulse"></div>
+              </div>
             ) : weatherData[communeCode] ? (
               <div className="text-gray-700 dark:text-gray-300">
                 <p className="capitalize mb-2">{weatherData[communeCode].weather_description}</p>
@@ -430,11 +580,32 @@ export default function HomeDashboard() {
 
           {/* Section Eau Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 border border-cyan-100 dark:border-cyan-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-cyan-900 dark:text-cyan-300 mb-3 gap-2">
-              <DropletOff className="w-6 h-6" /> Tours d&apos;eau
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center text-lg font-semibold text-cyan-900 dark:text-cyan-300 gap-2">
+                <DropletOff className="w-6 h-6" aria-hidden="true" />
+                <div className="flex flex-col">
+                  <span>Tours d&apos;eau</span>
+                  <span className="text-xs font-normal text-cyan-700 dark:text-cyan-400 normal-case">
+                    Coupures d&apos;eau planifiées
+                  </span>
+                </div>
+              </h3>
+              <HelpButton
+                title="Tours d'eau"
+                content="Les tours d'eau sont des coupures d'eau planifiées pour permettre la maintenance du réseau de distribution."
+              />
+            </div>
             {waterLoading ? (
-              <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
+              <div className="space-y-3">
+                <div className="h-12 w-full bg-cyan-200 dark:bg-cyan-800 rounded-lg animate-pulse"></div>
+                <div className="h-4 w-full bg-cyan-200 dark:bg-cyan-800 rounded animate-pulse"></div>
+              </div>
+            ) : waterError ? (
+              <ErrorDisplay
+                variant="inline"
+                message={waterError.message}
+                onRetry={retryWater}
+              />
             ) : waterData[communeCode] ? (
               <div>
                 {hasCutsOnDay(waterData[communeCode], new Date()) ? (
@@ -465,11 +636,26 @@ export default function HomeDashboard() {
 
           {/* Section Air Locale */}
           <div className={`p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-100 dark:border-green-800`}>
-            <h3 className="flex items-center text-lg font-semibold text-green-900 dark:text-green-300 mb-3 gap-2">
-              <Wind className="w-6 h-6" /> Qualité de l&apos;Air
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center text-lg font-semibold text-green-900 dark:text-green-300 gap-2">
+                <Wind className="w-6 h-6" aria-hidden="true" /> Qualité de l&apos;Air
+              </h3>
+              <HelpButton
+                title="Qualité de l'air"
+                content="L'indice ATMO mesure la qualité de l'air sur une échelle de 1 (Bon) à 6 (Extrêmement mauvais). Il prend en compte plusieurs polluants."
+              />
+            </div>
             {airLoading ? (
-              <p className="text-gray-700 dark:text-gray-300">Chargement...</p>
+              <div className="space-y-2">
+                <div className="h-8 w-24 bg-green-200 dark:bg-green-800 rounded-full animate-pulse"></div>
+                <div className="h-3 w-full bg-green-200 dark:bg-green-800 rounded animate-pulse"></div>
+              </div>
+            ) : airError ? (
+              <ErrorDisplay
+                variant="inline"
+                message={airError.message}
+                onRetry={retryAir}
+              />
             ) : airData[communeCode] ? (
               <div>
                 {(() => {
@@ -487,17 +673,23 @@ export default function HomeDashboard() {
                   const highlightColor = hexToRgba(airColor, 0.15);
 
                   return (
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
-                        style={{
-                          backgroundColor: highlightColor,
-                          color: airColor,
-                          borderColor: airColor
-                        }}
-                      >
-                        {airQuality}
-                      </span>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="px-3 py-1.5 rounded-full text-sm font-bold border transition-colors"
+                          style={{
+                            backgroundColor: highlightColor,
+                            color: airColor,
+                            borderColor: airColor
+                          }}
+                          title="Indice ATMO"
+                        >
+                          {airQuality}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">
+                        Échelle ATMO : 1=Bon → 6=Critique
+                      </p>
                     </div>
                   );
                 })()}
@@ -512,10 +704,14 @@ export default function HomeDashboard() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[600px] gap-6 p-4 max-w-7xl mx-auto">
+    <>
+      {/* Onboarding Tour */}
+      <OnboardingTour />
 
-      {/* Colonne Gauche : Carte + Tabs Navigation */}
-      <div className="lg:w-2/3 flex flex-col gap-4">
+      <div className="flex flex-col lg:flex-row min-h-[600px] gap-4 sm:gap-6 p-2 xs:p-3 sm:p-4 max-w-7xl mx-auto">
+
+        {/* Colonne Gauche : Carte + Tabs Navigation */}
+        <div className="lg:w-2/3 flex flex-col gap-4">
 
         {/* Selecteur de commune */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700">
@@ -528,33 +724,71 @@ export default function HomeDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as TabType)} className="w-full gap-0">
-          <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0">
+          <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0" role="tablist" aria-label="Catégories de données">
             {TABS.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
+                className={`flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                  prefersReducedMotion ? '' : 'transition-colors'
+                }`}
+                title={tab.label}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`${tab.id}-panel`}
               >
                 {tab.getIcon(activeTab === tab.id)}
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
           {/* Carte Container */}
-          <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden">
+          <div
+            className="relative min-h-[50vh] md:min-h-[60vh] lg:min-h-[65vh] max-h-[80vh] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden"
+            role="tabpanel"
+            id={`${activeTab}-panel`}
+            aria-labelledby={`${activeTab}-tab`}
+          >
 
-            {/* Légende flottante en fonction du tab */}
-            <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
-              <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+            {/* Légende flottante dynamique */}
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-2 sm:p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[240px] sm:max-w-[280px]" role="complementary" aria-label="Légende de la carte">
+              <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                 {activeTab === 'meteo' ? 'Vigilance Météo' :
-                  activeTab === 'water' ? 'Tours d\'eau' : 'Qualité de l\'air'}
+                  activeTab === 'water' ? 'Coupures d\'eau' : 'Qualité de l\'air'}
               </h4>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {activeTab === 'meteo' ? (!meteoMounted || meteoLoading ? 'Chargement...' : (vigilanceData?.label || 'Chargement...')) :
-                  activeTab === 'water' ? 'Zones coupées en couleur' :
-                    'Indice ATMO'}
+
+              {/* État actuel */}
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
+                {activeTab === 'meteo'
+                  ? (!meteoMounted || meteoLoading ? 'Chargement...' : (vigilanceData?.label ?? 'Chargement...'))
+                  : activeTab === 'water'
+                    ? 'Zones touchées'
+                    : 'Indice ATMO'}
               </p>
+
+              {/* Mini légende avec couleurs (uniquement pour l'onglet Eau) */}
+              {activeTab === 'water' && (
+                <div className="space-y-1.5 mb-2">
+
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <div className="w-3 h-3 rounded-sm bg-gray-300 dark:bg-gray-600"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Gris = Pas de coupure</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Message d'aide contextuel (commune sélectionnée uniquement) */}
+              {selectedCommune && (
+                <div className={`text-xs leading-relaxed pt-2 ${activeTab === 'water' ? 'border-t border-blue-200 dark:border-blue-600' : ''}`}>
+                  <p className="text-blue-600 dark:text-blue-400 hidden lg:block">
+                    ✓ Commune sélectionnée · Cliquez ailleurs pour désélectionner
+                  </p>
+                  <p className="text-blue-600 dark:text-blue-400 lg:hidden">
+                    ✓ Commune sélectionnée · Touchez ailleurs pour désélectionner
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="p-4">
@@ -575,11 +809,12 @@ export default function HomeDashboard() {
         <CommuneTooltip hoveredInfo={hoveredInfo} />
       </div>
 
-      {/* Colonne Droite : Info Panel (Sticky sur Desktop) */}
-      <div ref={infoPanelRef} className="lg:w-1/3 lg:h-[800px] lg:sticky lg:top-4">
-        {renderInfoPanelContent()}
-      </div>
+        {/* Colonne Droite : Info Panel (Sticky sur Desktop) */}
+        <div ref={infoPanelRef} className="lg:w-1/3 lg:h-[800px] lg:sticky lg:top-4" role="region" aria-label="Informations détaillées">
+          {renderInfoPanelContent()}
+        </div>
 
-    </div>
+      </div>
+    </>
   );
 }

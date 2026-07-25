@@ -1,6 +1,6 @@
 'use client'; // Indispensable pour utiliser les hooks
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import GuadeloupeMap, { HoverInfo } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { CommuneTooltip } from '../components/shared/CommuneTooltip';
@@ -54,6 +54,17 @@ export default function QualiteAirClient() {
     return null;
   }, [selectedCommune, airData]);
 
+  // Scroll vers la section polluants si hash #polluants (ex: depuis le widget air de l'accueil)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash !== '#polluants') return;
+    const el = document.getElementById('polluants');
+    if (!el) return;
+    const timer = setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50 dark:from-slate-950 dark:via-teal-950 dark:to-emerald-950 transition-colors duration-300">
@@ -143,7 +154,9 @@ export default function QualiteAirClient() {
         <AirQualityGuide airData={airData} selectedCommune={selectedCommune} />
 
         {/* --- NOUVELLE SECTION: Guide des polluants (Interactive) --- */}
-        <PollutantsGuide />
+        <section id="polluants" aria-label="Guide des polluants">
+          <PollutantsGuide />
+        </section>
 
       </div>
     </main>

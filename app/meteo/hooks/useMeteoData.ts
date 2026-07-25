@@ -23,7 +23,9 @@ export function useMeteoData() {
       const cachedWeatherTimestamp = localStorage.getItem(WEATHER_CACHE_TIMESTAMP_KEY);
       const cachedVigilanceTimestamp = localStorage.getItem(VIGILANCE_CACHE_TIMESTAMP_KEY);
 
-      if (cachedWeather && cachedVigilance && cachedWeatherTimestamp && cachedVigilanceTimestamp) {
+      if (cachedWeather && cachedWeather.trim() !== '' &&
+          cachedVigilance && cachedVigilance.trim() !== '' &&
+          cachedWeatherTimestamp && cachedVigilanceTimestamp) {
         return {
           weatherData: JSON.parse(cachedWeather),
           vigilanceData: JSON.parse(cachedVigilance),
@@ -97,6 +99,10 @@ export function useMeteoData() {
         }
 
         try {
+          if (!cachedVigilance || cachedVigilance.trim() === '') {
+            console.log('[Vigilance Cache] Données vigilance vides, chargement...');
+            return true;
+          }
           const parsedVigilance = JSON.parse(cachedVigilance);
           if (!parsedVigilance || !parsedVigilance.department) {
             console.log('[Vigilance Cache] Données vigilance vides, chargement...');
@@ -176,6 +182,10 @@ export function useMeteoData() {
         }
 
         try {
+          if (!cachedWeather || cachedWeather.trim() === '') {
+            console.log('[Weather Cache] Données météo vides, chargement...');
+            return true;
+          }
           const parsedWeather = JSON.parse(cachedWeather);
           if (!parsedWeather || Object.keys(parsedWeather).length === 0) {
             console.log('[Weather Cache] Données météo vides, chargement...');
@@ -211,6 +221,9 @@ export function useMeteoData() {
         }
 
         try {
+          if (!cachedVigilance || cachedVigilance.trim() === '') {
+            return true;
+          }
           const parsedVigilance = JSON.parse(cachedVigilance);
           if (!parsedVigilance || !parsedVigilance.department) {
             return true;

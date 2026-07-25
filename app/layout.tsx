@@ -45,7 +45,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          {children}
+          <main id="main-content">
+            {children}
+          </main>
           <Footer />
         </ThemeProvider>
         {process.env.NEXT_PUBLIC_GA_ID && (

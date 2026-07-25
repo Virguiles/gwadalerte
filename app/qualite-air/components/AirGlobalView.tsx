@@ -27,19 +27,33 @@ export const AirGlobalView: React.FC<AirGlobalViewProps> = ({ lastUpdate, format
         <div className="p-4 bg-teal-50 dark:bg-teal-900/30 rounded-xl border border-teal-100 dark:border-teal-800">
            <h3 className="font-semibold text-teal-900 dark:text-teal-300 mb-2 text-lg">Synthèse Régionale</h3>
            <p className="text-slate-700 dark:text-gray-300 leading-relaxed text-sm">
-              La qualité de l&apos;air est surveillée en permanence sur l&apos;ensemble de l&apos;archipel par les stations de mesure de Gwad&apos;Air.
+              La qualité de l&apos;air est surveillée en permanence sur l&apos;ensemble de l&apos;archipel par les stations de mesure de{' '}
+              <span
+                className="font-medium underline decoration-dotted cursor-help"
+                title="Gwad'Air - Association Agréée de Surveillance de la Qualité de l'Air en Guadeloupe"
+              >
+                Gwad&apos;Air
+              </span>.
            </p>
         </div>
 
         <div>
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-3">Échelle ATMO</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-slate-800 dark:text-white">Échelle ATMO</h3>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium px-2 py-1 bg-slate-100 dark:bg-gray-700 rounded" title="Indice ATMO - Air et Transport, Mesure de l'Ozone">
+              1=Bon → 6=Critique
+            </span>
+          </div>
           <div className="space-y-2">
-              {qualityLevels.map((level) => (
+              {qualityLevels.map((level, index) => (
               <div key={level.label} className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
                   <div
-                  className="w-8 h-8 rounded-lg border-2 flex-shrink-0 shadow-sm"
+                  className="w-8 h-8 rounded-lg border-2 flex-shrink-0 shadow-sm flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-200"
                   style={{ backgroundColor: level.color, borderColor: level.color + '80' }}
-                  ></div>
+                  title={`Niveau ${index + 1}`}
+                  >
+                    {index + 1}
+                  </div>
                   <span className="text-sm font-medium text-slate-700 dark:text-gray-300">{level.label}</span>
               </div>
               ))}
@@ -54,7 +68,10 @@ export const AirGlobalView: React.FC<AirGlobalViewProps> = ({ lastUpdate, format
             </div>
           )}
           <div className="flex justify-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-700 text-xs font-medium text-slate-600 dark:text-gray-300">
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-gray-700 text-xs font-medium text-slate-600 dark:text-gray-300 cursor-help"
+                title="Gwad'Air - Association Agréée de Surveillance de la Qualité de l'Air en Guadeloupe"
+              >
                   Source: Gwad&apos;Air
               </span>
           </div>

@@ -139,7 +139,12 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-600 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 shrink-0">
             <div className="flex items-center gap-2">
                  <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                 <span>Données SMGEAG</span>
+                 <span
+                   className="cursor-help underline decoration-dotted"
+                   title="SMGEAG - Syndicat Mixte de Gestion de l'Eau et de l'Assainissement de la Guadeloupe"
+                 >
+                   Données SMGEAG
+                 </span>
             </div>
             <div className="flex items-center gap-1.5 font-medium">
                 <RefreshCw className="w-3 h-3" />

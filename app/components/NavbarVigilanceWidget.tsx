@@ -40,3 +40,37 @@ export const NavbarVigilanceWidget = () => {
     </Link>
   );
 };
+
+// Version compacte pour mobile - Pastille de vigilance
+export const VigilanceBadge = () => {
+  const { vigilanceData, mounted } = useMeteoData();
+
+  const currentVigilanceInfo = useMemo(
+    () => getVigilanceLevelInfo(vigilanceData?.level),
+    [vigilanceData?.level]
+  );
+
+  if (!mounted) return null;
+
+  // Ne pas afficher si niveau vert (pas d'alerte)
+  if (vigilanceData?.level === 1) return null;
+
+  return (
+    <Link
+      href="/meteo"
+      className="md:hidden flex items-center justify-center"
+      title={`Vigilance: ${currentVigilanceInfo.label}`}
+      aria-label={`Vigilance météo: ${currentVigilanceInfo.label}`}
+    >
+      <div className="relative">
+        <div
+          className="w-3 h-3 rounded-full animate-pulse"
+          style={{
+            backgroundColor: currentVigilanceInfo.color,
+            boxShadow: `0 0 6px ${currentVigilanceInfo.color}`,
+          }}
+        />
+      </div>
+    </Link>
+  );
+};
