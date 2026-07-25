@@ -81,6 +81,7 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
             id="commune-select"
             value={selectedCommune}
             onChange={(event) => onSelectCommune(event.target.value)}
+            aria-label="Choisir une commune"
             className="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-3 sm:py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-white font-medium transition-all duration-200 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md appearance-none text-sm sm:text-base"
           >
             <option value="">-- Choisir une commune --</option>

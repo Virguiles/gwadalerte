@@ -101,6 +101,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
               <button
                 onClick={() => handleSelect(info.id)}
                 className="w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -179,6 +180,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
             <button
               key={info.id}
               onClick={() => handleSelect(info.id)}
+              aria-current={selectedId === info.id ? 'true' : undefined}
               className={`group relative w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-150 text-left ${
                 selectedId === info.id
                   ? 'bg-white dark:bg-slate-800 shadow-lg scale-[1.02] z-10'

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { CommuneTooltip } from '../components/shared/CommuneTooltip';
 // import { WaterTooltip, TooltipAnchor } from './components/WaterTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterTowersGuide } from './components/WaterTowersGuide';
-import { WaterDataMap, DateFilter } from './types';
+import { DateFilter } from './types';
 import { getCommuneColors, hasCutsOnDay, getTargetDate, formatCommuneName } from './utils';
+import { useWaterData } from '../hooks/useWaterData';
+import { ErrorDisplay } from '../components/shared/ErrorDisplay';
 import {
   Tabs,
   TabsList,
@@ -16,21 +18,10 @@ import {
 } from "@/components/ui/tabs";
 
 export default function ToursDeauClient() {
-  const [waterData, setWaterData] = useState<WaterDataMap>({});
+  const { data: waterData, loading, error, retry } = useWaterData();
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
   const [selectedCommune, setSelectedCommune] = useState<string>('');
-
-  // 1. Récupérer les données
-  useEffect(() => {
-    // Utiliser les API Routes Next.js locales
-    fetch('/api/water-cuts')
-      .then((res) => res.json())
-      .then((data) => {
-        setWaterData(data);
-      })
-      .catch(console.error);
-  }, []);
 
   // 2. Logique de couleur
   const getCommuneColor = useCallback((code_zone: string): string => {
@@ -186,7 +177,23 @@ export default function ToursDeauClient() {
 
         {/* Layout Principal : Carte + Sidebar */}
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
+          <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
+            {loading && (
+              <div role="status" aria-label="Chargement des données de tours d'eau" className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-3xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" aria-hidden="true"></div>
+              </div>
+            )}
+
+            {error && Object.keys(waterData).length === 0 && (
+              <div className="p-4 m-4">
+                <ErrorDisplay
+                  title="Impossible de charger les tours d'eau"
+                  message={error.message}
+                  onRetry={retry}
+                />
+              </div>
+            )}
+
             <div className="p-4">
               <section className="flex flex-col lg:flex-row gap-6 w-full items-start relative z-10">
                 {/* Colonne Gauche : Carte + Tabs Navigation */}

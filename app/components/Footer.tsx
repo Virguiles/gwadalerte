@@ -20,7 +20,9 @@ export default function Footer() {
 
           {/* Section 2: Liens Utiles */}
           <div className="space-y-4">
-
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-white">
+              Liens utiles
+            </h4>
             <ul className="flex flex-col gap-3 text-sm">
               <li>
                 <Link
@@ -53,7 +55,9 @@ export default function Footer() {
 
           {/* Section 3: Localisation */}
           <div className="space-y-4">
-
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-white">
+              Localisation
+            </h4>
             <div className="flex items-start gap-2 text-slate-600 dark:text-gray-400 text-sm">
               <MapPin className="w-4 h-4 mt-0.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <p className="leading-relaxed">

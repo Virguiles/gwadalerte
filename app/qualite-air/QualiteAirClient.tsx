@@ -96,13 +96,13 @@ export default function QualiteAirClient() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
             {loading && (
-              <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-3xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+              <div role="status" aria-label="Chargement des données de qualité de l'air" className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-3xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" aria-hidden="true"></div>
               </div>
             )}
 
             {!loading && Object.keys(airData).length === 0 && (
-              <div className="p-4 m-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center text-red-600 dark:text-red-400">
+              <div role="alert" className="p-4 m-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center text-red-600 dark:text-red-400">
                 <p className="font-medium">Impossible de charger les données de qualité de l&apos;air.</p>
                 <p className="text-sm mt-1 opacity-80">Veuillez vérifier votre connexion internet ou réessayer plus tard.</p>
               </div>

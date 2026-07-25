@@ -37,6 +37,7 @@ const ONBOARDING_KEY = 'gwadaSvg_onboardingCompleted';
 export const OnboardingTour: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const hasCompletedOnboarding = localStorage.getItem(ONBOARDING_KEY);
@@ -47,10 +48,21 @@ export const OnboardingTour: React.FC = () => {
     }
   }, []);
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
     setIsVisible(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isVisible, handleClose]);
 
   const handleNext = () => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {
@@ -95,6 +107,7 @@ export const OnboardingTour: React.FC = () => {
           {/* Header */}
           <div className="relative p-6 pb-4">
             <button
+              ref={closeButtonRef}
               onClick={handleClose}
               className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Fermer"

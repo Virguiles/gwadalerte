@@ -42,10 +42,10 @@ export default function MentionsLegales() {
               Site web : <a href="https://virgile.site/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">https://virgile.site/</a>
               <br />
               <br />
-              <strong>Contact :</strong> Pour toute question ou réclamation, veuillez utiliser l&apos;adresse e-mail suivante : [votre-email-de-contact]@exemple.com
+              <strong>Contact :</strong> Pour toute question ou réclamation, veuillez utiliser l&apos;adresse e-mail suivante : <a href="mailto:hello@virgilepopote.com" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">hello@virgilepopote.com</a>
             </p>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">2. Hébergement</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -56,7 +56,7 @@ export default function MentionsLegales() {
               Site web : <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">https://vercel.com</a>
             </p>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">3. Propriété intellectuelle</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -65,20 +65,20 @@ export default function MentionsLegales() {
               La reproduction de tout ou partie de ce site sur un support électronique quel qu&apos;il soit est formellement interdite sauf autorisation expresse du directeur de la publication.
             </p>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">4. Avertissement et Responsabilité</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
               <strong>Gwad&apos;Alerte est un tableau de bord citoyen non officiel.</strong>
               <br />
-              Les informations fournies (qualité de l&apos;air, météo, vigilance, tours d&apos;eau) sont agrégées à partir de sources externes et affichées à **titre informatif uniquement**. L&apos;éditeur ne peut garantir l&apos;exactitude, la complétude, la fiabilité ou l&apos;actualité des données.
+              Les informations fournies (qualité de l&apos;air, météo, vigilance, tours d&apos;eau) sont agrégées à partir de sources externes et affichées à <strong>titre informatif uniquement</strong>. L&apos;éditeur ne peut garantir l&apos;exactitude, la complétude, la fiabilité ou l&apos;actualité des données.
               <br /><br />
               <strong>En cas d&apos;alerte météorologique ou cyclonique (Vigilance), ou de risque sanitaire (Qualité de l&apos;Air), l&apos;utilisateur doit impérativement consulter les canaux de communication officiels des autorités compétentes.</strong>
               <br /><br />
               L&apos;éditeur de Gwad&apos;Alerte décline toute responsabilité quant aux décisions prises ou non prises par l&apos;utilisateur sur la base des informations consultées sur ce site.
             </p>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">5. Sources de Données Externes</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -91,7 +91,7 @@ export default function MentionsLegales() {
               <li><strong>Tours d&apos;eau :</strong> Planning fourni par la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">SMGEAG</a>.</li>
             </ul>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">6. Données Personnelles (RGPD) et Cookies</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">

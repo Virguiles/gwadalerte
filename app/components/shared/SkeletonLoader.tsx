@@ -19,7 +19,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className = '', variant = 't
 };
 
 export const WidgetSkeleton: React.FC = () => (
-  <div className="p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+  <div role="status" aria-busy="true" aria-label="Chargement des données" className="p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -41,7 +41,7 @@ export const WidgetSkeleton: React.FC = () => (
 );
 
 export const MapSkeleton: React.FC = () => (
-  <div className="relative w-full h-full min-h-[500px] bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
+  <div role="status" aria-busy="true" aria-label="Chargement de la carte interactive" className="relative w-full h-full min-h-[500px] bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
     <div className="absolute inset-0 flex items-center justify-center">
       <div className="text-center space-y-4">
         <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto animate-spin-slow flex items-center justify-center">
@@ -58,7 +58,7 @@ export const MapSkeleton: React.FC = () => (
 );
 
 export const CommuneDetailsSkeleton: React.FC = () => (
-  <div className="space-y-6">
+  <div role="status" aria-busy="true" aria-label="Chargement des détails de la commune" className="space-y-6">
     {/* Header */}
     <div className="flex justify-between items-center">
       <Skeleton className="h-8 w-48" />

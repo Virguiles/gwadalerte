@@ -84,6 +84,7 @@ export const HelpButton: React.FC<HelpButtonProps> = ({
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         onBlur={() => setTimeout(() => { setIsOpen(false); setCoords(null); }, 200)}
+        onKeyDown={(e) => { if (e.key === 'Escape') { setIsOpen(false); setCoords(null); } }}
         className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         aria-label={`Aide: ${title}`}
         aria-expanded={isOpen}

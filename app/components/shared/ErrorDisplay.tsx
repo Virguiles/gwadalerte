@@ -16,7 +16,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 }) => {
   if (variant === 'inline') {
     return (
-      <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+      <div role="alert" className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
         <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
         <div className="flex-1 space-y-2">
           <p className="text-sm font-medium text-red-900 dark:text-red-200">{title}</p>
@@ -36,7 +36,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+    <div role="alert" className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
       <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
         <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
       </div>

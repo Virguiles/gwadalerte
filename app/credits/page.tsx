@@ -47,7 +47,7 @@ export default function Credits() {
               <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">smgeag.fr</a>).</li>
             </ul>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">2. Ressources Graphiques</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -58,7 +58,7 @@ export default function Credits() {
               <li><strong>Icônes :</strong> Les icônes utilisées sur ce site proviennent de la librairie <a href="https://lucide.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300">Lucide</a>.</li>
             </ul>
           </section>
-<br />
+
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">3. Avertissement</h2>
             <p className="text-slate-600 dark:text-gray-300 leading-relaxed">

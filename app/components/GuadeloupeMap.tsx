@@ -380,6 +380,8 @@ const GuadeloupeMap = ({
         onTouchStart={handleSvgTouchStart}
         onTouchMove={handleSvgTouchMove}
         onTouchEnd={handleSvgTouchEnd}
+        role="img"
+        aria-label="Carte interactive des communes de Guadeloupe. Survolez ou touchez une commune pour ses données ; utilisez le sélecteur de commune pour une navigation au clavier."
       >
         <g id="g4">
           <polygon
