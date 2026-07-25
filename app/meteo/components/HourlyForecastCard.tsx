@@ -89,10 +89,13 @@ export function HourlyForecastCard({ hour }: HourlyForecastCardProps) {
           />
         )}
 
-        {/* Probabilité de précipitations */}
+        {/* Probabilité de précipitations.
+            Libellé et icône distincts de l'humidité : les deux s'affichent en
+            pourcentage et partageaient la même goutte, ce qui rendait ce
+            « Pluie 96 % » indistinguable d'un taux d'humidité. */}
         <MetricRow
-          icon={<Droplets className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />}
-          label="Pluie"
+          icon={<CloudRain className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500" />}
+          label="Risque pluie"
           value={`${hour.precipitation_probability}%`}
         />
 

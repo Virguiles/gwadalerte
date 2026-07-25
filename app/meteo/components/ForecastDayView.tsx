@@ -109,7 +109,9 @@ export function ForecastDayView({
       <div className="grid grid-cols-2 gap-3">
         <MetricCard
           icon={<CloudRain className="w-5 h-5 text-sky-400" />}
-          label="Pluie"
+          // « Pluie 96 % » se lisait comme une quantité, voire comme l'humidité,
+          // et contredisait un ciel annoncé dégagé : c'est une probabilité.
+          label="Risque de pluie"
           value={`${rainRisk}%`}
         />
         <MetricCard
