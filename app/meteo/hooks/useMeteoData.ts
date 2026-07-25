@@ -9,7 +9,16 @@ const WEATHER_CACHE_VALIDITY_MS = 45 * 60 * 1000; // 45 minutes (synchronisé av
 const VIGILANCE_CACHE_VALIDITY_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France optimisé)
 const VIGILANCE_REFRESH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes (vigilance Météo-France, réduit pour éviter surcharge)
 
-export function useMeteoData() {
+/**
+ * Source de vérité pour la météo et la vigilance.
+ *
+ * À n'instancier QU'UNE FOIS, dans le DataProvider : ce hook porte un
+ * intervalle de rafraîchissement et un cache localStorage, que plusieurs
+ * instances dupliqueraient (la Navbar, la carte et les guides le consommaient
+ * chacun de leur côté, provoquant autant d'appels réseau et de minuteurs).
+ * Les composants passent par `useMeteoData()` (contexte).
+ */
+export function useMeteoDataSource() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -366,3 +375,5 @@ export function useMeteoData() {
     mounted,
   };
 }
+
+export type MeteoDataValue = ReturnType<typeof useMeteoDataSource>;

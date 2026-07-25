@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
 export interface GuideSection {
@@ -133,15 +132,9 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
               </button>
 
               {/* Accordion Content */}
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="border-t border-slate-100 dark:border-slate-700"
-                >
-                  <div className="p-4 space-y-4">
+              <div className="collapsible" data-open={isExpanded} aria-hidden={!isExpanded}>
+                <div>
+                  <div className="border-t border-slate-100 dark:border-slate-700 p-4 space-y-4">
                     {info.headerDescription && (
                       <p className="text-base text-slate-600 dark:text-slate-400 font-medium">
                         {info.headerDescription}
@@ -165,8 +158,8 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
                       </div>
                     ))}
                   </div>
-                </motion.div>
-              )}
+                </div>
+              </div>
             </div>
           );
         })}
@@ -228,15 +221,12 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
 
         {/* Right: Card Details */}
         <div className="lg:col-span-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedId}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative min-h-[400px] flex flex-col"
-            >
+          {/* La clé force le remontage à chaque sélection, ce qui rejoue
+              l'animation d'entrée CSS (voir .animate-slide-in-right). */}
+          <div
+            key={selectedId}
+            className="animate-slide-in-right bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden relative min-h-[400px] flex flex-col"
+          >
               {/* Decorative background element */}
               <div
                 className="absolute top-0 right-0 w-64 h-64 opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"
@@ -292,8 +282,7 @@ export const InteractiveGuide: React.FC<InteractiveGuideProps> = ({
                   ))}
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>

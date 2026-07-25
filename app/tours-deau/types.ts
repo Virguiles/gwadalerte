@@ -14,9 +14,3 @@ export type WaterDataMap = {
 };
 
 export type DateFilter = 'today' | 'tomorrow' | 'week';
-
-export type CommuneColors = {
-  primary: string;
-  light: string;
-  border: string;
-};

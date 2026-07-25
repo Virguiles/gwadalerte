@@ -1,90 +1,49 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
 import { WaterDataMap } from '../tours-deau/types';
+import { useCachedResource } from './useCachedResource';
 
-const CACHE_KEY = 'gwada_water_cuts_cache';
-const CACHE_TIMESTAMP_KEY = 'gwada_water_cuts_cache_timestamp';
+const CACHE_KEY = 'gwada_water_cuts';
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+/** En-tête portant la date de relevé du planning SMGEAG */
+const SOURCE_DATE_HEADER = 'X-Data-Collected-At';
 
-export function useWaterData() {
-  const [data, setData] = useState<WaterDataMap>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+const EMPTY_WATER_DATA: WaterDataMap = {};
 
-  const loadFromCache = (): { data: WaterDataMap; timestamp: number } | null => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const cachedData = localStorage.getItem(CACHE_KEY);
-      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-
-      if (cachedData && cachedTimestamp) {
-        return {
-          data: JSON.parse(cachedData),
-          timestamp: parseInt(cachedTimestamp, 10)
-        };
-      }
-    } catch (error) {
-      console.error('Erreur lecture cache:', error);
-    }
-    return null;
-  };
-
-  const saveToCache = (data: WaterDataMap) => {
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-      const timestamp = Date.now();
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, timestamp.toString());
-      setLastUpdate(new Date(timestamp));
-    } catch (error) {
-      console.error('Erreur sauvegarde cache:', error);
-    }
-  };
-
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch('/api/water-cuts');
-      if (!res.ok) {
-        throw new Error('Impossible de récupérer les données des tours d\'eau');
-      }
-      const jsonData = await res.json();
-      setData(jsonData);
-      saveToCache(jsonData);
-    } catch (err) {
-      setError(err as Error);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const retry = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
-
-  useEffect(() => {
-    const checkAndFetch = async () => {
-      // Load from cache first
-      const cached = loadFromCache();
-      if (cached) {
-        setData(cached.data);
-        setLastUpdate(new Date(cached.timestamp));
-        setLoading(false);
-
-        // Check if cache is still valid
-        const now = Date.now();
-        if (now - cached.timestamp < CACHE_DURATION_MS) {
-          return; // Cache is fresh, no need to fetch
-        }
-      }
-
-      // Fetch fresh data
-      await fetchData();
-    };
-
-    checkAndFetch();
-  }, [fetchData]);
-
-  return { data, loading, error, lastUpdate, retry };
+/**
+ * Convertit une date calendaire « AAAA-MM-JJ » en Date locale.
+ * `new Date('2025-11-30')` serait interprété à minuit UTC, ce qui affiche
+ * la veille dans les fuseaux négatifs — dont celui de la Guadeloupe.
+ */
+function parseCalendarDate(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    const fallback = new Date(value);
+    return Number.isNaN(fallback.getTime()) ? null : fallback;
+  }
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 }
+
+/**
+ * Source de vérité pour les tours d'eau.
+ * À n'instancier que dans le DataProvider — les composants passent par
+ * `useWaterData()` (contexte).
+ */
+export function useWaterDataSource(enabled: boolean) {
+  const { data, loading, error, lastUpdate, meta, retry } = useCachedResource<WaterDataMap>({
+    url: '/api/water-cuts',
+    cacheKey: CACHE_KEY,
+    cacheDurationMs: CACHE_DURATION_MS,
+    initialData: EMPTY_WATER_DATA,
+    errorMessage: "Impossible de récupérer les données des tours d'eau",
+    enabled,
+    metaHeader: SOURCE_DATE_HEADER,
+  });
+
+  // Date de RELEVÉ du planning côté SMGEAG — à ne pas confondre avec
+  // `lastUpdate`, qui n'est que l'heure du dernier appel réseau.
+  const sourceDate = useMemo(() => (meta ? parseCalendarDate(meta) : null), [meta]);
+
+  return { data, loading, error, lastUpdate, sourceDate, retry };
+}
+
+export type WaterDataValue = ReturnType<typeof useWaterDataSource>;

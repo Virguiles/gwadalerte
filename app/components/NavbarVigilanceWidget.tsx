@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { useMeteoData } from '../meteo/hooks/useMeteoData';
+import { useMeteoData } from '../providers/DataProvider';
 import { getVigilanceLevelInfo } from '../meteo/utils';
 
 export const NavbarVigilanceWidget = () => {

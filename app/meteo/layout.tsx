@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: 'Carte interactive des vigilances et météo temps réel en Guadeloupe.',
     type: 'website',
     locale: 'fr_FR',
-    siteName: 'GwadaSVG Météo',
+    siteName: "Gwad'Alerte",
   },
 };
 

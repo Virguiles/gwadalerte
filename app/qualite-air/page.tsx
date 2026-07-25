@@ -15,20 +15,11 @@ export const metadata: Metadata = {
     siteName: "Gwad'Alerte",
     locale: "fr_FR",
     type: "website",
-    images: [
-      {
-        url: "/og-image-air.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Carte de qualité de l'air Guadeloupe",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Qualité Air Guadeloupe - ATMO & Polluants",
     description: "Indice ATMO et polluants en temps réel pour toutes les communes de Guadeloupe.",
-    images: ["/og-image-air.jpg"],
   },
   alternates: {
     canonical: "https://gwadalerte.com/qualite-air",

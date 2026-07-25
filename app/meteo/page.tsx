@@ -15,20 +15,11 @@ export const metadata: Metadata = {
     siteName: "Gwad'Alerte",
     locale: "fr_FR",
     type: "website",
-    images: [
-      {
-        url: "/og-image-meteo.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Carte météo interactive de la Guadeloupe",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Météo Guadeloupe - Vigilance & Prévisions",
     description: "Prévisions météo détaillées et vigilance officielle pour toutes les communes de Guadeloupe.",
-    images: ["/og-image-meteo.jpg"],
   },
   alternates: {
     canonical: "https://gwadalerte.com/meteo",

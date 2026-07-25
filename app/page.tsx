@@ -87,20 +87,11 @@ export const metadata: Metadata = {
     siteName: "Gwad'Alerte",
     locale: "fr_FR",
     type: "website",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Gwad'Alerte - Carte interactive de la Guadeloupe",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Gwad'Alerte - Infos environnementales Guadeloupe",
     description: "Surveillez qualité de l'air, tours d'eau et météo en temps réel pour votre commune en Guadeloupe.",
-    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,

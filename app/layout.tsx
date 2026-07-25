@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./providers/ThemeProvider";
+import { DataProvider } from "./providers/DataProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Indispensable pour que les images Open Graph soient résolues en URL absolues
+  // (sans ça, Next les préfixe avec http://localhost:3000 et les aperçus de
+  // partage WhatsApp / Facebook restent vides).
+  metadataBase: new URL("https://gwadalerte.com"),
   title: "Gwad'Alerte - Cartes de la Guadeloupe",
   description: "Visualisation de la qualité de l'air et des tours d'eau en Guadeloupe",
 };
@@ -44,11 +49,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main id="main-content">
-            {children}
-          </main>
-          <Footer />
+          <DataProvider>
+            <Navbar />
+            <main id="main-content">
+              {children}
+            </main>
+            <Footer />
+          </DataProvider>
         </ThemeProvider>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />

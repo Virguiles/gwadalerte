@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { NavbarVigilanceWidget, VigilanceBadge } from './NavbarVigilanceWidget';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -152,60 +151,41 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu with animation */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
-              className="md:hidden border-t border-slate-200 dark:border-slate-700 overflow-hidden"
-            >
-              <motion.div
-                initial={{ y: -10 }}
-                animate={{ y: 0 }}
-                exit={{ y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="px-2 pt-2 pb-3 space-y-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md"
-              >
-                {NAV_LINKS.map((link, index) => {
-                  const active = isActive(link.href);
-                  return (
-                    <motion.div
-                      key={link.href}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.2 }}
-                    >
-                      <Link
-                        href={link.href}
-                        onClick={handleLinkClick}
-                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                          active
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: NAV_LINKS.length * 0.05, duration: 0.2 }}
-                  className="pt-2 border-t border-slate-200 dark:border-slate-700"
-                >
-                  <div className="flex justify-center">
-                    <NavbarVigilanceWidget />
-                  </div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Menu mobile : repli/dépli en CSS (voir .collapsible) */}
+        <div
+          className="md:hidden collapsible"
+          data-open={isMobileMenuOpen}
+          aria-hidden={!isMobileMenuOpen}
+        >
+          <div>
+            <div className="border-t border-slate-200 dark:border-slate-700 px-2 pt-2 pb-3 space-y-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+              {NAV_LINKS.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={handleLinkClick}
+                    tabIndex={isMobileMenuOpen ? undefined : -1}
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      active
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex justify-center">
+                  <NavbarVigilanceWidget />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </nav>
     </>

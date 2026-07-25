@@ -13,6 +13,14 @@ import { WaterCutsDataMap } from '@/lib/api-clients';
 
 // Importer les données statiques directement depuis lib/data
 import waterCutsData from '@/lib/data/tours-deau.json';
+import waterCutsSource from '@/lib/data/tours-deau-source.json';
+
+/**
+ * En-tête portant la date de RELEVÉ du planning (et non la date du fetch).
+ * Le client s'en sert pour dater honnêtement la donnée à l'écran : sans ça,
+ * un planning vieux de plusieurs mois s'affiche comme « mis à jour à l'instant ».
+ */
+export const WATER_SOURCE_DATE_HEADER = 'X-Data-Collected-At';
 
 // Configuration ISR - 24 heures (données statiques)
 export const revalidate = 86400;
@@ -31,6 +39,8 @@ export async function GET() {
       headers: {
         // Cache longue durée car données statiques
         'Cache-Control': `public, s-maxage=${CACHE_TTL.WATER_CUTS}, stale-while-revalidate=${CACHE_TTL.WATER_CUTS * 2}`,
+        [WATER_SOURCE_DATE_HEADER]: waterCutsSource.collectedAt,
+        'Access-Control-Expose-Headers': WATER_SOURCE_DATE_HEADER,
       },
     });
   } catch (error) {

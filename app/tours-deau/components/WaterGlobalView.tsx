@@ -1,6 +1,7 @@
 import React from 'react';
 import { DateFilter } from '../types';
 import { WaterLogoIcon } from './WaterIcons';
+import { SourceDateIndicator } from '../../components/shared/SourceDateIndicator';
 
 interface WaterGlobalViewProps {
   archipelInfo?: {
@@ -8,19 +9,25 @@ interface WaterGlobalViewProps {
     affectedCommunesList?: string[];
   };
   dateFilter: DateFilter;
+  /** Date de relevé du planning SMGEAG */
+  sourceDate?: Date | null;
 }
 
 export const WaterGlobalView: React.FC<WaterGlobalViewProps> = ({
   archipelInfo,
   dateFilter,
+  sourceDate = null,
 }) => {
   return (
     <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-6">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <WaterLogoIcon />
-          Tours d&apos;eau
-        </h2>
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <WaterLogoIcon />
+            Tours d&apos;eau
+          </h2>
+          <SourceDateIndicator sourceDate={sourceDate} source="SMGEAG" />
+        </div>
 
         <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-100 dark:border-blue-800">
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2 text-lg">Situation Générale</h3>

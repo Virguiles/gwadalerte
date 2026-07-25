@@ -11,8 +11,8 @@ interface OnboardingStep {
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
-    title: 'Bienvenue sur GwadaSVG !',
-    description: 'Suivez l\'état de la Guadeloupe en temps réel : météo, qualité de l\'air et tours d\'eau.',
+    title: 'Bienvenue sur Gwad\'Alerte !',
+    description: 'Suivez l\'état de la Guadeloupe : météo et qualité de l\'air en temps réel, planning des tours d\'eau.',
     icon: '🌴'
   },
   {

@@ -4,45 +4,31 @@ import React, { useState, useMemo, useCallback } from 'react';
 import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
 import { CommuneSelector } from '../components/shared/CommuneSelector';
 import { CommuneTooltip } from '../components/shared/CommuneTooltip';
-// import { WaterTooltip, TooltipAnchor } from './components/WaterTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterTowersGuide } from './components/WaterTowersGuide';
+import { WaterMapLegend } from './components/WaterMapLegend';
 import { DateFilter } from './types';
-import { getCommuneColors, hasCutsOnDay, getTargetDate, formatCommuneName } from './utils';
-import { useWaterData } from '../hooks/useWaterData';
-import { ErrorDisplay } from '../components/shared/ErrorDisplay';
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+  getCommuneWaterStatus,
+  getWaterStatusColor,
+  formatCommuneName,
+  hasCutsOnDay,
+  getTargetDate,
+  WATER_STATUS_DETAILS,
+} from './utils';
+import { useWaterData } from '../providers/DataProvider';
+import { ErrorDisplay } from '../components/shared/ErrorDisplay';
+import { DataPageLayout } from '../components/shared/DataPageLayout';
+import { MapPanel } from '../components/shared/MapPanel';
+import { MapTabs } from '../components/shared/MapTabs';
 
 export default function ToursDeauClient() {
-  const { data: waterData, loading, error, retry } = useWaterData();
+  const { data: waterData, loading, error, sourceDate, retry } = useWaterData();
   const [hoveredInfo, setHoveredInfo] = useState<HoverInfo | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
   const [selectedCommune, setSelectedCommune] = useState<string>('');
 
-  // 2. Logique de couleur
-  const getCommuneColor = useCallback((code_zone: string): string => {
-    const commune = waterData[code_zone];
-    if (!commune || commune.details.length === 0) {
-      return '#B9B9B9';
-    }
-
-    if (dateFilter !== 'week') {
-      const targetDate = getTargetDate(dateFilter);
-      if (!hasCutsOnDay(commune, targetDate)) {
-        return '#B9B9B9';
-      }
-    }
-
-    const colors = getCommuneColors(commune.commune);
-    return colors.primary;
-  }, [waterData, dateFilter]);
-
-
-  // 3. Gestion du survol (Hover)
+  // 2. Gestion du survol (Hover)
   const handleCommuneHover = useCallback((info: HoverInfo) => {
     setHoveredInfo(info);
   }, []);
@@ -55,37 +41,25 @@ export default function ToursDeauClient() {
     setSelectedCommune(prev => prev === code ? '' : code);
   }, []);
 
-  // Préparation des données pour la carte
+  // Préparation des données pour la carte : la couleur encode l'ÉTAT de la
+  // commune (pas d'identité), et le libellé de statut alimente le tooltip.
   const mapDataForComponent = useMemo(() => {
-    const targetDate = getTargetDate(dateFilter);
+    const now = new Date();
 
-    const result = Object.keys(waterData).reduce((acc, code) => {
+    return Object.keys(waterData).reduce((acc, code) => {
       const commune = waterData[code];
       if (commune) {
-        let coul_qual = '#B9B9B9';
-
-        if (commune.details.length > 0) {
-          if (dateFilter !== 'week') {
-            if (hasCutsOnDay(commune, targetDate)) {
-              const colors = getCommuneColors(commune.commune);
-              coul_qual = colors.primary;
-            }
-          } else {
-            const colors = getCommuneColors(commune.commune);
-            coul_qual = colors.primary;
-          }
-        }
+        const status = getCommuneWaterStatus(commune, dateFilter, now);
 
         acc[code] = {
           ...commune,
-          coul_qual: coul_qual,
+          coul_qual: getWaterStatusColor(status),
           lib_zone: commune.commune,
-          lib_qual: '',
+          lib_qual: WATER_STATUS_DETAILS[status].label,
         };
       }
       return acc;
     }, {} as AirData);
-    return result;
   }, [waterData, dateFilter]);
 
   const getDateLabel = (): string => {
@@ -148,126 +122,76 @@ export default function ToursDeauClient() {
 
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-slate-950 dark:via-blue-950 dark:to-cyan-950 transition-colors duration-300">
-      <div className="w-full max-w-7xl space-y-6 md:space-y-8">
-        {/* En-tête */}
-        <header className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center gap-3 mb-2">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 dark:from-blue-400 dark:via-cyan-400 dark:to-sky-400 bg-clip-text text-transparent">
-              Tours d&apos;Eau
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-600 dark:text-slate-400 mt-1">Guadeloupe</span>
-            </h1>
+    <DataPageLayout
+      accent="water"
+      title={<>Tours d&apos;Eau</>}
+      subtitle={<>{getDateLabel()} - Consultez les coupures d&apos;eau programmées pour votre commune.</>}
+      sources={
+        <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
+          SMGEAG
+        </a>
+      }
+      loading={loading}
+      loadingLabel="Chargement des données de tours d'eau"
+      sectionLabel="Carte et planning des tours d'eau"
+      error={
+        error && Object.keys(waterData).length === 0 ? (
+          <div className="p-4 m-4">
+            <ErrorDisplay
+              title="Impossible de charger les tours d'eau"
+              message={error.message}
+              onRetry={retry}
+            />
           </div>
+        ) : null
+      }
+      below={<WaterTowersGuide />}
+    >
+      {/* Colonne Gauche : Carte + Onglets */}
+      <div className="w-full lg:flex-1 flex flex-col gap-4">
+        <CommuneSelector
+          selectedCommune={selectedCommune}
+          onSelectCommune={setSelectedCommune}
+          communes={communesForSelector}
+        />
 
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium">
-            {getDateLabel()} - Consultez les coupures d&apos;eau programmées pour votre commune.
-          </p>
+        <MapTabs
+          tabs={DATE_TABS}
+          value={dateFilter}
+          onValueChange={setDateFilter}
+          ariaLabel="Période du planning"
+        >
+          <MapPanel underTabs>
+            {/* Légende flottante : clé de lecture des couleurs */}
+            <WaterMapLegend
+              periodLabel={getDateLabel()}
+              statuses={dateFilter === 'tomorrow' ? ['scheduled', 'none'] : ['ongoing', 'scheduled', 'none']}
+              className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]"
+            />
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-            <div className="flex items-center gap-2 px-4 py-1.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-full shadow-sm border border-blue-100 dark:border-blue-900/50">
-              <span className="text-slate-500 dark:text-gray-400 font-medium">Données officielles :</span>
-              <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
-                SMGEAG
-              </a>
+            <div className="p-4 h-full flex justify-center items-center">
+              <GuadeloupeMap
+                data={mapDataForComponent}
+                selectedCommune={selectedCommune}
+                onCommuneHover={handleCommuneHover}
+                onCommuneLeave={handleCommuneLeave}
+                onCommuneClick={handleCommuneClick}
+              />
             </div>
-          </div>
-        </header>
+          </MapPanel>
+        </MapTabs>
 
-
-
-        {/* Layout Principal : Carte + Sidebar */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
-          <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 dark:border-gray-700 p-1">
-            {loading && (
-              <div role="status" aria-label="Chargement des données de tours d'eau" className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-3xl">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" aria-hidden="true"></div>
-              </div>
-            )}
-
-            {error && Object.keys(waterData).length === 0 && (
-              <div className="p-4 m-4">
-                <ErrorDisplay
-                  title="Impossible de charger les tours d'eau"
-                  message={error.message}
-                  onRetry={retry}
-                />
-              </div>
-            )}
-
-            <div className="p-4">
-              <section className="flex flex-col lg:flex-row gap-6 w-full items-start relative z-10">
-                {/* Colonne Gauche : Carte + Tabs Navigation */}
-                <div className="w-full lg:flex-1 flex flex-col gap-4">
-                  {/* Selecteur de commune */}
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700">
-                    <CommuneSelector
-                      selectedCommune={selectedCommune}
-                      onSelectCommune={setSelectedCommune}
-                      communes={communesForSelector}
-                    />
-                  </div>
-
-                  {/* Navigation Tabs */}
-                  <Tabs value={dateFilter} onValueChange={(val) => setDateFilter(val as DateFilter)} className="w-full gap-0">
-                    <TabsList className="relative flex h-auto w-full gap-0 bg-transparent p-0">
-                      {DATE_TABS.map((tab) => (
-                        <TabsTrigger
-                          key={tab.id}
-                          value={tab.id}
-                          className="flex-1 overflow-hidden rounded-b-none border border-gray-200 dark:border-gray-700 border-b bg-muted py-3 -ml-px first:ml-0 data-[state=active]:z-10 data-[state=active]:shadow-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 dark:bg-gray-800 dark:text-gray-400 dark:data-[state=active]:text-white data-[state=active]:border-b-0 data-[state=active]:mb-[-1px]"
-                        >
-                          <span className="hidden sm:inline">{tab.label}</span>
-                          <span className="sm:hidden">{tab.labelShort}</span>
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-
-                    {/* Carte Container */}
-                    <div className="relative h-[500px] md:h-[700px] min-h-[400px] md:min-h-[500px] bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-lg overflow-hidden">
-                      {/* Légende flottante */}
-                      <div className="absolute top-4 left-4 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 max-w-[200px]">
-                        <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                          Tours d&apos;eau
-                        </h4>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {getDateLabel()}
-                        </p>
-                      </div>
-
-                      <div className="p-4 h-full flex justify-center items-center">
-                        <GuadeloupeMap
-                          data={mapDataForComponent}
-                          selectedCommune={selectedCommune}
-                          onCommuneHover={handleCommuneHover}
-                          onCommuneLeave={handleCommuneLeave}
-                          onCommuneClick={handleCommuneClick}
-                        />
-                      </div>
-                    </div>
-                  </Tabs>
-
-                  {/* Tooltip Flottant simple (toujours visible au survol) */}
-                  <CommuneTooltip hoveredInfo={hoveredInfo} />
-                </div>
-
-                {/* Sidebar */}
-                <WaterSidebar
-                  data={sidebarData}
-                  dateFilter={dateFilter}
-                  archipelInfo={archipelInfo}
-                  onClose={() => setSelectedCommune('')}
-                />
-
-              </section>
-            </div>
-          </div>
-        </div>
-
-        {/* Guide Informatif */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          <WaterTowersGuide />
-        </div>
+        {/* Tooltip Flottant simple (toujours visible au survol) */}
+        <CommuneTooltip hoveredInfo={hoveredInfo} />
       </div>
-    </main>
+
+      <WaterSidebar
+        data={sidebarData}
+        dateFilter={dateFilter}
+        archipelInfo={archipelInfo}
+        sourceDate={sourceDate}
+        onClose={() => setSelectedCommune('')}
+      />
+    </DataPageLayout>
   );
 }

@@ -246,14 +246,59 @@ body {
   animation: spin 3s linear infinite;
 }
 
+/* --- Transitions reprises de framer-motion (retiré du bundle) --- */
+
+/* Repli/dépli à hauteur automatique : 0fr → 1fr est interpolable, contrairement
+   à height: auto. Le conteneur doit avoir un unique enfant en overflow-hidden. */
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.collapsible > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.collapsible[data-open='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.15s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.2s ease-out both;
+}
+
 /* prefers-reduced-motion : réduit seulement les animations longues, garde les transitions courtes */
 @media (prefers-reduced-motion: reduce) {
   .animate-in,
   .fade-in,
   .slide-in-from-top-2,
   .animate-spin-slow,
-  .animate-aurora {
+  .animate-aurora,
+  .animate-slide-in-right,
+  .animate-slide-in-left {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .collapsible {
+    transition-duration: 0.01ms !important;
   }
 }

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import HomeDashboard from './components/HomeDashboard';
 import { Wind, Droplets, CloudSun, ArrowRight, Activity, Info } from 'lucide-react';
-import { useAirData } from './hooks/useAirData';
+import { useAirData } from './providers/DataProvider';
 
 export default function HomeClient() {
   const { data: airData } = useAirData();
@@ -51,7 +51,7 @@ export default function HomeClient() {
 
             <div className="hidden md:flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-gray-500 bg-white dark:bg-gray-800 px-4 py-2 rounded-full border border-slate-200 dark:border-gray-700 shadow-sm">
               <Info className="w-4 h-4" />
-              <span>Données mises à jour en temps réel</span>
+              <span>Air et météo en temps réel · planning d&apos;eau daté</span>
             </div>
           </div>
 
@@ -130,7 +130,7 @@ export default function HomeClient() {
                 </h3>
 
                 <p className="text-slate-600 dark:text-gray-300 leading-relaxed mb-8 flex-1">
-                  Calendrier des coupures d&apos;eau programmées, planning SMGEAG et zones impactées en temps réel.
+                  Calendrier des coupures d&apos;eau programmées : planning SMGEAG et zones impactées, avec sa date de relevé.
                 </p>
 
                 <div className="flex items-center gap-2 text-sm text-cyan-700 dark:text-cyan-400 font-semibold bg-cyan-50 dark:bg-cyan-900/30 w-fit px-4 py-2 rounded-full border border-cyan-100 dark:border-cyan-800/50">

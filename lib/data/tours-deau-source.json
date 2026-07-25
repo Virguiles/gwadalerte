@@ -1,0 +1,7 @@
+{
+  "source": "SMGEAG",
+  "sourceUrl": "https://www.smgeag.fr/",
+  "documentLabel": "Planning des tours d'eau SMGEAG",
+  "collectedAt": "2025-11-30",
+  "note": "Ce planning est relevé manuellement depuis les publications du SMGEAG. Mettre à jour `collectedAt` À CHAQUE modification de tours-deau.json : cette date est affichée telle quelle aux utilisateurs."
+}

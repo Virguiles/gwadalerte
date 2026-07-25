@@ -66,7 +66,8 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
   }, [communes]);
 
   return (
-    <div className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-2 sm:mb-6 px-2 sm:px-4">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-700">
+      <div className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-2 sm:mb-6 px-2 sm:px-4">
       {/* Instructions adaptées par taille d'écran */}
       <p className="text-left text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1.5 sm:mb-2 px-2">
         <span className="hidden sm:inline">Choisir une commune dans la liste ou cliquer sur la carte</span>
@@ -122,6 +123,7 @@ export const CommuneSelector: React.FC<CommuneSelectorProps> = ({
           <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Réinitialiser
         </button>
+        </div>
       </div>
     </div>
   );

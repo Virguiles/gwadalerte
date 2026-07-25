@@ -1,31 +1,40 @@
 import React, { useMemo } from 'react';
-import { Clock, MapPin, ShieldCheck, Info, CheckCircle, Inbox, RefreshCw } from 'lucide-react';
+import { Clock, MapPin, ShieldCheck, Info, CheckCircle, Inbox } from 'lucide-react';
+import { SourceDateIndicator } from '../../components/shared/SourceDateIndicator';
 import { WaterCutData, DateFilter } from '../types';
-import { getCommuneColors, parseDaysFromHoraires, getTargetDate } from '../utils';
+import {
+  WATER_STATUS_DETAILS,
+  getCommuneWaterStatus,
+  getCutsForFilter,
+  getDetailStatus,
+} from '../utils';
 
 interface WaterCommuneViewProps {
   data: WaterCutData;
   dateFilter: DateFilter;
+  /** Date de relevé du planning SMGEAG */
+  sourceDate?: Date | null;
   onClose?: () => void;
 }
 
 export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
   data,
   dateFilter,
+  sourceDate = null,
   onClose,
 }) => {
-  const colors = getCommuneColors(data.commune);
+  // Statut global de la commune : donne sa couleur à l'en-tête
+  const status = useMemo(
+    () => getCommuneWaterStatus(data, dateFilter),
+    [data, dateFilter]
+  );
+  const statusDetails = WATER_STATUS_DETAILS[status];
 
-  // Filtrer les détails
-  const filteredDetails = useMemo(() => {
-    return dateFilter !== 'week'
-      ? data.details.filter(detail => {
-          const days = parseDaysFromHoraires(detail.horaires);
-          const targetDay = getTargetDate(dateFilter).getDay();
-          return days.includes(targetDay);
-        })
-      : data.details;
-  }, [data.details, dateFilter]);
+  // Filtrer les détails (gère les coupures de nuit qui débordent sur le lendemain)
+  const filteredDetails = useMemo(
+    () => getCutsForFilter(data, dateFilter),
+    [data, dateFilter]
+  );
 
   const getDateLabel = () => {
     if (dateFilter === 'week') return 'Planning hebdomadaire';
@@ -39,14 +48,17 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
 
         {/* En-tête Premium */}
         <div
-            className="flex items-center justify-between px-6 py-5 bg-gradient-to-br text-white shadow-sm shrink-0"
+            className="flex items-center justify-between px-6 py-5 text-white shadow-sm shrink-0"
             style={{
-                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.border} 100%)`,
+                background: status === 'none'
+                  ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'
+                  : `linear-gradient(135deg, ${statusDetails.color} 0%, ${status === 'ongoing' ? '#991B1B' : '#B45309'} 100%)`,
             }}
         >
             <div className="flex flex-col min-w-0">
                 <span className="text-xs font-medium uppercase tracking-wider opacity-90">Commune de</span>
                 <span className="text-2xl font-bold truncate leading-tight">{data.commune}</span>
+                <span className="text-xs font-semibold mt-1 opacity-95">{statusDetails.label}</span>
             </div>
             {onClose && (
               <button
@@ -65,7 +77,13 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
                 <Info className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                 {getDateLabel()}
             </span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${filteredDetails.length > 0 ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800'}`}>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                status === 'ongoing'
+                  ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800'
+                  : status === 'scheduled'
+                    ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-800'
+                    : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800'
+            }`}>
                 {filteredDetails.length > 0 ? `${filteredDetails.length} perturbation${filteredDetails.length > 1 ? 's' : ''}` : 'Aucune coupure'}
             </span>
         </div>
@@ -75,7 +93,10 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
             {filteredDetails.length > 0 ? (
                 filteredDetails.map((detail, idx) => (
                     <div key={idx} className="group relative bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200 overflow-hidden">
-                        <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: colors.primary }}></div>
+                        <div
+                          className="absolute left-0 top-0 bottom-0 w-1.5"
+                          style={{ backgroundColor: WATER_STATUS_DETAILS[getDetailStatus(detail, dateFilter)].color }}
+                        ></div>
 
                         <div className="p-4 pl-5">
                             {/* Horaires */}
@@ -88,6 +109,11 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
                                     <span className="text-base font-bold text-gray-900 dark:text-white leading-tight block">
                                         {detail.horaires}
                                     </span>
+                                    {getDetailStatus(detail, dateFilter) === 'ongoing' && (
+                                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                                            ● Coupure en cours
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -146,10 +172,7 @@ export const WaterCommuneView: React.FC<WaterCommuneViewProps> = ({
                    Données SMGEAG
                  </span>
             </div>
-            <div className="flex items-center gap-1.5 font-medium">
-                <RefreshCw className="w-3 h-3" />
-                <span>Mis à jour récemment</span>
-            </div>
+            <SourceDateIndicator sourceDate={sourceDate} source="SMGEAG" />
         </div>
       </div>
     </div>
