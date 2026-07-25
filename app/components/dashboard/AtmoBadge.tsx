@@ -1,5 +1,6 @@
 import React from 'react';
 import { hexToRgba } from '../../qualite-air/components/colorUtils';
+import { getAtmoIndex } from '../../qualite-air/airQuality';
 
 interface AtmoBadgeProps {
   /** Libellé de qualité (« Bon », « Dégradé »…) */
@@ -24,6 +25,9 @@ export const AtmoBadge: React.FC<AtmoBadgeProps> = ({
   ariaLabel,
 }) => {
   const safeColor = color || '#50F0E6'; // Repli : « Bon »
+  // L'indice était annoncé par la légende mais jamais affiché : l'échelle
+  // 1 → 6 ne renvoyait à aucun chiffre visible.
+  const index = getAtmoIndex(quality);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -39,11 +43,12 @@ export const AtmoBadge: React.FC<AtmoBadgeProps> = ({
           {...(ariaLabel ? { role: 'status', 'aria-label': ariaLabel } : {})}
         >
           {quality}
+          {index !== null && <span className="font-semibold"> {index}/6</span>}
         </span>
       </div>
       {withScale && (
         <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-          Échelle ATMO : 1=Bon → 6=Critique
+          Échelle ATMO : 1 = Bon → 6 = Extrêmement mauvais
         </p>
       )}
     </div>

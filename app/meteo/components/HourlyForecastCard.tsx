@@ -138,7 +138,7 @@ export function HourlyForecastCard({ hour }: HourlyForecastCardProps) {
       </div>
 
       {/* Description météo */}
-      <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-center text-gray-600 dark:text-gray-400 capitalize leading-tight">
+      <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-center text-gray-600 dark:text-gray-400 first-letter:uppercase leading-tight">
         {hour.weather_description}
       </div>
     </div>

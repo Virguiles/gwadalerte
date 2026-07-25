@@ -50,6 +50,8 @@ export const MeteoSidebar: React.FC<MeteoSidebarProps> = ({
             <MeteoGlobalView
                 avgTemperature={archipelInfo.avgTemperature}
                 generalWeather={archipelInfo.generalWeather}
+                generalWeatherCode={archipelInfo.generalWeatherCode}
+                isDay={archipelInfo.isDay}
                 sunrise={archipelInfo.sunrise}
                 sunset={archipelInfo.sunset}
                 avgWindSpeed={archipelInfo.avgWindSpeed}

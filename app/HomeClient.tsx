@@ -4,15 +4,15 @@ import Link from 'next/link';
 import HomeDashboard from './components/HomeDashboard';
 import { Wind, Droplets, CloudSun, ArrowRight, Activity, Info } from 'lucide-react';
 import { useAirData } from './providers/DataProvider';
+import { isAirQualityOfConcern } from './qualite-air/airQuality';
 
 export default function HomeClient() {
   const { data: airData } = useAirData();
 
-  // Filtrer les communes en alerte
-  const alertCommunes = Object.values(airData || {}).filter(data => {
-    const label = data?.lib_qual?.toLowerCase() || '';
-    return ['dégradé', 'mauvais', 'très mauvais', 'extrêmement mauvais', 'médiocre'].includes(label);
-  });
+  // Communes dont la qualité de l'air justifie un signalement (indice ATMO >= 3)
+  const alertCommunes = Object.values(airData || {}).filter(data =>
+    isAirQualityOfConcern(data?.lib_qual)
+  );
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-white dark:bg-gray-900 text-slate-900 dark:text-gray-100 font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-300">

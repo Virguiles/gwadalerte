@@ -4,7 +4,7 @@
  * Récupère les données de qualité de l'air depuis l'API Gwad'Air (ArcGIS)
  * pour toutes les communes de Guadeloupe.
  *
- * Cache: 3 minutes (aligné sur le backend Python original)
+ * Cache: CACHE_TTL.AIR_QUALITY (5 minutes)
  */
 
 import { NextResponse } from 'next/server';

@@ -3,13 +3,17 @@ import { useArchipelForecast } from '../hooks/useArchipelForecast';
 import { WeatherData } from '../types';
 import { ForecastDisplay } from './ForecastDisplay';
 import { WeatherIcon } from './WeatherIcon';
-import { isNightTime } from '@/lib/weather-codes';
+import { getWeatherIcon } from '@/lib/weather-codes';
 
 type ForecastFilter = 'today' | 'tomorrow' | '3days';
 
 interface MeteoGlobalViewProps {
     avgTemperature: number | null;
     generalWeather: string | null;
+    /** Code WMO dominant sur l'archipel en ce moment */
+    generalWeatherCode: number | null;
+    /** Jour ou nuit d'après les données Open-Meteo */
+    isDay: boolean;
     sunrise: string | null;
     sunset: string | null;
     avgWindSpeed: number | null;
@@ -19,6 +23,8 @@ interface MeteoGlobalViewProps {
 export const MeteoGlobalView: React.FC<MeteoGlobalViewProps> = ({
     avgTemperature,
     generalWeather,
+    generalWeatherCode,
+    isDay,
     sunrise,
     sunset,
     avgWindSpeed,
@@ -26,12 +32,6 @@ export const MeteoGlobalView: React.FC<MeteoGlobalViewProps> = ({
 }) => {
     // Récupérer les prévisions agrégées de l'archipel
     const { forecast, loading } = useArchipelForecast();
-
-    // Déterminer si c'est le jour ou la nuit
-    const isDay = !isNightTime();
-
-    // Récupérer le code météo du jour actuel depuis les prévisions
-    const currentWeatherCode = forecast?.daily?.[0]?.weather_code;
 
     // Créer un objet WeatherData virtuel pour l'archipel (données actuelles)
     const archipelCurrentWeather: WeatherData | null = useMemo(() => {
@@ -51,7 +51,12 @@ export const MeteoGlobalView: React.FC<MeteoGlobalViewProps> = ({
             wind_gust: null,
             weather_main: generalWeather || '',
             weather_description: generalWeather || '',
-            weather_icon: 'Sun', // Par défaut
+            // Icône et code dérivés des conditions observées, et non d'une
+            // valeur par défaut : sans weather_code, l'affichage se rabattait
+            // sur le code des prévisions du jour, en contradiction avec le texte.
+            weather_icon: getWeatherIcon(generalWeatherCode, isDay ? 12 : 0),
+            weather_code: generalWeatherCode ?? undefined,
+            is_day: isDay,
             clouds: null,
             visibility: null,
             dew_point: null,
@@ -62,7 +67,7 @@ export const MeteoGlobalView: React.FC<MeteoGlobalViewProps> = ({
             rain_3h: null,
             uv_index: null,
         };
-    }, [avgTemperature, avgWindSpeed, generalWeather, sunrise, sunset]);
+    }, [avgTemperature, avgWindSpeed, generalWeather, generalWeatherCode, isDay, sunrise, sunset]);
 
     return (
         <section className="space-y-4">
@@ -70,7 +75,7 @@ export const MeteoGlobalView: React.FC<MeteoGlobalViewProps> = ({
             <div className="flex items-center justify-between gap-2">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <WeatherIcon
-                        weatherCode={currentWeatherCode}
+                        weatherCode={generalWeatherCode ?? undefined}
                         isDay={isDay}
                         size={24}
                         className="text-blue-600 dark:text-blue-400"

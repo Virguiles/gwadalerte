@@ -8,7 +8,7 @@
  * - code_zone (optionnel): Code INSEE de la commune (ex: 97105)
  *   Si non fourni, retourne les prévisions pour toutes les communes
  *
- * Cache: 3 heures (prévisions stables sur cette période)
+ * Cache: CACHE_TTL.FORECAST (4 heures)
  */
 
 import { NextRequest, NextResponse } from 'next/server';

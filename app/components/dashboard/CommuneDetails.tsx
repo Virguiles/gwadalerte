@@ -131,7 +131,7 @@ export const CommuneDetails: React.FC<CommuneDetailsProps> = ({
             </div>
           ) : weather ? (
             <div className="text-gray-700 dark:text-gray-300">
-              <p className="capitalize mb-2">{weather.weather_description}</p>
+              <p className="first-letter:uppercase mb-2">{weather.weather_description}</p>
               <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                 <div className="flex items-center gap-1.5">
                   <Droplet className="w-4 h-4" aria-hidden="true" /> Humidité: {weather.humidity}%

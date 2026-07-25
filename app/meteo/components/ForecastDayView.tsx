@@ -98,7 +98,7 @@ export function ForecastDayView({
             <div className="text-5xl font-bold text-slate-800 dark:text-white mb-1">
               {Math.round(displayTemp)}°C
             </div>
-            <div className="text-sm text-slate-600 dark:text-slate-300 capitalize">
+            <div className="text-sm text-slate-600 dark:text-slate-300 first-letter:uppercase">
               {displayWeather.weather_description || displayWeather.weather_main}
             </div>
           </div>

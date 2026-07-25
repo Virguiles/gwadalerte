@@ -12,8 +12,6 @@ import {
   getCommuneWaterStatus,
   getWaterStatusColor,
   formatCommuneName,
-  hasCutsOnDay,
-  getTargetDate,
   WATER_STATUS_DETAILS,
 } from './utils';
 import { useWaterData } from '../providers/DataProvider';
@@ -88,29 +86,21 @@ export default function ToursDeauClient() {
     return communes;
   }, [waterData]);
 
-  const waterEntries = useMemo(() => Object.values(waterData || {}), [waterData]);
-
+  // Le décompte s'appuie sur le même statut que la couleur de la carte :
+  // il comptait auparavant toute commune ayant des détails, si bien qu'un
+  // planning non exploitable était annoncé « concerné » tout en restant gris.
   const archipelInfo = useMemo(() => {
-    const targetDate = getTargetDate(dateFilter);
-    const affectedCommunesList = Object.entries(waterData)
-      .filter(([code, commune]) => {
-        if (!commune.details || commune.details.length === 0) return false;
-        if (dateFilter === 'week') return true;
-        return hasCutsOnDay(commune, targetDate);
-      })
-      .map(([code, commune]) => formatCommuneName(commune.commune))
+    const now = new Date();
+    const affectedCommunesList = Object.values(waterData)
+      .filter((commune) => getCommuneWaterStatus(commune, dateFilter, now) !== 'none')
+      .map((commune) => formatCommuneName(commune.commune))
       .sort();
 
     return {
       affectedCommunes: affectedCommunesList.length,
-      affectedCommunesList
+      affectedCommunesList,
     };
-  }, [waterData, waterEntries, dateFilter]);
-
-  const totalCuts = useMemo(
-    () => waterEntries.reduce((acc, commune) => acc + (commune.details?.length || 0), 0),
-    [waterEntries]
-  );
+  }, [waterData, dateFilter]);
 
   const sidebarData = useMemo(() => {
     const code = selectedCommune;

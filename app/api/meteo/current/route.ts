@@ -4,7 +4,7 @@
  * Récupère les données météo actuelles pour toutes les communes de Guadeloupe
  * depuis l'API Open-Meteo (gratuite, sans clé API).
  *
- * Cache: 15 minutes (données actuelles nécessitant des mises à jour fréquentes)
+ * Cache: CACHE_TTL.CURRENT_WEATHER (45 minutes)
  */
 
 import { NextResponse } from 'next/server';
@@ -17,20 +17,11 @@ import {
 } from '@/lib/api-clients';
 import { getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/lib/weather-codes';
 
-// Configuration ISR - 30 minutes (aligné avec CACHE_TTL)
-export const revalidate = 1800;
+// ISR aligné sur le TTL du cache applicatif : les deux couches expiraient
+// à des rythmes différents (30 min ici, 45 min côté cache), et l'en-tête
+// Cache-Control annonçait encore une troisième valeur.
+export const revalidate = 2700;
 // Note: Edge Runtime non utilisé car CacheManager utilise @vercel/kv qui nécessite Node.js runtime
-
-type CachedWeatherPayload = {
-  data: WeatherDataMap;
-  fetchedAt: number;
-};
-
-// TTL "soft" pour déclencher une régénération en arrière-plan sans pénaliser l'utilisateur
-const SOFT_TTL_MS = (CACHE_TTL.CURRENT_WEATHER || 1800) * 1000;
-// TTL "hard" plus long pour conserver une version de secours le temps de la régénération
-const HARD_TTL_SECONDS = Math.max((CACHE_TTL.CURRENT_WEATHER || 1800) * 4, CACHE_TTL.CURRENT_WEATHER || 1800);
-let refreshPromise: Promise<void> | null = null;
 
 // ============================================================================
 // CONFIGURATION OPEN-METEO

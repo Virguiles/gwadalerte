@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Database, Wind } from 'lucide-react';
 import type { AirData } from '../GuadeloupeMap';
+import { isAirQualityOfConcern } from '../../qualite-air/airQuality';
 import { DataFreshnessIndicator } from '../shared/DataFreshnessIndicator';
 import { AtmoBadge } from './AtmoBadge';
 import { WidgetCard, WidgetTitle } from './WidgetCard';
@@ -44,10 +45,7 @@ export const AirWidget: React.FC<AirWidgetProps> = ({
     const globalColor = entries.find((entry) => entry.lib_qual === globalQuality)?.coul_qual;
 
     const zonesToWatch = entries
-      .filter((entry) => {
-        const quality = entry.lib_qual?.toLowerCase();
-        return quality && quality !== 'bon' && quality !== 'indisponible';
-      })
+      .filter((entry) => isAirQualityOfConcern(entry.lib_qual))
       .map((entry) => entry.lib_zone)
       .sort((a, b) => a.localeCompare(b));
 
@@ -109,7 +107,7 @@ export const AirWidget: React.FC<AirWidgetProps> = ({
             </div>
           ) : (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Qualité de l&apos;air satisfaisante sur l&apos;archipel.
+              Aucune zone à surveiller sur l&apos;archipel.
             </p>
           )}
         </div>
