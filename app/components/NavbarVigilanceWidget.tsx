@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { useMeteoData } from '../providers/DataProvider';
-import { getVigilanceLevelInfo } from '../meteo/utils';
+import { getVigilanceLevelInfo } from '@/app/(site)/meteo/utils';
 
 export const NavbarVigilanceWidget = () => {
   const { vigilanceData, mounted } = useMeteoData();

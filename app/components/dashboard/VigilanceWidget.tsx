@@ -1,7 +1,7 @@
 import React from 'react';
 import { CloudSun } from 'lucide-react';
-import { VIGILANCE_LEVEL_DETAILS } from '../../meteo/constants';
-import type { VigilanceData } from '../../meteo/types';
+import { VIGILANCE_LEVEL_DETAILS } from '@/app/(site)/meteo/constants';
+import type { VigilanceData } from '@/app/(site)/meteo/types';
 import { WidgetCard, WidgetTitle } from './WidgetCard';
 
 interface VigilanceWidgetProps {

@@ -1,4 +1,4 @@
-import { CommuneData } from '../components/GuadeloupeMap';
+import { CommuneData } from '@/app/components/GuadeloupeMap';
 
 export type WeatherData = {
   lib_zone: string;

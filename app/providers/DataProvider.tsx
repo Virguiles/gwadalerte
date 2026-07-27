@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAirDataSource, type AirDataValue } from '../hooks/useAirData';
 import { useWaterDataSource, type WaterDataValue } from '../hooks/useWaterData';
-import { useMeteoDataSource, type MeteoDataValue } from '../meteo/hooks/useMeteoData';
+import { useMeteoDataSource, type MeteoDataValue } from '@/app/(site)/meteo/hooks/useMeteoData';
 
 /**
  * Source unique des données environnementales.

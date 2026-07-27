@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { HoverInfo, CommuneData } from '../../components/GuadeloupeMap';
+import { HoverInfo, CommuneData } from '@/app/components/GuadeloupeMap';
 import { WeatherDataMap, VigilanceLevelInfo } from '../types';
 import { ALL_COMMUNES } from '../constants';
 

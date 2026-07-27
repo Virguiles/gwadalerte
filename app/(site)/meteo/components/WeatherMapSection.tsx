@@ -1,9 +1,9 @@
 import React, { Suspense, lazy, useMemo } from 'react';
-import { AirData, CommuneData, HoverInfo } from '../../components/GuadeloupeMap';
+import { AirData, CommuneData, HoverInfo } from '@/app/components/GuadeloupeMap';
 import { WeatherDataMap, VigilanceLevelInfo } from '../types';
 import { ALL_COMMUNES } from '../constants';
 
-const GuadeloupeMap = lazy(() => import('../../components/GuadeloupeMap').then(module => ({ default: module.default })));
+const GuadeloupeMap = lazy(() => import('@/app/components/GuadeloupeMap').then(module => ({ default: module.default })));
 
 interface WeatherMapSectionProps {
   weatherData: WeatherDataMap;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { hexToRgba } from '../../qualite-air/components/colorUtils';
-import { getAtmoIndex } from '../../qualite-air/airQuality';
+import { hexToRgba } from '@/app/(site)/qualite-air/components/colorUtils';
+import { getAtmoIndex } from '@/app/(site)/qualite-air/airQuality';
 
 interface AtmoBadgeProps {
   /** Libellé de qualité (« Bon », « Dégradé »…) */

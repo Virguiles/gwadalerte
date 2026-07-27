@@ -1,7 +1,7 @@
 import React from 'react';
 import { DateFilter } from '../types';
 import { WaterLogoIcon } from './WaterIcons';
-import { SourceDateIndicator } from '../../components/shared/SourceDateIndicator';
+import { SourceDateIndicator } from '@/app/components/shared/SourceDateIndicator';
 
 interface WaterGlobalViewProps {
   archipelInfo?: {

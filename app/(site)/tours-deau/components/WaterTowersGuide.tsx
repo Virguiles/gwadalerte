@@ -11,7 +11,7 @@ import {
   ClipboardList,
   Map
 } from 'lucide-react';
-import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
+import { InteractiveGuide, GuideItem } from '@/app/components/shared/InteractiveGuide';
 
 // Données basées sur l'Analyse Systémique fournie
 const WATER_GUIDE_DATA = [

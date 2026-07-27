@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity } from 'lucide-react';
-import { CommuneData } from '../../components/GuadeloupeMap';
+import { CommuneData } from '@/app/components/GuadeloupeMap';
 import { hexToRgba } from './colorUtils';
 
 interface AirPollutantListProps {

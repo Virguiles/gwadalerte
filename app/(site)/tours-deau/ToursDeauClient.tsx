@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import GuadeloupeMap, { HoverInfo, AirData } from '../components/GuadeloupeMap';
-import { CommuneSelector } from '../components/shared/CommuneSelector';
-import { CommuneTooltip } from '../components/shared/CommuneTooltip';
+import GuadeloupeMap, { HoverInfo, AirData } from '@/app/components/GuadeloupeMap';
+import { CommuneSelector } from '@/app/components/shared/CommuneSelector';
+import { CommuneTooltip } from '@/app/components/shared/CommuneTooltip';
 import { WaterSidebar } from './components/WaterSidebar';
 import { WaterTowersGuide } from './components/WaterTowersGuide';
 import { WaterMapLegend } from './components/WaterMapLegend';
@@ -14,11 +14,11 @@ import {
   formatCommuneName,
   WATER_STATUS_DETAILS,
 } from './utils';
-import { useWaterData } from '../providers/DataProvider';
-import { ErrorDisplay } from '../components/shared/ErrorDisplay';
-import { DataPageLayout } from '../components/shared/DataPageLayout';
-import { MapPanel } from '../components/shared/MapPanel';
-import { MapTabs } from '../components/shared/MapTabs';
+import { useWaterData } from '@/app/providers/DataProvider';
+import { ErrorDisplay } from '@/app/components/shared/ErrorDisplay';
+import { DataPageLayout } from '@/app/components/shared/DataPageLayout';
+import { MapPanel } from '@/app/components/shared/MapPanel';
+import { MapTabs } from '@/app/components/shared/MapTabs';
 
 export default function ToursDeauClient() {
   const { data: waterData, loading, error, sourceDate, retry } = useWaterData();

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommuneData } from '../../components/GuadeloupeMap';
+import { CommuneData } from '@/app/components/GuadeloupeMap';
 import { AirPollutantList } from './AirPollutantList';
 import { hexToRgba } from './colorUtils';
 

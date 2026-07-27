@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Database, Wind } from 'lucide-react';
 import type { AirData } from '../GuadeloupeMap';
-import { isAirQualityOfConcern } from '../../qualite-air/airQuality';
+import { isAirQualityOfConcern } from '@/app/(site)/qualite-air/airQuality';
 import { DataFreshnessIndicator } from '../shared/DataFreshnessIndicator';
 import { AtmoBadge } from './AtmoBadge';
 import { WidgetCard, WidgetTitle } from './WidgetCard';

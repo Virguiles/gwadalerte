@@ -4,7 +4,7 @@ import Link from 'next/link';
 import HomeDashboard from './components/HomeDashboard';
 import { Wind, Droplets, CloudSun, ArrowRight, Activity, Info } from 'lucide-react';
 import { useAirData } from './providers/DataProvider';
-import { isAirQualityOfConcern } from './qualite-air/airQuality';
+import { isAirQualityOfConcern } from '@/app/(site)/qualite-air/airQuality';
 
 export default function HomeClient() {
   const { data: airData } = useAirData();

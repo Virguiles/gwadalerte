@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HomeClient from './HomeClient';
+import HomeClient from '@/app/HomeClient';
 
 // Composant pour les données structurées SEO (JSON-LD)
 const HomeJsonLd = () => {

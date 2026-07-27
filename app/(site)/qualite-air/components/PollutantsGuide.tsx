@@ -1,6 +1,6 @@
 import { Wind, Sun, Factory, Activity, Stethoscope } from 'lucide-react';
 import type { SVGProps } from 'react';
-import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
+import { InteractiveGuide, GuideItem } from '@/app/components/shared/InteractiveGuide';
 
 // Composant SVG pour l'icône de fumée
 const SmokeIcon = ({ className, ...props }: SVGProps<SVGSVGElement>) => (

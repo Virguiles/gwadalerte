@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { useMeteoData } from '../providers/DataProvider';
+import { useMeteoData } from '@/app/providers/DataProvider';
 // import { useTooltip } from './hooks/useTooltip';
 import { getVigilanceLevelInfo, formatRelativeTime } from './utils';
-import { CommuneSelector } from '../components/shared/CommuneSelector';
+import { CommuneSelector } from '@/app/components/shared/CommuneSelector';
 import { ALL_COMMUNES } from './constants';
 import { WeatherMapSection } from './components/WeatherMapSection';
 import { MeteoSidebar } from './components/MeteoSidebar';
-import { CommuneTooltip } from '../components/shared/CommuneTooltip';
+import { CommuneTooltip } from '@/app/components/shared/CommuneTooltip';
 // import { MeteoTooltip } from './components/MeteoTooltip';
-import { HoverInfo } from '../components/GuadeloupeMap';
+import { HoverInfo } from '@/app/components/GuadeloupeMap';
 import { CyclonicVigilanceGuide } from './components/CyclonicVigilanceGuide';
-import { DataPageLayout } from '../components/shared/DataPageLayout';
-import { MapPanel } from '../components/shared/MapPanel';
-import { MapTabs } from '../components/shared/MapTabs';
+import { DataPageLayout } from '@/app/components/shared/DataPageLayout';
+import { MapPanel } from '@/app/components/shared/MapPanel';
+import { MapTabs } from '@/app/components/shared/MapTabs';
 // Icônes Lucide supprimées - utilisant maintenant le composant WeatherIcon
 
 // Type pour les filtres de prévision

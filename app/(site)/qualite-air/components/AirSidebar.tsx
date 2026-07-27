@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommuneData } from '../../components/GuadeloupeMap';
+import { CommuneData } from '@/app/components/GuadeloupeMap';
 import { AirGlobalView } from './AirGlobalView';
 import { AirCommuneView } from './AirCommuneView';
 

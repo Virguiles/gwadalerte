@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Database, DropletOff } from 'lucide-react';
-import type { WaterDataMap } from '../../tours-deau/types';
-import { formatCommuneName, getCommuneWaterStatus } from '../../tours-deau/utils';
+import type { WaterDataMap } from '@/app/(site)/tours-deau/types';
+import { formatCommuneName, getCommuneWaterStatus } from '@/app/(site)/tours-deau/utils';
 import { SourceDateIndicator } from '../shared/SourceDateIndicator';
 import { WidgetCard, WidgetTitle } from './WidgetCard';
 

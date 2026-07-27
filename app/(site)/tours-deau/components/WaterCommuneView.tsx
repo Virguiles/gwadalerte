@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Clock, MapPin, ShieldCheck, Info, CheckCircle, Inbox } from 'lucide-react';
-import { SourceDateIndicator } from '../../components/shared/SourceDateIndicator';
+import { SourceDateIndicator } from '@/app/components/shared/SourceDateIndicator';
 import { WaterCutData, DateFilter } from '../types';
 import {
   WATER_STATUS_DETAILS,

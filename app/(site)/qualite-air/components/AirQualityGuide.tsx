@@ -1,6 +1,6 @@
 import { ShieldCheck, Leaf, Info, AlertTriangle, AlertOctagon, Activity, HeartPulse, BookOpen } from 'lucide-react';
-import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
-import { AirData } from '../../components/GuadeloupeMap';
+import { InteractiveGuide, GuideItem } from '@/app/components/shared/InteractiveGuide';
+import { AirData } from '@/app/components/GuadeloupeMap';
 import { useMemo } from 'react';
 
 // Données des niveaux ATMO

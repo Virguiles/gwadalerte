@@ -6,9 +6,9 @@ import { CloudSun, Droplet, Wind } from 'lucide-react';
 
 import GuadeloupeMap, { HoverInfo } from './GuadeloupeMap';
 import { useWaterData, useAirData, useMeteoData } from '../providers/DataProvider';
-import { getCommuneWaterStatus, getWaterStatusColor } from '../tours-deau/utils';
-import { WaterMapLegend } from '../tours-deau/components/WaterMapLegend';
-import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '../meteo/constants';
+import { getCommuneWaterStatus, getWaterStatusColor } from '@/app/(site)/tours-deau/utils';
+import { WaterMapLegend } from '@/app/(site)/tours-deau/components/WaterMapLegend';
+import { VIGILANCE_LEVEL_DETAILS, ALL_COMMUNES } from '@/app/(site)/meteo/constants';
 import { CommuneSelector } from './shared/CommuneSelector';
 import { CommuneTooltip } from './shared/CommuneTooltip';
 import { CommuneDetailsSkeleton } from './shared/SkeletonLoader';

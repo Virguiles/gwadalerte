@@ -1,13 +1,13 @@
 import React from 'react';
 import { CloudSun, Droplet, DropletOff, Wind, X } from 'lucide-react';
 import type { AirData } from '../GuadeloupeMap';
-import type { WaterCutData } from '../../tours-deau/types';
-import type { WeatherDataMap } from '../../meteo/types';
+import type { WaterCutData } from '@/app/(site)/tours-deau/types';
+import type { WeatherDataMap } from '@/app/(site)/meteo/types';
 import {
   WATER_STATUS_DETAILS,
   getCommuneWaterStatus,
   getCutsForFilter,
-} from '../../tours-deau/utils';
+} from '@/app/(site)/tours-deau/utils';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { ErrorDisplay } from '../shared/ErrorDisplay';
 import { HelpButton } from '../shared/HelpButton';

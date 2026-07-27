@@ -1,7 +1,7 @@
 import React from 'react';
 import type { AirData } from '../GuadeloupeMap';
-import type { WaterDataMap } from '../../tours-deau/types';
-import type { VigilanceData } from '../../meteo/types';
+import type { WaterDataMap } from '@/app/(site)/tours-deau/types';
+import type { VigilanceData } from '@/app/(site)/meteo/types';
 import { ErrorDisplay } from '../shared/ErrorDisplay';
 import { HelpButton } from '../shared/HelpButton';
 import { VigilanceWidget } from './VigilanceWidget';

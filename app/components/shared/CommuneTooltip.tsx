@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { HoverInfo } from '../GuadeloupeMap';
-import { ALL_COMMUNES } from '../../meteo/constants';
+import { ALL_COMMUNES } from '@/app/(site)/meteo/constants';
 
 interface CommuneTooltipProps {
   hoveredInfo: HoverInfo | null;

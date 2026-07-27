@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { VIGILANCE_LEVEL_DETAILS } from '../constants';
 import { AlertTriangle, Info, Shield, Home, CheckCircle } from 'lucide-react';
-import { useMeteoData } from '../../providers/DataProvider';
-import { InteractiveGuide, GuideItem } from '../../components/shared/InteractiveGuide';
+import { useMeteoData } from '@/app/providers/DataProvider';
+import { InteractiveGuide, GuideItem } from '@/app/components/shared/InteractiveGuide';
 
 export const CyclonicVigilanceGuide = () => {
   const { vigilanceData, mounted } = useMeteoData();

@@ -1,15 +1,15 @@
 'use client'; // Indispensable pour utiliser les hooks
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import GuadeloupeMap, { HoverInfo } from '../components/GuadeloupeMap';
-import { CommuneSelector } from '../components/shared/CommuneSelector';
-import { CommuneTooltip } from '../components/shared/CommuneTooltip';
-import { DataPageLayout } from '../components/shared/DataPageLayout';
-import { MapPanel } from '../components/shared/MapPanel';
+import GuadeloupeMap, { HoverInfo } from '@/app/components/GuadeloupeMap';
+import { CommuneSelector } from '@/app/components/shared/CommuneSelector';
+import { CommuneTooltip } from '@/app/components/shared/CommuneTooltip';
+import { DataPageLayout } from '@/app/components/shared/DataPageLayout';
+import { MapPanel } from '@/app/components/shared/MapPanel';
 import { AirSidebar } from './components/AirSidebar';
 import { AirQualityGuide } from './components/AirQualityGuide';
 import { PollutantsGuide } from './components/PollutantsGuide';
-import { useAirData } from '../providers/DataProvider';
+import { useAirData } from '@/app/providers/DataProvider';
 
 export default function QualiteAirClient() {
   // --- GESTION DES DONNÉES ---
