@@ -1,0 +1,198 @@
+/*
+ * Palette de Gwad'Alerte — source unique, partagée par les deux groupes de
+ * routes.
+ *
+ * Le tableau de bord et les pages légales avaient chacun leur système : les
+ * tokens sauge/encre ici, les tokens shadcn en oklch dans `globals.css`, et
+ * des `slate-600` / `gray-900` / `blue-600` écrits en dur dans les pages. Trois
+ * vocabulaires pour deux pages, et aucune couleur ne circulait de l'un à
+ * l'autre. Le tableau de bord étant devenu le produit, c'est sa palette qui
+ * fait foi : `globals.css` mappe désormais les tokens shadcn sur celle-ci
+ * plutôt que de les redéfinir.
+ *
+ * Thème clair par défaut (usage quotidien en plein soleil) ; `.dark` restaure
+ * le thème sombre. Piloté par next-themes (class) depuis les deux layouts.
+ *
+ * Règle à tenir : aucune couleur littérale hors de ce fichier et de
+ * `(dashboard)/lib/palette.ts`, qui porte les échelles ATMO et vigilance.
+ */
+
+:root {
+  --ink: #eef3f1;
+  --ink2: #ffffff;
+  --sage: #14574a;
+  --sage-dim: #2f7a66;
+  --txt: #0b1413;
+  /*
+   * Deux niveaux d'atténuation seulement, et tous deux au-dessus de 4.5:1 sur
+   * fond clair comme sur l'encre sombre (voir `.dark` ci-dessous).
+   */
+  --mut: rgba(11, 20, 19, 0.68);
+  --mut2: rgba(11, 20, 19, 0.58);
+  --line: rgba(11, 20, 19, 0.14);
+  --panel-w: 460px;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-solid: #ffffff;
+  --on-sage: #ffffff;
+  --hover-bg: rgba(11, 20, 19, 0.05);
+  --active-bg: rgba(20, 87, 74, 0.12);
+  --map-stroke: rgba(11, 20, 19, 0.55);
+  --map-highlight: #0b1413;
+  --stage-bg: radial-gradient(120% 90% at 22% 12%, #ffffff 0%, #dfe9e5 45%, #c3d4cd 100%);
+  --stage-veil: linear-gradient(to top, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.25) 26%, transparent 46%);
+  /*
+   * Foyer sombre du coin bas-gauche : il assoit le readout sur l'encre. Sur
+   * fond clair il ne fait qu'assombrir une zone déjà voilée de blanc, et
+   * faisait tomber le pied de page sous 4.5:1 — il est donc neutralisé ici.
+   */
+  --stage-halo: rgba(4, 10, 9, 0);
+
+  /*
+   * Contour des *contrôles* (bouton fantôme, bascule de thème, champ de
+   * recherche). `--line` reste réservée aux séparateurs décoratifs, que
+   * WCAG 1.4.11 dispense ; la limite d'un contrôle, elle, demande 3:1.
+   * Mesuré : 4.13:1 sur le panneau, 3.64:1 au pire de la scène.
+   */
+  --control-line: rgba(11, 20, 19, 0.55);
+
+  /*
+   * Couleur des liens. Elle ne se distingue pas du texte courant par le
+   * contraste seul (2.2:1) : les liens sont donc soulignés en permanence, et
+   * la couleur n'est qu'un renfort.
+   */
+  --link: #14574a;
+
+  /*
+   * Fonds décoratifs et d'attente. Ils restent sous 3:1 à dessein — un fond
+   * de barre à 3:1 se lirait comme une barre pleine. L'information qu'ils
+   * portent est disponible en texte à côté (« 4/6 · Dégradé » au-dessus de
+   * la barre, « Chargement des communes » sur le squelette), ce qui les fait
+   * entrer dans l'exception « information disponible en texte » de 1.4.11.
+   */
+  --track: rgba(11, 20, 19, 0.18);
+  --skeleton: rgba(11, 20, 19, 0.14);
+  --chip-bg: rgba(11, 20, 19, 0.04);
+  --tint-sage: rgba(20, 87, 74, 0.1);
+  --orb-tint: rgba(20, 87, 74, 0.22);
+  --shadow-pop: 0 8px 24px rgba(11, 20, 19, 0.14);
+
+  /*
+   * Commune sans mesure. Aucun aplat ne peut tenir 3:1 à la fois contre la
+   * scène et contre les remplissages ATMO voisins : l'état est donc porté par
+   * le contour tireté de `.is-no-data`, pas par la seule couleur.
+   */
+  --no-data: #778782;
+  /* Le tireté doit se voir sur l'aplat qu'il borde : `--mut2` n'y tenait que
+     2,68:1, `--map-stroke` 2,54:1. Mesuré ici 3,87:1 sur `--no-data` et
+     8,80:1 sur la scène, de l'autre côté du trait. */
+  --no-data-stroke: rgba(11, 20, 19, 0.8);
+
+  /*
+   * Échelle des tours d'eau. Elle était globale, calibrée sur l'encre sombre :
+   * sur la scène claire, « 1 jour » tombait à 1,08:1 et « 2 jours et plus » à
+   * 1,53:1 — une commune coupée devenait invisible, tandis que « aucune
+   * coupure », seule teinte sombre, était ce que l'œil trouvait en premier.
+   * La gravité gouverne maintenant la saillance dans les deux thèmes.
+   *
+   * Clair : 1,2–1,5:1 pour l'état calme (la forme de la commune reste portée
+   * par son contour, à 3,42:1), 3,3:1 pour un jour, 6,9:1 au-delà. Écarts
+   * entre niveaux : 2,7 / 2,1 / 5,8:1, complétés par un saut de teinte
+   * vert → ambre → brique et par la légende, qui nomme chaque couleur.
+   */
+  --water-0: #a8c6b6;
+  --water-1: #96650f;
+  --water-2: #6d2a0d;
+
+  /* Fraîcheur du planning SMGEAG (voir `.status-tag`). */
+  /*
+   * Échelle ATMO en *texte*. Distincte des aplats de la carte : le chiffre de
+   * l'indice s'affiche en 64 px sur le panneau blanc, où les teintes vives de
+   * la carte tombaient entre 1,67 et 2,36:1 — sous le seuil de 3:1 des grands
+   * caractères. Les aplats, eux, restent vifs : ils se lisent les uns contre
+   * les autres sur la carte, pas contre du blanc.
+   *
+   * Mesuré sur `--ink2` clair : 6,46 / 5,64 / 6,57 / 6,85 / 7,37 / 8,73:1.
+   */
+  --atmo-fg-1: #1f6b45;
+  --atmo-fg-2: #55701c;
+  --atmo-fg-3: #7a5710;
+  --atmo-fg-4: #8a4a12;
+  --atmo-fg-5: #9c2f26;
+  --atmo-fg-6: #7a2f61;
+  --ok-fg: #1f6b45;
+  --ok-bg: rgba(31, 107, 69, 0.1);
+  --warn-fg: #7a5710;
+  --warn-bg: rgba(122, 87, 16, 0.1);
+
+  /*
+   * Couleurs des glyphes météo (voir WeatherGlyph.tsx). Elles décrivent un
+   * phénomène — soleil, lune, pluie — et ne doivent pas se confondre avec les
+   * couleurs sémantiques de la carte : le jaune du soleil est plus chaud que
+   * le jaune « dégradé » de l'échelle ATMO, et le bleu de la pluie reprend
+   * exactement la bande froide de l'échelle de température.
+   */
+  --wx-sun: #b87a00;
+  --wx-moon: #4a6572;
+  --wx-cloud: #5c737e;
+  --wx-cloud-dim: #79908a;
+  --wx-rain: #2f6f8f;
+  --wx-bolt: #b87a00;
+  --wx-fog: #5c737e;
+  --wx-snow: #5c737e;
+}
+
+.dark {
+  --ink: #0b1413;
+  --ink2: #101c1a;
+  --sage: #a9c6bc;
+  --sage-dim: #7d9a91;
+  --txt: #f1f5f4;
+  --mut: rgba(241, 245, 244, 0.66);
+  --mut2: rgba(241, 245, 244, 0.52);
+  --line: rgba(241, 245, 244, 0.12);
+  --surface: rgba(8, 16, 15, 0.72);
+  --surface-solid: #101c1a;
+  --on-sage: #0b1413;
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --active-bg: rgba(169, 198, 188, 0.12);
+  --map-stroke: rgba(10, 20, 19, 0.85);
+  --map-highlight: #fff;
+  --stage-bg: radial-gradient(120% 90% at 22% 12%, #2d4340 0%, #1a2a28 42%, #0d1615 100%);
+  --stage-veil: linear-gradient(to top, rgba(4, 10, 9, 0.82) 0%, rgba(4, 10, 9, 0.35) 26%, transparent 46%);
+  --stage-halo: rgba(4, 10, 9, 0.18);
+  --control-line: rgba(241, 245, 244, 0.55);
+  --link: #a9c6bc;
+  --track: rgba(241, 245, 244, 0.1);
+  --skeleton: rgba(241, 245, 244, 0.12);
+  --chip-bg: rgba(255, 255, 255, 0.04);
+  --tint-sage: rgba(169, 198, 188, 0.1);
+  --orb-tint: rgba(169, 198, 188, 0.3);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --no-data: #8b9c97;
+  --no-data-stroke: rgba(10, 20, 19, 0.85);
+  /* Sur l'encre sombre, l'échelle d'origine classait déjà juste : jaune et
+     orange vifs ressortent (9,0 et 6,3:1), le slate désaturé s'efface. */
+  --water-0: #4b6660;
+  --water-1: #e2c76a;
+  --water-2: #df9a58;
+  /* Sur l'encre sombre, les teintes de la carte passent déjà le seuil : le
+     texte reprend l'échelle vive. */
+  --atmo-fg-1: #79bd8c;
+  --atmo-fg-2: #a9c68a;
+  --atmo-fg-3: #e2c76a;
+  --atmo-fg-4: #df9a58;
+  --atmo-fg-5: #d4685d;
+  --atmo-fg-6: #a05a86;
+  --ok-fg: #79bd8c;
+  --ok-bg: rgba(121, 189, 140, 0.14);
+  --warn-fg: #e2c76a;
+  --warn-bg: rgba(226, 199, 106, 0.14);
+  --wx-sun: #f0c04a;
+  --wx-moon: #ccdae8;
+  --wx-cloud: #9fb2ad;
+  --wx-cloud-dim: #79908a;
+  --wx-rain: #6f9fb5;
+  --wx-bolt: #f2b134;
+  --wx-fog: #93a8a4;
+  --wx-snow: #e2edf3;
+}

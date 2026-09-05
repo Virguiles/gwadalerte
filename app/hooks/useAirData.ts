@@ -1,4 +1,4 @@
-import { AirData } from '../components/GuadeloupeMap';
+import type { AirData } from '../data/air-types';
 import { useCachedResource } from './useCachedResource';
 
 const CACHE_KEY = 'gwada_air_quality';

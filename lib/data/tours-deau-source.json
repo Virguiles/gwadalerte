@@ -2,6 +2,9 @@
   "source": "SMGEAG",
   "sourceUrl": "https://www.smgeag.fr/",
   "documentLabel": "Planning des tours d'eau SMGEAG",
-  "collectedAt": "2026-07-24",
-  "note": "Ce planning est relevé manuellement depuis les publications du SMGEAG. Mettre à jour `collectedAt` À CHAQUE modification de tours-deau.json : cette date est affichée telle quelle aux utilisateurs."
+  "documentTitle": "Planning tours d'eau 2026 — du 10 au 16 août 2026",
+  "periodStart": "2026-08-10",
+  "periodEnd": "2026-08-16",
+  "collectedAt": "2026-08-11",
+  "note": "Ce planning est relevé manuellement depuis les publications du SMGEAG. Mettre à jour `collectedAt` À CHAQUE modification de tours-deau.json : cette date est affichée telle quelle aux utilisateurs. `periodStart` / `periodEnd` reprennent la période de validité imprimée sur le document source ; le SMGEAG publie un planning par semaine."
 }

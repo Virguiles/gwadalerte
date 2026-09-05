@@ -122,6 +122,14 @@ export function useCachedResource<T>({
 
     if (cachedData && cachedData.trim() !== '' && cachedTimestamp) {
       try {
+        /*
+         * Dette assumée : peindre le cache avant le réseau est tout l'intérêt
+         * de ce hook — c'est ce qui rend le site consultable hors ligne. Le
+         * faire sans `setState` en effet demanderait de lire `localStorage`
+         * pendant le rendu, donc de traiter l'écart d'hydratation qui va avec.
+         * À reprendre avec la lecture d'URL du tableau de bord, même sujet.
+         */
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- voir ci-dessus
         setData(JSON.parse(cachedData) as T);
         const timestamp = parseInt(cachedTimestamp, 10);
         setLastUpdate(new Date(timestamp));

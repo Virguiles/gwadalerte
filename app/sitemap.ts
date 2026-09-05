@@ -1,5 +1,12 @@
 import { MetadataRoute } from 'next'
 
+/**
+ * Trois entrées seulement : le tableau de bord et les deux pages légales.
+ *
+ * /meteo, /qualite-air et /tours-deau ne sont plus des pages mais des
+ * redirections vers l'accueil (voir next.config.ts) — les déclarer ici
+ * demanderait à Google d'indexer des URL qui ne répondent plus 200.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://gwadalerte.com'
 
@@ -7,26 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'hourly',
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/meteo`,
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/qualite-air`,
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/tours-deau`,
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.8,
     },
     {
       url: `${baseUrl}/credits`,

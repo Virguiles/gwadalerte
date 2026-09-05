@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { WaterDataMap } from '@/app/(site)/tours-deau/types';
+import { WaterDataMap } from '@/app/data/water-types';
 import { useCachedResource } from './useCachedResource';
 
 const CACHE_KEY = 'gwada_water_cuts';

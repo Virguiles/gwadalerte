@@ -1,0 +1,1632 @@
+/*
+ * Gwad'Alerte — feuille de style du tableau de bord.
+ *
+ * Elle n'utilise pas Tailwind, mais elle partage désormais sa palette avec les
+ * pages légales : les tokens vivent dans `app/tokens.css`, que `globals.css`
+ * importe également (voir le commentaire d'en-tête de ce fichier).
+ */
+
+@import '../tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body.dashboard-body {
+  background: var(--ink);
+  color: var(--txt);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-weight: 300;
+  /* Les blocs qui ne déclaraient pas d'interlignage héritaient du ~1,2 par
+     défaut. Les valeurs et titres, eux, posent le leur explicitement. */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  /*
+   * Le tutoriel d'accueil est `fixed` en haut de la fenêtre : la place qu'il
+   * occupe se réserve ici, une fois, pour toute l'application.
+   *
+   * Le décalage a d'abord été tenté en `margin-top` sur `.shell` : mesuré sans
+   * effet, la marge y étant neutralisée jusqu'en `!important`. Le `padding` du
+   * body, lui, décale bien tout le contenu — et `box-sizing: border-box` le
+   * garde à la hauteur de la fenêtre.
+   *
+   * Sans transition, et c'est délibéré : animer ce décalage laissait la
+   * propriété bloquée à `0px` (mesuré — la valeur adossée à une variable
+   * n'atteignait jamais son terme), et il n'y a rien à animer de toute façon.
+   * Le bandeau est là au premier rendu ou pas du tout.
+   */
+  padding-top: var(--onboarding-h, 0px);
+}
+
+/*
+ * Métadonnées et valeurs : mono capitales espacées. 10 px était trop petit
+ * pour du texte espacé en capitales — les libellés d'action, eux, sortent de
+ * cette classe (voir `.btn`) : une commande principale ne se lit pas en
+ * capitales de 10 px.
+ */
+.mono {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Réservé aux annonces destinées aux lecteurs d'écran. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * Lien d'évitement : invisible jusqu'au focus clavier.
+ *
+ * Sa position de repos se compte depuis le haut de `.shell`, qui descend sous
+ * le tutoriel d'accueil : un `-48px` fixe ne le sortait plus de l'écran, il
+ * venait se poser sur le bandeau. L'écart reprend donc la hauteur du bandeau.
+ */
+.skip-link {
+  position: absolute;
+  top: calc(-48px - var(--onboarding-h, 0px));
+  left: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--sage);
+  color: var(--on-sage);
+  font-size: 13px;
+  text-decoration: none;
+  /* Pas de transition sur `top` : sa valeur dépend d'une variable, et animer
+     une telle valeur la laissait bloquée à son point de départ — le lien
+     restait alors visible en permanence, posé sur le bandeau. Il apparaît donc
+     d'un coup au focus, ce qui est le comportement attendu d'un lien
+     d'évitement. */
+}
+
+.skip-link:focus-visible {
+  top: 12px;
+}
+
+/*
+ * Pile des bannières d'état, en haut de la scène.
+ *
+ * Elles étaient posées en `position: absolute` par style inline, alors que
+ * `.shell` n'était pas positionné : elles se calaient sur le bloc conteneur
+ * initial. Et le tutoriel d'accueil, `fixed` et pleine largeur, les recouvrait
+ * — au premier chargement, c'est-à-dire précisément quand une erreur de
+ * chargement est la plus probable. C'est désormais `.shell` tout entière qui
+ * descend sous le tutoriel (voir plus bas) ; la pile, posée dedans, suit — et
+ * ne doit donc plus reprendre l'écart elle-même, sous peine de le compter deux
+ * fois.
+ */
+.banner-stack {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: min(100%, 560px);
+  padding: 0 16px;
+  /* La pile couvre toute la largeur : sans ça, elle intercepterait les clics
+     sur la carte même quand elle est vide. */
+  pointer-events: none;
+}
+
+.banner-stack > * {
+  pointer-events: auto;
+}
+
+/* Bandeau d'erreur / hors-ligne : visible, avec action de réessai. */
+.banner-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #d4685d;
+  background: var(--surface-solid);
+  color: var(--txt);
+  font-size: 13px;
+}
+
+.banner-error button {
+  padding: 8px 14px;
+  min-height: 44px;
+  border-radius: 999px;
+  background: var(--sage);
+  color: var(--on-sage);
+  font-weight: 500;
+}
+
+.banner-offline {
+  border-color: var(--line);
+}
+
+/* Bouton de thème dans la barre du dashboard : cible 44px minimum. */
+.theme-toggle-dashboard {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--control-line);
+  background: var(--surface);
+  color: var(--txt);
+}
+
+/* Les glyphes météo portent leurs propres couleurs : rien à hériter. */
+.wx-glyph {
+  flex: none;
+  display: block;
+}
+
+/* Barres de défilement fines, cohérentes avec la direction artistique. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------- ossature */
+
+/*
+ * Le tutoriel d'accueil est `fixed` en haut de la fenêtre, pleine largeur.
+ * Seule `.banner-stack` descendait sous lui : la marque, l'heure et le haut du
+ * panneau restaient dessous, invisibles à la première visite — à *toutes* les
+ * largeurs, pas seulement en mobile (mesuré : bandeau 0→131 px, en-tête
+ * 18→67 px à 320 px, et le recouvrement persiste jusqu'à 1440 px).
+ *
+ * C'est donc l'ossature entière qui se décale, et non chacun de ses blocs :
+ * le bandeau occupe une bande en haut, l'application occupe le reste. La
+ * hauteur suit, sinon le bas de la page sortirait de l'écran.
+ */
+.shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--panel-w);
+  height: 100vh;
+  height: calc(100dvh - var(--onboarding-h, 0px));
+  width: 100%;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--stage-bg);
+}
+
+/* Voile bas : assoit le readout sur la scène, avec un foyer discret dans son
+   coin. La carte ne passe pas dessous — il ne s'agit que de l'asseoir. */
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 50% at 4% 92%, var(--stage-halo) 0%, transparent 70%),
+    var(--stage-veil);
+}
+
+/*
+ * Les blocs posés sur la carte. Ils étaient six positions absolues avec des
+ * coordonnées en dur — dont un `top: 168px` pour le rail, somme mesurée à
+ * l'œil des hauteurs de la marque et du texte d'accueil : trois lignes de
+ * texte au lieu de deux, ou un zoom texte à 200 %, et l'accueil passait sous
+ * le rail. La rangée du rail est souple et il défile en lui-même, donc il ne
+ * peut plus recouvrir le readout sur une fenêtre courte.
+ */
+.stage-overlay {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'brand   actions'
+    'welcome welcome'
+    'rail    .'
+    'readout readout';
+  align-content: start;
+  gap: 14px 20px;
+  height: 100%;
+  /* Le bas laisse passer `.dashboard-footer`, posé en absolu sur `.shell` à
+     10 px du bord : le readout s'arrêtait à 24 px et les deux se
+     chevauchaient sur une quinzaine de pixels. */
+  padding: 26px 28px 52px;
+  /* La grille couvre toute la scène : sans ça, elle avalerait les clics
+     destinés à la carte, y compris ceux qui doivent désélectionner. */
+  pointer-events: none;
+}
+
+.stage-overlay > * {
+  pointer-events: auto;
+  min-width: 0;
+}
+
+.map-holder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* ------------------------------------------------------------------ carte */
+
+.commune-path {
+  fill-opacity: 0.86;
+  stroke: var(--map-stroke);
+  stroke-width: 0.9px;
+  cursor: pointer;
+  transition: fill 0.25s ease, fill-opacity 0.18s ease, stroke-width 0.18s ease;
+}
+
+/* Survol croisé : la mise en évidence vaut depuis la carte comme depuis la
+   liste, sans quoi les deux vues restent étrangères l'une à l'autre. */
+.commune-path.is-hovered {
+  stroke: var(--map-highlight);
+  stroke-width: 1.4px;
+  fill-opacity: 1;
+}
+
+/*
+ * Pas d'outline rectangulaire sur les communes du SVG : en SVG, l'outline
+ * dessine un carré autour de la boîte englobante, pas autour de la forme.
+ * Le focus clavier reprend le surlignage qui suit le contour.
+ *
+ * Il est *tireté* : le focus faisait 2 px et la sélection 1,8 px, dans la même
+ * couleur — 0,2 px d'écart, donc rien de perceptible quand on tabulait sur la
+ * commune déjà choisie. Un trait discontinu se distingue par sa forme, pas par
+ * son épaisseur, et reste lisible quel que soit le remplissage dessous.
+ */
+.commune-path:focus,
+.commune-path:focus-visible {
+  outline: none;
+  stroke: var(--map-highlight);
+  stroke-width: 2.6px;
+  stroke-dasharray: 4 2.5;
+  fill-opacity: 1;
+}
+
+.commune-path:active {
+  fill-opacity: 1;
+}
+
+.commune-path.is-selected {
+  stroke: var(--map-highlight);
+  stroke-width: 1.8px;
+  stroke-dasharray: none;
+  fill-opacity: 1;
+}
+
+/*
+ * Commune sans mesure. Aucun aplat ne tient 3:1 à la fois contre la scène et
+ * contre les remplissages ATMO voisins : l'absence de donnée est donc portée
+ * par un contour tireté, différence de forme et non de couleur — et le libellé
+ * « Non mesuré » l'accompagne partout (`aria-label`, `<title>`, liste).
+ */
+.commune-path.is-no-data {
+  stroke: var(--no-data-stroke);
+  stroke-dasharray: 3 2;
+  fill-opacity: 1;
+}
+
+/* Les états interactifs reprennent la main sur le tireté « sans mesure ». */
+.commune-path.is-no-data.is-hovered,
+.commune-path.is-no-data.is-selected {
+  stroke: var(--map-highlight);
+  stroke-dasharray: none;
+}
+
+/*
+ * Fond de carte cliquable : il remplit tout le SVG, sous les communes, et
+ * rend le clic « à côté » utile — la sélection tombe. Transparent, mais pas
+ * `fill: none`, qui ne recevrait aucun événement.
+ */
+.map-backdrop {
+  fill: transparent;
+}
+
+.map-tooltip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  transform: translate(-50%, -118%);
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--txt);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.map-tooltip strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.map-tooltip span {
+  display: block;
+  color: var(--mut);
+  font-size: 11px;
+}
+
+/*
+ * Rail des archipels — Saint-Martin, Les Saintes, Marie-Galante et La
+ * Désirade, chacun sur sa propre petite carte plutôt qu'un point sur la
+ * carte principale, qui ne les dessine plus du tout (voir `mainlandGeo` dans
+ * DashboardClient) : les montrer aux deux endroits les ferait voir en double.
+ * Colonne verticale reprise telle quelle de gwadair.fr, qui présente ses
+ * quatre îles de la même façon, dans le même ordre, sur le même bord.
+ */
+.archipelago-rail {
+  grid-area: rail;
+  align-self: start;
+  /* Bornée par sa rangée : sur une fenêtre courte, le rail défile au lieu de
+     déborder sur le readout. */
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.archipelago-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 108px;
+  flex: none;
+  padding: 7px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+}
+
+.archipelago-card-label {
+  padding: 0 2px;
+  color: var(--mut);
+}
+
+.archipelago-card-map {
+  width: 100%;
+  height: 46px;
+  overflow: visible;
+}
+
+.archipelago-card .commune-path {
+  /* Les îles fines (La Désirade) se réduisent à un filet quasi invisible en
+     Mercator : un contour clair, plutôt que le trait sombre de la carte
+     principale, leur donne un bord lisible même quand le remplissage ne
+     fait presque aucune surface. */
+  stroke: var(--mut);
+  stroke-width: 1.1px;
+}
+
+.archipelago-card .commune-path:hover,
+.archipelago-card .commune-path.is-hovered {
+  stroke: var(--map-highlight);
+  stroke-width: 1.6px;
+}
+
+.archipelago-card .commune-path.is-selected {
+  stroke: var(--map-highlight);
+  stroke-width: 1.9px;
+  stroke-dasharray: none;
+}
+
+/* Les règles de la carte principale sont à égalité de spécificité avec
+   `.archipelago-card .commune-path` et viennent avant elle : sans ce
+   doublon, le focus clavier serait écrasé sur les mini-cartes. */
+.archipelago-card .commune-path:focus,
+.archipelago-card .commune-path:focus-visible {
+  stroke: var(--map-highlight);
+  stroke-width: 2.4px;
+  stroke-dasharray: 3.5 2;
+}
+
+.archipelago-card .commune-path.is-no-data {
+  stroke: var(--no-data-stroke);
+  stroke-dasharray: 2.5 1.8;
+}
+
+.map-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 320px;
+  text-align: center;
+  color: var(--mut);
+  font-size: 13px;
+}
+
+/* Texte d'accueil, sous la barre du logo. */
+.welcome-note {
+  grid-area: welcome;
+  max-width: 400px;
+}
+
+.welcome-note h1,
+.welcome-note .welcome-title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--txt);
+}
+
+.welcome-note p,
+.welcome-note .welcome-text {
+  font-size: 12.5px;
+  margin: 5px 0 0;
+  color: var(--mut);
+  line-height: 1.5;
+}
+
+.dashboard-footer {
+  position: absolute;
+  bottom: 10px;
+  left: 28px;
+  z-index: 4;
+  font-size: 11.5px;
+  color: var(--mut);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.dashboard-footer a {
+  color: var(--mut);
+  text-decoration: none;
+  margin-right: 14px;
+  padding: 8px 4px;
+  display: inline-block;
+}
+
+.dashboard-footer a:hover {
+  color: var(--txt);
+}
+
+/* --------------------------------------------- en-tête, vigilance, légende */
+
+/*
+ * Le nom du site en haut à gauche, à la place qu'on cherche d'instinct pour
+ * « revenir à l'accueil » : c'est le bouton de retour à toute l'île. Sous lui,
+ * le contexte de ce qu'on regarde — commune choisie ou territoire entier — et
+ * l'heure du relevé.
+ */
+.brand-bar {
+  grid-area: brand;
+  align-self: start;
+  min-width: 0;
+}
+
+.brand {
+  display: block;
+  padding: 0;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--txt);
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.brand:hover {
+  color: var(--sage);
+}
+
+.brand-meta {
+  margin: 5px 0 0;
+  color: var(--mut);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Colonne d'actions en haut à droite : bascule clair/sombre (emplacement
+ * conventionnel) puis bandeau de vigilance. La donnée vigilance est
+ * départementale, elle ne peut pas être portée par les communes — elle reste
+ * donc visible en permanence, à part.
+ */
+.top-actions {
+  grid-area: actions;
+  justify-self: end;
+  align-self: start;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Sans `flex-wrap` ni `min-width: 0`, les trois textes se comprimaient sans
+   point de rupture prévu : à 320 px, la pastille partage la ligne avec un
+   bouton de 44 px. */
+.vigilance-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 9px 16px 9px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+}
+
+.vigilance-banner .dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.vigilance-banner .level {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.vigilance-banner .scope {
+  min-width: 0;
+  color: var(--mut);
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+/* Passée à la ligne, la portée n'a plus de voisin à séparer. */
+@media (max-width: 420px) {
+  .vigilance-banner .scope {
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+/* La vigilance est fréquente en Guadeloupe : le bandeau change d'insistance
+   avec le niveau — discret au vert, pleine alerte au rouge. */
+.vigilance-banner.level-3,
+.vigilance-banner.level-4 {
+  border-width: 2px;
+  font-weight: 500;
+}
+
+.vigilance-banner.level-4 {
+  border-color: #d4685d;
+}
+
+/*
+ * La légende dit ce que la couleur veut dire, et change avec la couche. Dans
+ * le panneau, en flux normal sous les onglets : posée en flottant sur la
+ * carte, elle recouvrait les chiffres du readout sur les fenêtres étroites.
+ */
+.legend {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 12px 26px;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--mut);
+}
+
+.legend-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}
+
+/* --------------------------------------------------------------- readout */
+
+/*
+ * L'état du territoire, dans le coin bas-gauche. Il ne dépend pas de la
+ * commune choisie et ne change donc jamais de taille — c'est ce qui permet à
+ * la carte de rester cadrée à l'identique d'un clic à l'autre.
+ */
+.readout {
+  grid-area: readout;
+  align-self: end;
+  width: min(430px, 100%);
+}
+
+/* `auto-fit` plutôt que trois colonnes fixes : sur un téléphone étroit,
+   « Communes en tour d'eau » passe de lui-même à la ligne suivante. */
+.readout-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 20px;
+}
+
+.readout-stat-value {
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 200;
+  line-height: 1;
+}
+
+.readout-stat-value small {
+  font-size: 0.4em;
+  color: var(--mut);
+  margin-left: 3px;
+}
+
+.readout-stat-label {
+  margin-top: 8px;
+  color: var(--mut);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 18px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--chip-bg);
+  backdrop-filter: blur(8px);
+  color: var(--mut);
+}
+
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  /* Casse normale : « OUVRIR LA FICHE COMMUNE » en capitales de 10 px se
+     déchiffre plus qu'il ne se lit. */
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.btn-solid {
+  background: var(--sage);
+  color: var(--on-sage);
+}
+
+.btn-solid:hover {
+  filter: brightness(1.12);
+}
+
+.btn-ghost {
+  border-color: var(--control-line);
+  color: var(--mut);
+}
+
+.btn-ghost:hover {
+  border-color: var(--sage-dim);
+  color: var(--txt);
+}
+
+/* ----------------------------------------------------------- panneau droit */
+
+/*
+ * Le panneau défile comme un tout, en dernier recours.
+ *
+ * Sans ça, en vue d'ensemble : recherche, guide, onglets, légende, texte
+ * d'explication et liste (44vh) sont tous en `flex: none` et occupent à eux
+ * seuls la hauteur de la fenêtre sur un écran court. `.panel-detail` était en
+ * `flex: 1`, c'est-à-dire une base de 0 — il ne recevait que le *reste*, qui
+ * tombait à zéro, et le classement du bas devenait inatteignable puisque
+ * `body.dashboard-body` est en `overflow: hidden`. La fiche commune, elle, n'a
+ * jamais montré le problème : elle remplace la note et la liste par un simple
+ * en-tête, et le reste redevient large.
+ */
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  border-left: 1px solid var(--line);
+  background: var(--ink2);
+}
+
+.panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+/* En-tête de commande du panneau : recherche, guide, filtre, légende. Toutes
+   en `flex: none` — c'est le contenu du dessous qui doit céder, pas elles. */
+.panel-guide {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 26px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-guide-label {
+  font-size: 12px;
+  color: var(--mut2);
+}
+
+/*
+ * Le filtre de données. Deux onglets sous la recherche, en tête du panneau :
+ * ils commandent la carte, la liste, le classement et le texte d'explication
+ * d'un seul geste. Onglets pleine largeur plutôt que pastille flottante — il
+ * faut qu'on voie qu'il y a un choix à faire, et lequel est actif.
+ */
+.layer-tabs {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  flex: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.layer-tabs button {
+  padding: 14px 10px;
+  min-height: 46px;
+  color: var(--mut);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.layer-tabs button:hover {
+  color: var(--txt);
+  background: var(--hover-bg);
+}
+
+.layer-tabs button:active {
+  background: var(--active-bg);
+}
+
+.layer-tabs button[aria-pressed='true'] {
+  color: var(--txt);
+  border-bottom-color: var(--sage);
+}
+
+/* Le texte d'explication, en tête de panneau, sous les onglets qu'il éclaire. */
+.panel-note {
+  flex: none;
+  padding: 18px 26px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * Ce que veut dire la donnée. Casse normale et interligne large : c'est le
+ * seul texte suivi de la page, il ne peut pas être en capitales espacées
+ * comme les métadonnées.
+ */
+.explainer {
+  margin: 0 0 12px;
+  color: var(--mut);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.explainer-source {
+  margin-bottom: 0;
+  color: var(--mut2);
+  font-size: 12px;
+}
+
+/*
+ * Le champ occupe toute la largeur du panneau, sans encadré : son
+ * soulignement est donc sa seule limite, et à ce titre il relève de
+ * WCAG 1.4.11 (3:1) — pas du contraste des séparateurs décoratifs.
+ */
+.search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 74px;
+  border-bottom: 2px solid var(--control-line);
+}
+
+.search input {
+  padding: 30px;
+  border: none;
+  background: transparent;
+  color: var(--txt);
+  font: inherit;
+  font-size: 14px;
+}
+
+.search input::placeholder {
+  color: var(--mut2);
+}
+
+.search input:focus {
+  outline: 2px solid var(--sage);
+  outline-offset: -2px;
+}
+
+.search-icon {
+  display: grid;
+  place-items: center;
+  background: var(--tint-sage);
+  color: var(--sage);
+  border-left: 1px solid var(--line);
+}
+
+/*
+ * Bornée, pas extensible : une recherche à un ou deux résultats ne doit pas
+ * étirer la liste jusqu'à la moitié du panneau. Elle se limite à la hauteur
+ * de son contenu (jusqu'au plafond), et la synthèse en dessous — toujours
+ * affichée, y compris pendant la recherche — absorbe l'espace restant.
+ */
+.commune-list {
+  flex: none;
+  max-height: 44vh;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+/* La liste est un vrai `<ul>` depuis que `role="list"` a été retiré. */
+.commune-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commune-row {
+  display: grid;
+  /* Nom · valeur de la couche · pastille. */
+  grid-template-columns: minmax(0, 1fr) auto 10px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 26px;
+  border-left: 2px solid transparent;
+  text-align: left;
+  transition: background 0.18s ease;
+}
+
+.commune-row:hover,
+.commune-row.is-hovered {
+  background: var(--hover-bg);
+}
+
+.commune-row:active {
+  background: var(--active-bg);
+}
+
+.commune-row[aria-current='true'] {
+  background: var(--active-bg);
+  border-left-color: var(--sage);
+}
+
+.commune-row .name {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commune-row .value {
+  color: var(--mut);
+}
+
+.commune-row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.list-empty {
+  padding: 26px;
+  color: var(--mut);
+  font-size: 13px;
+}
+
+/*
+ * `flex: 1 0 auto` et non `flex: 1` : la base part de la hauteur du contenu au
+ * lieu de zéro, et le bloc ne se laisse plus écraser. Il grandit pour occuper
+ * le vide quand il y en a, et c'est `.panel` qui défile quand il n'y en a pas
+ * — plus de zone de défilement imbriquée à hauteur nulle.
+ */
+.panel-detail {
+  flex: 1 0 auto;
+  min-height: 0;
+  padding: 26px;
+}
+
+/* ------------------------------------------------- fiche commune (panneau) */
+
+/*
+ * La fiche a remplacé la modale : elle occupe le panneau, la carte reste
+ * visible à côté, et le retour à la vue d'ensemble est un simple bouton —
+ * plus de couche superposée à fermer.
+ */
+.detail-head {
+  flex: none;
+  padding: 22px 26px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+/*
+ * Le temps qu'il fait, en tête de fiche. Ces trois informations vivaient sur
+ * la carte, dans un bloc de 132 px que la fiche doublait déjà par ailleurs :
+ * elles sont descendues ici, où le reste de la commune se lit.
+ */
+.detail-now {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.detail-now-temp {
+  font-size: 62px;
+  font-weight: 200;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.detail-now-temp sup {
+  font-size: 0.3em;
+  vertical-align: super;
+  margin-left: 3px;
+  color: var(--mut);
+}
+
+.detail-now-condition {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--mut);
+}
+
+/* Les libellés Open-Meteo sont longs : capitales espacées illisibles ici. */
+.detail-now-condition .mono {
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Dans la fiche, les puces ouvrent le propos — pas de marge haute. */
+.panel-detail .chips {
+  margin: 0 0 4px;
+}
+
+.detail-sources {
+  margin: 30px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--mut2);
+}
+
+.section + .section {
+  margin-top: 30px;
+}
+
+.section-title {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mut2);
+  margin: 0 0 14px;
+  font-weight: 400;
+}
+
+.pair {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.pair dt {
+  color: var(--mut);
+}
+
+.pair dd {
+  margin: 0;
+  text-align: right;
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.rank-row:hover .name {
+  color: var(--sage);
+}
+
+.rank-row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.rank-row .value {
+  color: var(--mut);
+}
+
+.bar-row {
+  padding: 9px 0;
+}
+
+.bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.bar-head .label {
+  font-size: 13px;
+}
+
+.bar-head .value {
+  color: var(--mut);
+}
+
+.bar-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* Ce que mesure le polluant, sous sa barre : « PM10 4/6 » ne dit rien seul. */
+.bar-note {
+  margin: 9px 0 0;
+  color: var(--mut2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.link-btn {
+  margin-top: 16px;
+  color: var(--sage);
+}
+
+.link-btn:hover {
+  filter: brightness(1.15);
+}
+
+
+/* Ouvre la fiche : plus de bloc « température du moment » au-dessus d'elle,
+   c'est le readout posé sur la carte qui le porte. */
+.forecast {
+  display: grid;
+  grid-template-columns: repeat(var(--forecast-days, 5), minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.forecast-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  text-align: center;
+}
+
+.forecast-day .day {
+  color: var(--mut);
+}
+
+.forecast-day .range {
+  color: var(--mut);
+}
+
+.forecast-day .range b {
+  color: var(--txt);
+  font-weight: 400;
+}
+
+.atmo-big {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.atmo-index {
+  font-size: 64px;
+  font-weight: 200;
+  line-height: 1;
+}
+
+.gauge {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin: 20px 0 24px;
+}
+
+.gauge span {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.cut-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--hover-bg);
+}
+
+.cut-card + .cut-card {
+  margin-top: 10px;
+}
+
+.cut-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--mut);
+}
+
+.cut-card .sector {
+  margin: 10px 0 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.cut-card .hours {
+  color: var(--sage);
+}
+
+.cut-card .zones {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--mut2);
+}
+
+/*
+ * Fraîcheur du planning. Les deux couleurs étaient posées en style inline
+ * depuis CommuneDetail, dans leur valeur du thème sombre : sur le panneau
+ * blanc, « Planning à jour » tombait à 2,00:1 et « À vérifier » à 1,56:1.
+ */
+.status-tag {
+  padding: 4px 9px;
+  border-radius: 8px;
+}
+
+.status-tag.is-ok {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+.status-tag.is-stale {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.tip {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--mut);
+  margin: 0 0 14px;
+}
+
+.empty-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--mut);
+}
+
+/* État affiché quand toutes les communes partagent la même valeur. */
+.uniform-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--mut);
+}
+
+.uniform-note strong {
+  color: var(--txt);
+  font-weight: 400;
+}
+
+.uniform-note .dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  margin-right: 9px;
+}
+
+/* ------------------------------------------------------------ chargement */
+
+/*
+ * Trois sources mettent quelques secondes à répondre. Sans ces marques, la
+ * page s'affichait vide — carte absente, chiffres manquants — et se lisait
+ * comme une panne plutôt que comme une attente.
+ */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.skeleton-bar {
+  display: inline-block;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--skeleton);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeleton-bar-sm {
+  width: 46px;
+}
+
+.skeleton-value {
+  height: 30px;
+  width: 74px;
+  border-radius: 6px;
+}
+
+.commune-row.is-skeleton {
+  grid-template-columns: minmax(0, 1fr) auto;
+  cursor: default;
+  pointer-events: none;
+}
+
+.map-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--mut);
+}
+
+.map-loading-orb {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: radial-gradient(circle at 35% 30%, var(--orb-tint), transparent 62%);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar,
+  .map-loading-orb {
+    animation: none;
+  }
+
+  /* La seule transition de position ou de taille restante. */
+  .bar-fill {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------- repli mobile */
+
+/*
+ * Sous 1100 px, les deux colonnes ne tiennent plus côte à côte : la scène
+ * s'empile — en-tête, carte, rail, légende, chiffres — puis le panneau passe
+ * dessous. Le seuil est celui de `COMPACT_WIDTH` dans MapStage, qui bascule au
+ * même moment sur des marges de projection plus serrées.
+ */
+@media (max-width: 1099px) {
+  body.dashboard-body {
+    overflow: auto;
+  }
+
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 100vh;
+  }
+
+  /* En repli, rien ne se pose plus sur la carte : tout s'empile sous elle. */
+  .stage {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 24px;
+  }
+
+  .stage::after {
+    display: none;
+  }
+
+  /*
+   * `display: contents` : les blocs de la grille redeviennent enfants directs
+   * de `.stage`, qui est en colonne flex ici. Les règles `order` ci-dessous
+   * continuent donc de s'appliquer telles quelles, et il n'y a plus deux
+   * mises en page à maintenir — seulement une grille qui s'efface.
+   */
+  .stage-overlay {
+    display: contents;
+  }
+
+  .brand-bar,
+  .top-actions,
+  .welcome-note,
+  .archipelago-rail,
+  .readout {
+    /* En colonne flex, `align-self` joue sur l'axe horizontal : gardés tels
+       quels, `start` et `end` colleraient les blocs à un bord. */
+    align-self: auto;
+    justify-self: auto;
+    max-width: none;
+    width: auto;
+  }
+
+  .dashboard-footer {
+    position: static;
+    max-width: none;
+    width: auto;
+  }
+
+  /* Le rail redevient une rangée : plus de hauteur à borner. */
+  .archipelago-rail {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* L'en-tête reprend la première place, en pleine largeur. */
+  .brand-bar {
+    order: -2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin: 18px 16px 0;
+  }
+
+  .brand-meta {
+    margin: 0;
+  }
+
+  .top-actions {
+    order: -1;
+    margin: 12px 16px 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .top-actions .vigilance-banner {
+    margin: 0;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  /* En repli, l'accueil et le pied de page sortent de la carte : posés en
+     absolu, ils chevauchaient l'en-tête devenue statique et le panneau. */
+  .welcome-note {
+    order: -1;
+    margin: 0 16px 12px;
+  }
+
+  .dashboard-footer {
+    margin: 18px 16px 0;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .map-holder {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 48vh;
+    min-height: 320px;
+  }
+
+  /* Le rail passe sous la carte en grille : empilé en colonne, il aurait fallu
+     lui donner la moitié de la hauteur de l'écran. */
+  .archipelago-rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 14px 16px 0;
+  }
+
+  .legend {
+    padding: 12px 20px;
+  }
+
+  /* Bornée : étalés sur toute la largeur d'une tablette, les trois chiffres
+     se retrouvaient à trente centimètres les uns des autres. */
+  .readout {
+    margin: 18px 16px 0;
+    max-width: 620px;
+  }
+
+  .readout-stats {
+    gap: 18px;
+  }
+
+  .panel {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+
+  /* La liste garde son défilement propre : déroulée, ses trente-deux lignes
+     font 1 400 px et repoussent le classement hors de portée. */
+  .commune-list {
+    flex: none;
+    min-height: 0;
+    max-height: 50vh;
+  }
+
+  .panel-detail {
+    flex: none;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .panel-note {
+    padding: 16px 20px 18px;
+  }
+
+  .detail-head {
+    padding: 18px 20px;
+  }
+
+  .detail-name {
+    font-size: 24px;
+  }
+}
+
+/* Sur un téléphone étroit, trois chiffres de front ne tiennent plus : la
+   grille les répartit d'elle-même sur deux lignes. */
+@media (max-width: 560px) {
+  .brand {
+    font-size: 19px;
+  }
+
+  .commune-row,
+  .rank-row {
+    padding-inline: 18px;
+  }
+
+  .panel-detail,
+  .detail-head {
+    padding-inline: 18px;
+  }
+
+  /* 5 colonnes à ~60px écrasaient glyphes et températures : passage en
+     grille fluide, 2-3 colonnes selon la largeur réelle. */
+  .forecast {
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  }
+
+  .search {
+    grid-template-columns: minmax(0, 1fr) 52px;
+  }
+
+  .search input {
+    padding: 18px;
+  }
+}
