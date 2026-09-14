@@ -1,0 +1,14 @@
+# Configuration Netlify pour Gwad'Alerte
+# Documentation: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Plugin Next.js pour Netlify (gère automatiquement les Route Handlers, l'ISR, etc.)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Les en-têtes de sécurité (CSP, X-Frame-Options, etc.) vivent maintenant dans
+# next.config.ts : le Netlify Next Runtime applique les `headers()` définis
+# par Next.js, pas besoin de les dupliquer ici.
