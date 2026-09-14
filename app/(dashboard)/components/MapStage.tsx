@@ -55,6 +55,15 @@ export function MapStage({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [size, setSize] = React.useState<{ w: number; h: number; viewport: number } | null>(null);
   const [tooltip, setTooltip] = React.useState<{ x: number; y: number; code: string } | null>(null);
+  const tooltipFrameRef = React.useRef<number | null>(null);
+
+  // Un seul rAF en vol : une souris rapide n'en accumule plus plusieurs qui
+  // finiraient tous par déclencher setTooltip coup sur coup.
+  React.useEffect(() => {
+    return () => {
+      if (tooltipFrameRef.current !== null) cancelAnimationFrame(tooltipFrameRef.current);
+    };
+  }, []);
 
   // Le redimensionnement est amorti : reprojeter 32 communes à chaque pixel
   // de largeur ne sert à rien.
@@ -133,7 +142,11 @@ export function MapStage({
     // Évite un setState par pixel de souris : le tooltip suit en rAF.
     const x = event.clientX - base.left;
     const y = event.clientY - base.top;
-    requestAnimationFrame(() => setTooltip({ x, y, code }));
+    if (tooltipFrameRef.current !== null) cancelAnimationFrame(tooltipFrameRef.current);
+    tooltipFrameRef.current = requestAnimationFrame(() => {
+      tooltipFrameRef.current = null;
+      setTooltip({ x, y, code });
+    });
   };
 
   const leave = () => {
