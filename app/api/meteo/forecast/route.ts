@@ -17,7 +17,7 @@ import {
   COMMUNE_COORDINATES,
   createErrorResponse,
 } from '@/lib/api-clients';
-import { getWeatherInfo, getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/lib/weather-codes';
+import { getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/lib/weather-codes';
 import { formatDate as formatDateUtil, getDayName as getDayNameUtil } from '@/lib/utils';
 
 // Configuration dynamique - cette route utilise des paramètres de requête
@@ -247,7 +247,6 @@ async function fetchCommuneForecast(
     for (let dayIndex = 0; dayIndex < data.daily.time.length; dayIndex++) {
       const dayDate = data.daily.time[dayIndex];
       const weatherCode = data.daily.weather_code[dayIndex];
-      const weatherInfo = getWeatherInfo(weatherCode);
       // Pour les prévisions journalières, utiliser l'icône du jour (12h)
       const dayIcon = getWeatherIcon(weatherCode, 12);
 
@@ -258,7 +257,6 @@ async function fetchCommuneForecast(
         const hourTime = data.hourly.time[hourIndex];
         if (hourTime.startsWith(dayDate)) {
           const hourWeatherCode = data.hourly.weather_code[hourIndex];
-          const hourWeatherInfo = getWeatherInfo(hourWeatherCode);
           const isDay = data.hourly.is_day[hourIndex] === 1;
           const hour = new Date(hourTime).getHours();
 

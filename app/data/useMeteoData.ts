@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useEffectEvent, useRef } from 'react';
 import { useMounted } from '@/app/hooks/useClientFlag';
 import { WeatherDataMap, VigilanceData } from './weather-types';
 
@@ -49,11 +49,14 @@ export function useMeteoDataSource() {
     return null;
   };
 
-  // Initialiser avec les données du cache si disponibles
-  const cached = typeof window !== 'undefined' ? loadFromCache() : null;
-  const [weatherData, setWeatherData] = useState<WeatherDataMap>(cached?.weatherData || {});
-
-  const [vigilanceData, setVigilanceData] = useState<VigilanceData | null>(cached?.vigilanceData || null);
+  /*
+   * État initial toujours vide, y compris côté client : le lire depuis le
+   * cache ici provoquait un mismatch d'hydratation (le serveur rend
+   * toujours vide, `window` existe déjà au premier rendu client). Le cache
+   * est appliqué après le montage, dans `loadInitialData`.
+   */
+  const [weatherData, setWeatherData] = useState<WeatherDataMap>({});
+  const [vigilanceData, setVigilanceData] = useState<VigilanceData | null>(null);
 
   const isWeatherCacheValid = (timestamp: number): boolean => {
     const now = Date.now();
@@ -81,11 +84,6 @@ export function useMeteoDataSource() {
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du cache vigilance:', error);
     }
-  };
-
-  const saveToCache = (weather: WeatherDataMap, vigilance: VigilanceData) => {
-    saveWeatherToCache(weather);
-    saveVigilanceToCache(vigilance);
   };
 
   // Fonction pour rafraîchir uniquement la vigilance
@@ -325,53 +323,54 @@ export function useMeteoDataSource() {
       } finally {
         setLoading(false);
       }
-    } else {
-      // Force reload if data is empty in state but cache is valid
-      const cached = loadFromCache();
-      if (cached) {
-        // Check if state is empty
-        if (Object.keys(weatherData).length === 0 && cached.weatherData && Object.keys(cached.weatherData).length > 0) {
-          setWeatherData(cached.weatherData);
-        }
-        if (!vigilanceData && cached.vigilanceData) {
-          setVigilanceData(cached.vigilanceData);
-        }
-      }
     }
   };
 
-  // Chargement initial et rafraîchissement périodique
+  /*
+   * Les deux déclencheurs du montage passent par `useEffectEvent` : ils lisent
+   * toujours les dernières closures (`fetchData`, `fetchVigilanceOnly`) sans
+   * devenir des dépendances de l'effet, qui ne doit tourner qu'une seule fois.
+   */
+  const loadInitialData = useEffectEvent(() => {
+    const cachedOnMount = loadFromCache();
+    const cacheIsFresh =
+      !!cachedOnMount &&
+      isWeatherCacheValid(cachedOnMount.weatherTimestamp) &&
+      isVigilanceCacheValid(cachedOnMount.vigilanceTimestamp);
+
+    if (cacheIsFresh) {
+      console.log('[Init] Cache valide, hydratation depuis le cache');
+      setWeatherData(cachedOnMount.weatherData);
+      setVigilanceData(cachedOnMount.vigilanceData);
+      return;
+    }
+
+    console.log('[Init] Chargement des données manquantes...');
+    fetchData();
+  });
+
+  // On rafraîchit uniquement la vigilance pour éviter de surcharger l'API météo
+  const refreshVigilance = useEffectEvent(() => {
+    console.log('[Vigilance] Rafraîchissement périodique...');
+    fetchVigilanceOnly(false); // Logique de cache normale, pas de force
+  });
+
+  // Chargement initial et rafraîchissement périodique (toutes les 10 minutes)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Vérifier si le cache est valide avant de charger
-    const cached = loadFromCache();
-    const now = Date.now();
+    /*
+     * Dette assumée, la même que dans `useCachedResource` : la règle refuse
+     * tout `setState` atteignable depuis un effet, y compris — comme ici —
+     * après l'attente du réseau. S'en passer voudrait dire sortir le
+     * chargement de React (store externe) ou le remonter côté serveur, deux
+     * chantiers qui débordent de ce hook.
+     */
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- voir ci-dessus
+    loadInitialData();
 
-    const weatherValid = cached?.weatherTimestamp && isWeatherCacheValid(cached.weatherTimestamp);
-    const vigilanceValid = cached?.vigilanceTimestamp && isVigilanceCacheValid(cached.vigilanceTimestamp);
-
-    // Chargement initial seulement si nécessaire
-    if (!weatherValid || !vigilanceValid) {
-      console.log('[Init] Chargement des données manquantes...');
-      /*
-       * Dette assumée : `fetchData` pose l'état de façon synchrone quand le
-       * cache répond, ce que la règle signale à juste titre. La corriger
-       * suppose de restructurer le cache localStorage et la fenêtre de
-       * validité de ce hook, non couverts par des tests — hors du périmètre
-       * de la refonte du tableau de bord.
-       */
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- voir ci-dessus
-      fetchData();
-    } else {
-      console.log('[Init] Cache valide, pas de chargement initial');
-    }
-
-    // Rafraîchissement périodique de la vigilance (toutes les 10 minutes)
-    // On rafraîchit uniquement la vigilance pour éviter de surcharger l'API météo
     intervalRef.current = setInterval(() => {
-      console.log('[Vigilance] Rafraîchissement périodique...');
-      fetchVigilanceOnly(false); // Utiliser la logique de cache normale, pas de force
+      refreshVigilance();
     }, VIGILANCE_REFRESH_INTERVAL_MS);
 
     // Nettoyage de l'intervalle au démontage
@@ -380,7 +379,7 @@ export function useMeteoDataSource() {
         clearInterval(intervalRef.current);
       }
     };
-  }, []); // Empty dependency array - on veut que ça s'exécute une seule fois au montage
+  }, []);
 
   return {
     weatherData,
