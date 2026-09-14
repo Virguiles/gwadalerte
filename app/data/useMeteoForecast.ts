@@ -85,7 +85,6 @@ export function useMeteoForecast(options: UseForecastOptions = {}): UseForecastR
     // Vérifier le cache d'abord
     const cached = loadFromCache();
     if (cached) {
-      console.log('[Forecast] Utilisation du cache');
       if (codeZone) {
         setForecast(cached.data as ForecastData);
       } else {
@@ -129,7 +128,6 @@ export function useMeteoForecast(options: UseForecastOptions = {}): UseForecastR
       }
 
       saveToCache(data);
-      console.log('[Forecast] Données récupérées depuis l\'API');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue';
       console.error('[Forecast] Erreur:', message);
@@ -138,7 +136,6 @@ export function useMeteoForecast(options: UseForecastOptions = {}): UseForecastR
       // Fallback sur le cache même expiré
       const cached = loadFromCache();
       if (cached) {
-        console.log('[Forecast] Fallback sur cache expiré');
         if (codeZone) {
           setForecast(cached.data as ForecastData);
         } else {

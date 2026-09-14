@@ -98,18 +98,15 @@ export function useMeteoDataSource() {
         const cachedVigilanceTimestamp = localStorage.getItem(VIGILANCE_CACHE_TIMESTAMP_KEY);
 
         if (!cachedVigilance || !cachedVigilanceTimestamp) {
-          console.log('[Vigilance Cache] Pas de cache trouvé, chargement...');
           return true;
         }
 
         try {
           if (!cachedVigilance || cachedVigilance.trim() === '') {
-            console.log('[Vigilance Cache] Données vigilance vides, chargement...');
             return true;
           }
           const parsedVigilance = JSON.parse(cachedVigilance);
           if (!parsedVigilance || !parsedVigilance.department) {
-            console.log('[Vigilance Cache] Données vigilance vides, chargement...');
             return true;
           }
         } catch (parseError) {
@@ -118,11 +115,7 @@ export function useMeteoDataSource() {
         }
 
         const timestamp = parseInt(cachedVigilanceTimestamp, 10);
-        const needsRefresh = !isVigilanceCacheValid(timestamp);
-        if (needsRefresh) {
-          console.log('[Vigilance Cache] Cache expiré, rafraîchissement...');
-        }
-        return needsRefresh;
+        return !isVigilanceCacheValid(timestamp);
       } catch (error) {
         console.error('Erreur lors de la vérification du cache vigilance:', error);
         return true;
@@ -146,24 +139,14 @@ export function useMeteoDataSource() {
               setVigilanceData(newVigilanceData);
             }
           } else {
-            // Vérifier si le niveau de vigilance a changé
-            const previousLevel = vigilanceData?.level;
-            const newLevel = newVigilanceData.level;
-
             setVigilanceData(newVigilanceData);
             saveVigilanceToCache(newVigilanceData);
-            console.log('[Vigilance] Données mises à jour:', newVigilanceData.label, `(Niveau: ${newLevel})`);
-
-            if (previousLevel !== undefined && previousLevel !== newLevel) {
-              console.log(`[Vigilance] Niveau changé: ${previousLevel} → ${newLevel}`);
-            }
           }
         }
       } catch (error) {
         console.error('Erreur lors de la récupération de la vigilance:', error);
         const cached = loadFromCache();
         if (cached && cached.vigilanceData) {
-          console.log('[Vigilance Fallback] Utilisation du cache en cas d\'erreur API');
           setVigilanceData(cached.vigilanceData);
         }
       }
@@ -181,18 +164,15 @@ export function useMeteoDataSource() {
         const cachedWeatherTimestamp = localStorage.getItem(WEATHER_CACHE_TIMESTAMP_KEY);
 
         if (!cachedWeather || !cachedWeatherTimestamp) {
-          console.log('[Weather Cache] Pas de cache trouvé, chargement...');
           return true;
         }
 
         try {
           if (!cachedWeather || cachedWeather.trim() === '') {
-            console.log('[Weather Cache] Données météo vides, chargement...');
             return true;
           }
           const parsedWeather = JSON.parse(cachedWeather);
           if (!parsedWeather || Object.keys(parsedWeather).length === 0) {
-            console.log('[Weather Cache] Données météo vides, chargement...');
             return true;
           }
         } catch (parseError) {
@@ -201,11 +181,7 @@ export function useMeteoDataSource() {
         }
 
         const timestamp = parseInt(cachedWeatherTimestamp, 10);
-        const needsRefresh = !isWeatherCacheValid(timestamp);
-        if (needsRefresh) {
-          console.log('[Weather Cache] Cache expiré, rafraîchissement...');
-        }
-        return needsRefresh;
+        return !isWeatherCacheValid(timestamp);
       } catch (error) {
         console.error('Erreur lors de la vérification du cache météo:', error);
         return true;
@@ -280,7 +256,6 @@ export function useMeteoDataSource() {
         if (needsWeather && newWeatherData && Object.keys(newWeatherData).length > 0) {
           setWeatherData(newWeatherData);
           saveWeatherToCache(newWeatherData);
-          console.log(`[Weather] ${Object.keys(newWeatherData).length} communes chargées`);
         }
 
         if (needsVigilance && newVigilanceData && newVigilanceData.department) {
@@ -295,24 +270,14 @@ export function useMeteoDataSource() {
               setVigilanceData(newVigilanceData);
             }
           } else {
-            // Vérifier si le niveau de vigilance a changé
-            const previousLevel = vigilanceData?.level;
-            const newLevel = newVigilanceData.level;
-
             setVigilanceData(newVigilanceData);
             saveVigilanceToCache(newVigilanceData);
-            console.log('[Vigilance] Données chargées:', newVigilanceData.label, `(Niveau: ${newLevel})`);
-
-            if (previousLevel !== undefined && previousLevel !== newLevel) {
-              console.log(`[Vigilance] Niveau changé: ${previousLevel} → ${newLevel}`);
-            }
           }
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
         const cached = loadFromCache();
         if (cached) {
-          console.log('[Fallback] Utilisation du cache en cas d\'erreur API');
           if (cached.weatherData && Object.keys(cached.weatherData).length > 0) {
             setWeatherData(cached.weatherData);
           }
@@ -339,19 +304,16 @@ export function useMeteoDataSource() {
       isVigilanceCacheValid(cachedOnMount.vigilanceTimestamp);
 
     if (cacheIsFresh) {
-      console.log('[Init] Cache valide, hydratation depuis le cache');
       setWeatherData(cachedOnMount.weatherData);
       setVigilanceData(cachedOnMount.vigilanceData);
       return;
     }
 
-    console.log('[Init] Chargement des données manquantes...');
     fetchData();
   });
 
   // On rafraîchit uniquement la vigilance pour éviter de surcharger l'API météo
   const refreshVigilance = useEffectEvent(() => {
-    console.log('[Vigilance] Rafraîchissement périodique...');
     fetchVigilanceOnly(false); // Logique de cache normale, pas de force
   });
 

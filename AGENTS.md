@@ -1,3 +1,7 @@
+# GwadaSVG
+
+Tableau de bord météo, qualité de l'air et tours d'eau pour la Guadeloupe (Next.js App Router).
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
