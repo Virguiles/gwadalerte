@@ -4,8 +4,16 @@
  * Retourne les données de planning des tours d'eau pour les communes de
  * Guadeloupe, depuis l'API publique Orisk (https://orisk.app/api/tours-deau/public).
  *
- * En cas d'échec de l'API Orisk, on retombe sur le planning SMGEAG relevé
- * manuellement (`lib/data/tours-deau.json`) plutôt que de renvoyer une erreur.
+ * Orisk ne publie que les communes ayant une actualité récente (nouvelle
+ * restriction, incident) — pas les rotations permanentes que certaines
+ * communes suivent de longue date (ex. Le Gosier, Capesterre-Belle-Eau,
+ * « Mardi / jeudi / samedi » toutes les semaines) et qu'Orisk ne fait pas
+ * encore remonter. On complète donc Orisk avec le planning SMGEAG relevé
+ * manuellement (`lib/data/tours-deau.json`) : Orisk prime commune par
+ * commune quand il a une donnée, le relevé statique comble le reste.
+ *
+ * En cas d'échec total de l'API Orisk, on retombe entièrement sur ce même
+ * planning statique plutôt que de renvoyer une erreur.
  *
  * Cache: 5 minutes (aligné sur le cache CDN d'Orisk et le cache client)
  */
@@ -15,7 +23,7 @@ import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 import { API_CONFIG, WaterCutsDataMap } from '@/lib/api-clients';
 import { adaptOriskResponse, type OriskToursDeauResponse } from '@/lib/water-cuts-adapter';
 
-// Repli statique en cas d'échec de l'API Orisk
+// Planning statique : complète Orisk commune par commune, et sert de repli total en cas d'échec
 import waterCutsFallback from '@/lib/data/tours-deau.json';
 import waterCutsFallbackSource from '@/lib/data/tours-deau-source.json';
 
@@ -65,7 +73,11 @@ export async function GET() {
       { ttl: CACHE_TTL.WATER_CUTS, staleWhileRevalidate: true }
     );
 
-    return NextResponse.json(data, {
+    // Orisk d'abord, complété par le relevé SMGEAG pour les communes qu'il
+    // ne couvre pas encore (rotations permanentes non remontées côté Orisk).
+    const merged: WaterCutsDataMap = { ...(waterCutsFallback as WaterCutsDataMap), ...data };
+
+    return NextResponse.json(merged, {
       headers: {
         'Cache-Control': `public, s-maxage=${CACHE_TTL.WATER_CUTS}, stale-while-revalidate=${CACHE_TTL.WATER_CUTS * 2}`,
         [WATER_SOURCE_DATE_HEADER]: sourceDate,
