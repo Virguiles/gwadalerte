@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     'vigilance',
     'ATMO',
     'coupures eau',
-    'SMGEAG',
+    'Orisk',
   ],
   openGraph: {
     title: "Gwad'Alerte — informations environnementales Guadeloupe",

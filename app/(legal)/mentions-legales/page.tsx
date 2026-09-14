@@ -88,7 +88,7 @@ export default function MentionsLegales() {
               <li><strong>Qualité de l&apos;Air :</strong> Données fournies par <a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Gwad&apos;Air</a> .</li>
               <li><strong>Météo et Prévisions :</strong> Données fournies par <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Open Meteo</a> .</li>
               <li><strong>Vigilance Météo :</strong> Données officielles fournies par <a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Météo-France</a>.</li>
-              <li><strong>Tours d&apos;eau :</strong> Planning fourni par la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">SMGEAG</a>.</li>
+              <li><strong>Tours d&apos;eau :</strong> Planning fourni par <a href="https://orisk.app/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Orisk</a>, à partir des publications de la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">SMGEAG</a>.</li>
             </ul>
           </section>
 

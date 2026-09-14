@@ -8,8 +8,8 @@
  * de sable saharien y pèsent plus que le trafic, ce qu'aucune échelle
  * nationale ne laisse deviner.
  *
- * Formulation volontairement sobre : seules les consignes des autorités
- * (Gwad'Air, Météo-France, SMGEAG) font foi.
+ * Formulation volontairement sobre : seules les consignes des sources
+ * officielles (Gwad'Air, Météo-France, Orisk) font foi.
  */
 
 import type { Layer } from './model';
@@ -32,7 +32,7 @@ export const LAYER_NOTES: Record<Layer, LayerNote> = {
     summary:
       "La carte colore chaque commune selon le nombre de jours où une coupure d'eau est planifiée sur les sept prochains jours. Les tours d'eau alternent la distribution entre secteurs quand la ressource ne suffit pas à alimenter tout le réseau.",
     source:
-      'Source : planning des tours d’eau du SMGEAG, relevé à la main depuis ses publications. Il change chaque semaine et un secteur peut être coupé sans préavis.',
+      "Source : Orisk (orisk.app), planning des tours d'eau en Guadeloupe. Mis à jour en continu ; un secteur peut être coupé sans préavis.",
   },
 };
 

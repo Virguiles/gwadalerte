@@ -67,7 +67,7 @@ export function useAirData(): AirDataValue {
   return useRequiredContext(AirContext, 'useAirData');
 }
 
-/** Tours d'eau (planning SMGEAG) */
+/** Tours d'eau (planning Orisk) */
 export function useWaterData(): WaterDataValue {
   const enable = useContext(EnableWaterContext);
   useEffect(enable, [enable]);

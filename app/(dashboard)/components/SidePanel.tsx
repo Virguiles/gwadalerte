@@ -112,7 +112,7 @@ export function SidePanel({
       <div className="panel-guide">
         <span className="panel-guide-label">Guide du tableau de bord</span>
         <HelpButton title="Comment utiliser Gwad'Alerte">
-          <p>Le site affiche deux données : la qualité de l&apos;air (indice ATMO) et les coupures d&apos;eau (SMGEAG).</p>
+          <p>Le site affiche deux données : la qualité de l&apos;air (indice ATMO) et les coupures d&apos;eau (Orisk).</p>
           <p>Cliquez une commune sur la carte, ou cherchez son nom. Utilisez la touche <kbd>/</kbd> pour chercher, <kbd>Échap</kbd> pour revenir.</p>
         </HelpButton>
       </div>

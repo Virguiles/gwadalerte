@@ -59,7 +59,7 @@ export type Layer = 'air' | 'water';
 
 export const LAYERS: { id: Layer; label: string; desc: string }[] = [
   { id: 'air', label: "Qualité de l'air", desc: "Indice ATMO et polluants" },
-  { id: 'water', label: "Tours d'eau", desc: "Coupures planifiées SMGEAG" },
+  { id: 'water', label: "Tours d'eau", desc: "Coupures planifiées Orisk" },
 ];
 
 /** Sous-indices ATMO publiés par Gwad'Air, sur la même échelle 1–6 que l'indice global. */
@@ -209,13 +209,13 @@ export type DashboardData = {
   error: string | null;
   /** Relance les chargements air/eau (utilisé par le bandeau d'erreur). */
   retry: () => void;
-  /** Date de relevé du planning SMGEAG (saisie manuelle). */
+  /** Date de génération du planning Orisk (repli : date de relevé SMGEAG). */
   waterSourceDate: Date | null;
   lastUpdate: Date | null;
 };
 
 /**
- * Assemble les trois sources (Gwad'Air, Météo-France, SMGEAG) en un
+ * Assemble les trois sources (Gwad'Air, Météo-France, Orisk) en un
  * enregistrement par commune. Les contours font foi pour la liste et
  * l'orthographe des noms.
  */

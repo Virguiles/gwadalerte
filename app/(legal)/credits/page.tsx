@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Crédits & Sources - Gwad'Alerte",
-  description: "Découvrez les sources de données officielles utilisées par Gwad'Alerte : Météo-France, Gwad'Air, SMGEAG et Open-Meteo. Transparence sur les ressources et licences.",
-  keywords: ["crédits Gwad'Alerte", "sources données", "Météo-France", "Gwad'Air", "SMGEAG", "Open-Meteo", "licences", "transparence"],
+  description: "Découvrez les sources de données officielles utilisées par Gwad'Alerte : Météo-France, Gwad'Air, Orisk et Open-Meteo. Transparence sur les ressources et licences.",
+  keywords: ["crédits Gwad'Alerte", "sources données", "Météo-France", "Gwad'Air", "Orisk", "Open-Meteo", "licences", "transparence"],
   authors: [{ name: "Virgile" }],
   creator: "Virgile",
   publisher: "Gwad'Alerte",
@@ -44,7 +44,7 @@ export default function Credits() {
               <li><strong>Météo-France :</strong> Données officielles de vigilance météorologique et bulletins publics (<a href="https://meteofrance.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">meteofrance.fr</a> via leur API).</li>
               <li><strong>Gwad&apos;Air :</strong> Indices de qualité de l&apos;air (ATMO) fournis par l&apos;association agréée de surveillance de la qualité de l&apos;air en Guadeloupe (<a href="http://www.gwadair.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">gwadair.fr</a> via leur API).</li>
               <li><strong>Open Meteo :</strong> Données météorologiques et prévisions complémentaires (<a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">open-meteo.com</a>).</li>
-              <li><strong>SMGEAG :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">smgeag.fr</a>).</li>
+              <li><strong>Orisk :</strong> Planning des tours d&apos;eau pour la Guadeloupe (<a href="https://orisk.app/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">orisk.app</a>), à partir des publications de la <a href="https://www.smgeag.fr/" target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">SMGEAG</a>. Réutilisation libre, sous réserve de citer Orisk.</li>
             </ul>
           </section>
 

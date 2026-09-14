@@ -24,6 +24,11 @@ export const API_CONFIG = {
     // Documentation: https://open-meteo.com/en/docs
   },
 
+  // Orisk - Planning des tours d'eau en Guadeloupe
+  ORISK: {
+    TOURS_DEAU_URL: 'https://orisk.app/api/tours-deau/public',
+  },
+
   // Météo-France - Vigilance (conservé pour les alertes officielles)
   METEOFRANCE: {
     // URL du token OAuth2 - doit être définie via la variable d'environnement METEOFRANCE_TOKEN_URL

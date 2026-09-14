@@ -18,7 +18,7 @@ type Props = {
 /** Sept jours suffisent à couvrir un cycle complet de tours d'eau. */
 const CUT_DAYS = 7;
 
-/** Le planning SMGEAG est relevé à la main : au-delà d'une semaine, il vieillit. */
+/** Repli SMGEAG relevé à la main quand Orisk est indisponible : au-delà d'une semaine, il vieillit. */
 const FRESH_PLANNING_MS = 8 * 24 * 60 * 60 * 1000;
 
 function Pair({ label, children }: { label: string; children: React.ReactNode }) {
@@ -189,7 +189,7 @@ export function CommuneDetail({ commune, waterSourceDate, now }: Props) {
         </section>
 
         <section className="section">
-          <h2 className="section-title">Tours d&apos;eau — SMGEAG</h2>
+          <h2 className="section-title">Tours d&apos;eau — Orisk</h2>
 
           <p className="explainer">{LAYER_NOTES.water.summary}</p>
 
@@ -240,7 +240,7 @@ export function CommuneDetail({ commune, waterSourceDate, now }: Props) {
           </dl>
         </section>
 
-        <p className="detail-sources mono">Sources · Gwad&apos;Air · Météo-France · SMGEAG</p>
+        <p className="detail-sources mono">Sources · Gwad&apos;Air · Météo-France · Orisk</p>
       </div>
     </>
   );

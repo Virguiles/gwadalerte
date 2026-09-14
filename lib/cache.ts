@@ -17,7 +17,7 @@ export const CACHE_TTL = {
   WEATHER: 2700,           // 45 minutes - alias pour compatibilité
   FORECAST: 14400,         // 4 heures - prévisions météo (très stables, mise à jour 2x/jour)
   VIGILANCE: 600,          // 10 minutes - vigilance Météo-France (changements rares, mise à jour fréquente inutile)
-  WATER_CUTS: 86400,       // 24 heures - planning tours d'eau (données statiques)
+  WATER_CUTS: 300,         // 5 minutes - planning tours d'eau (API Orisk, temps réel)
 } as const;
 
 // Clés de cache

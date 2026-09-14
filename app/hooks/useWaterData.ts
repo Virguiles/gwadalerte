@@ -4,7 +4,7 @@ import { useCachedResource } from './useCachedResource';
 
 const CACHE_KEY = 'gwada_water_cuts';
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-/** En-tête portant la date de relevé du planning SMGEAG */
+/** En-tête portant la date de génération du planning Orisk */
 const SOURCE_DATE_HEADER = 'X-Data-Collected-At';
 
 const EMPTY_WATER_DATA: WaterDataMap = {};
@@ -39,7 +39,7 @@ export function useWaterDataSource(enabled: boolean) {
     metaHeader: SOURCE_DATE_HEADER,
   });
 
-  // Date de RELEVÉ du planning côté SMGEAG — à ne pas confondre avec
+  // Date de GÉNÉRATION du planning côté Orisk — à ne pas confondre avec
   // `lastUpdate`, qui n'est que l'heure du dernier appel réseau.
   const sourceDate = useMemo(() => (meta ? parseCalendarDate(meta) : null), [meta]);
 
