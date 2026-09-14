@@ -42,12 +42,15 @@ export function CookieBanner() {
         Le texte disait « un stockage local uniquement pour votre préférence
         d'affichage ». Le code en écrit davantage — thème, progression dans
         l'aide, et un cache des dernières données pour l'affichage hors ligne
-        (voir useCachedResource et useMeteoData). Et il ne dépose aucun cookie.
+        (voir useCachedResource et useMeteoData). Il ne dépose aucun cookie.
+        Cloudflare Web Analytics (voir CloudflareAnalytics) mesure l'audience
+        sans cookie ni identifiant : le texte le mentionne pour rester exact.
       */}
       <p style={{ margin: 0, marginBottom: 8 }}>
-        Ce site ne dépose aucun cookie et n&apos;utilise aucun outil de mesure d&apos;audience.
-        Votre navigateur garde seulement votre thème, votre progression dans l&apos;aide et les
-        dernières données reçues, pour rester consultable hors ligne. Rien n&apos;en sort.
+        Ce site ne dépose aucun cookie. Votre navigateur garde seulement votre thème, votre
+        progression dans l&apos;aide et les dernières données reçues, pour rester consultable
+        hors ligne — rien de tout ça n&apos;en sort. Cloudflare Web Analytics mesure la
+        fréquentation de façon anonyme, sans cookie ni identifiant personnel.
       </p>
       <button
         onClick={() => {

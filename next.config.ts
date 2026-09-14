@@ -33,11 +33,14 @@ const nextConfig: NextConfig = {
           },
           /*
            * Origines vérifiées dans le code, pas reprises de l'ancienne
-           * configuration : le navigateur n'appelle que les routes API locales
-           * et `geo.api.gouv.fr`, repli du contour des communes
-           * (`(dashboard)/lib/model.ts`). Open-Meteo, Météo-France et ArcGIS
-           * sont passés côté serveur — les lister ici ne protégerait rien.
-           * `googletagmanager` disparaît avec Google Analytics, retiré.
+           * configuration : le navigateur n'appelle que les routes API locales,
+           * `geo.api.gouv.fr`, repli du contour des communes
+           * (`(dashboard)/lib/model.ts`), et le beacon Cloudflare Web Analytics
+           * (`static.cloudflareinsights.com` pour le script, `cloudflareinsights.com`
+           * pour l'envoi des mesures — sans cookie, voir CookieBanner). Open-Meteo,
+           * Météo-France et ArcGIS sont passés côté serveur — les lister ici ne
+           * protégerait rien. `googletagmanager` disparaît avec Google Analytics,
+           * retiré.
            *
            * `'unsafe-inline'` sur `script-src` reste nécessaire : Next et
            * next-themes injectent des scripts en ligne, et le nonce qui
@@ -49,11 +52,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self'",
-              "connect-src 'self' https://geo.api.gouv.fr",
+              "connect-src 'self' https://geo.api.gouv.fr https://cloudflareinsights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

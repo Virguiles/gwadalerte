@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '@/app/globals.css';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
+import { CloudflareAnalytics } from '@/app/components/CloudflareAnalytics';
 
 /**
  * Layout des deux pages de texte : mentions légales et crédits.
@@ -22,9 +23,9 @@ import { ThemeToggle } from '@/app/components/ThemeToggle';
  * bandeau de la navbar.
  *
  * Plus de Google Analytics non plus : il ne tournait que sur ces deux pages,
- * jamais sur le tableau de bord, et le bandeau de consentement — qui, lui,
- * n'existe que sur le tableau de bord — affirmait qu'aucune donnée n'était
- * collectée. Le site ne mesure donc plus rien au-delà des relevés d'hébergement.
+ * jamais sur le tableau de bord. Cloudflare Web Analytics (voir
+ * CloudflareAnalytics) le remplace maintenant sur l'ensemble du site — sans
+ * cookie, texte du bandeau de consentement mis à jour en conséquence.
  */
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -98,6 +99,7 @@ export default function LegalLayout({ children }: Readonly<{ children: React.Rea
             </div>
           </footer>
         </ThemeProvider>
+        <CloudflareAnalytics />
       </body>
     </html>
   );

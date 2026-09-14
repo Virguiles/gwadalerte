@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Poppins, IBM_Plex_Mono } from 'next/font/google';
 import { DataProvider } from '@/app/providers/DataProvider';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
+import { CloudflareAnalytics } from '@/app/components/CloudflareAnalytics';
 import './dashboard.css';
 
 /**
@@ -70,6 +71,7 @@ export default function DashboardRootLayout({ children }: { children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <DataProvider>{children}</DataProvider>
         </ThemeProvider>
+        <CloudflareAnalytics />
       </body>
     </html>
   );
