@@ -249,6 +249,8 @@ export interface WaterCutDetail {
 export interface WaterCutData {
   commune: string;
   details: WaterCutDetail[];
+  /** Date de relevé de ce planning précis — voir `app/data/water-types.ts`. */
+  collectedAt?: string;
 }
 
 export type WaterCutsDataMap = Record<string, WaterCutData>;

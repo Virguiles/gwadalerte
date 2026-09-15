@@ -40,8 +40,8 @@
     "commune": "LE GOSIER",
     "details": [
       {
-        "secteur": "Secteur 1 & 2 (Brindeau, Petit-Havre, Morne Jacques, Vercino, Route de la Mutuelle, Providence, Pliane Vercino, Rue de la Chapelle, Salines, Plateau Joab, Béline, Mare-Gaillard, Fonds Thézan (Sainte-Anne), Flibustier, Bernard, Simonet, le Bourg du Gosier, Belle Plaine, Riviera, Bas du Fort, Montauban, Route des Hôtels, Bois de Rose, Route de Cocoyer, Champagne, Leroux, Impasse Leroux, Tombeau, Mare à Bwè, Goyave, Besson, Morne Diavet, Grande Ravine, Impasse Nocente, Chemin de Labouaye, Barbès, Lotissement Cannelle, Lotissement Vanille, Guiampo, Beaumanoir, Michaux 1, Michaux 2, Maudette, Gros Monbin, Grands-Bois, Moreau)",
-        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
+        "secteur": "Secteur 1 & 2 (Brindeau, Petit-Havre, Morne Jacques, Vercino, Route de la Mutuelle, Providence, Pliane Vercino, Rue de la Chapelle, Salines, Plateau Joab, Béline, Mare-Gaillard, Fonds Thézan (Sainte-Anne), Flibustier, Bernard, Simonet, le Bourg du Gosier, Belle Plaine, Riviera, Bas du Fort, Montauban, Route des Hôtels, Pointe de la Verdure, Bois de Rose, Route de Cocoyer, Champagne, Leroux, Impasse Leroux, Tombeau, Mare à Bwè, Goyave, Besson, Morne Diavet, Grande Ravine, Impasse Nocente, Chemin de Labouaye, Barbès, Lotissement Cannelle, Lotissement Vanille, Guiampo, Beaumanoir, Michaux 1, Michaux 2, Maudette, Gros Monbin, Grands-Bois, Moreau)",
+        "horaires": "Mardi / jeudi / samedi de 20h à 12h"
       }
     ]
   },
@@ -67,7 +67,7 @@
       },
       {
         "secteur": "Secteur 3 (Solitude)",
-        "horaires": "Jeudi de 18h à 6h"
+        "horaires": "Vendredi de 18h à 6h"
       }
     ]
   },
@@ -84,7 +84,7 @@
       },
       {
         "secteur": "Capesterre Belle-Eau 2 & 3 (Bananier, Trou aux Chiens, Trou aux Chats, Morne Cinq Jours, Haute Plaine, Monplaisir, Moulin à Eau, Routhiers, Fonds Cacao, Bord Bois, Cabet, Cacoville, Saint-Denis, Cacador, Petit Marquisat) — zone commune avec Les Saintes et Trois-Rivières",
-        "horaires": "Mardi / jeudi / samedi de 20h à 12h"
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       },
       {
         "secteur": "Capesterre Belle-Eau 4 (Ilet Pérou, Morne d'Or, Les Flamboyants, Sarlassone, Petit Pérou)",
@@ -97,7 +97,7 @@
     "details": [
       {
         "secteur": "Toute l'île — zone commune avec Capesterre Belle-Eau 2 & 3 et Trois-Rivières",
-        "horaires": "Mardi / jeudi / samedi de 20h à 12h"
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -106,7 +106,7 @@
     "details": [
       {
         "secteur": "Toute l'île — zone commune avec Capesterre Belle-Eau 2 & 3 et Trois-Rivières",
-        "horaires": "Mardi / jeudi / samedi de 20h à 12h"
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       }
     ]
   },
@@ -118,8 +118,8 @@
     "commune": "TROIS-RIVIÈRES",
     "details": [
       {
-        "secteur": "Secteurs (Bord de mer, Poterie, Robin) — zone commune avec Capesterre Belle-Eau 2 & 3 et Les Saintes",
-        "horaires": "Mardi / jeudi / samedi de 20h à 12h"
+        "secteur": "Secteurs (Bord de mer, Poterie, Robin, Carbet, Lotissement Belmont) — zone commune avec Capesterre Belle-Eau 2 & 3 et Les Saintes",
+        "horaires": "Mardi / jeudi / samedi de 20h à 7h"
       },
       {
         "secteur": "Secteur 5 (Bord de mer, Route de la Plage, Cocoyer, Grand-Anse)",
@@ -135,7 +135,7 @@
     "commune": "GOURBEYRE",
     "details": [
       {
-        "secteur": "Tous secteurs (Vieux Chemin, Champ Fleury, Saint-Charles, Blanchet, Bisdary, Bas de Grand-Camp)",
+        "secteur": "Tous secteurs (Vieux Chemin, Champ Fleury, Saint-Charles, Blanchet, Bisdary, Bas de Grand-Camp, Gillardin)",
         "horaires": "Lundi / mercredi / vendredi de 16h à 9h"
       }
     ]

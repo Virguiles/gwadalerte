@@ -30,7 +30,7 @@ export const LAYER_NOTES: Record<Layer, LayerNote> = {
   },
   water: {
     summary:
-      "La carte colore chaque commune selon le nombre de jours où une coupure d'eau est planifiée sur les sept prochains jours. Les tours d'eau alternent la distribution entre secteurs quand la ressource ne suffit pas à alimenter tout le réseau.",
+      "La carte colore chaque commune selon le nombre de jours où une coupure d'eau est planifiée sur les sept prochains jours. Une commune dont l'eau est coupée maintenant, ou qui doit l'être plus tard aujourd'hui, l'indique explicitement (« En cours » / « Prévu dans la journée »). Les tours d'eau alternent la distribution entre secteurs quand la ressource ne suffit pas à alimenter tout le réseau.",
     source:
       "Source : Orisk (orisk.app), planning des tours d'eau en Guadeloupe. Mis à jour en continu ; un secteur peut être coupé sans préavis.",
   },

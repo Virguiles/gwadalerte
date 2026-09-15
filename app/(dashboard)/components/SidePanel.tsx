@@ -28,7 +28,6 @@ type Props = {
    */
   showDetail: boolean;
   loading: boolean;
-  waterSourceDate: Date | null;
   now: Date | null;
   hovered: string | null;
   onHover: (code: string | null) => void;
@@ -48,7 +47,6 @@ export function SidePanel({
   query,
   showDetail,
   loading,
-  waterSourceDate,
   now,
   hovered,
   onHover,
@@ -152,7 +150,7 @@ export function SidePanel({
       </ul>
 
       {showDetail && selected ? (
-        <CommuneDetail commune={selected} waterSourceDate={waterSourceDate} now={now} />
+        <CommuneDetail commune={selected} layer={layer} now={now} />
       ) : (
         <>
           {/* Ce que veut dire la couleur, avant les valeurs qu'elle prend :

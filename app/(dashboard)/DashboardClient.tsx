@@ -69,8 +69,8 @@ export default function DashboardClient() {
   // Saint-Martin n'a pas abouti, un `?commune=97801` ne désigne encore rien.
   const geoSettled = (geo !== null || geoError !== null) &&
     (saintMartinGeo !== null || saintMartinError !== null);
-  const data = useDashboardData(geo, saintMartinFeature);
   const now = useNow();
+  const data = useDashboardData(geo, saintMartinFeature, now);
 
   // Les Saintes, Marie-Galante et La Désirade vivent désormais dans le rail,
   // sur leur propre carte : les revoir en miniature sur la carte principale
@@ -397,7 +397,6 @@ export default function DashboardClient() {
         query={query}
         showDetail={showDetail}
         loading={data.loading}
-        waterSourceDate={data.waterSourceDate}
         now={now}
         hovered={hovered}
         onHover={setHovered}

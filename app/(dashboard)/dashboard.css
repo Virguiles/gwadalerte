@@ -1284,6 +1284,13 @@ button {
   color: var(--mut);
 }
 
+.cut-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .cut-card .sector {
   margin: 10px 0 6px;
   font-size: 13.5px;
@@ -1319,6 +1326,20 @@ button {
 .status-tag.is-stale {
   background: var(--warn-bg);
   color: var(--warn-fg);
+}
+
+/* Coupure du jour : « Prévu dans la journée » reprend le ton d'alerte de
+   `.is-stale` (même paire de tokens, déjà calibrée) ; « En cours » reprend le
+   rouge déjà utilisé en bordure du bandeau d'erreur (`.banner-error`) plutôt
+   qu'un nouvel aplat de texte, dont le contraste resterait à vérifier. */
+.status-tag.is-upcoming {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.status-tag.is-ongoing {
+  border: 1px solid #d4685d;
+  color: var(--txt);
 }
 
 .tip {

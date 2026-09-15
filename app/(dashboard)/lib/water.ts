@@ -111,6 +111,80 @@ export function countCutDays(data: WaterCutData | undefined, days = 7, from = ne
   return keys.size;
 }
 
+export type TodayCutStatus = 'ongoing' | 'upcoming';
+
+export type TodayCut = {
+  status: TodayCutStatus;
+  secteur: string;
+  /** Plage horaire telle que publiée, ex. « 20h à 7h ». */
+  hours: string;
+};
+
+/** « 16h », « 9h30 » → minutes depuis minuit. */
+function parseHourLabel(value: string | undefined): number | null {
+  const match = value?.trim().match(/^(\d{1,2})h(\d{2})?$/i);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = match[2] ? Number(match[2]) : 0;
+  if (hours > 24 || minutes > 59) return null;
+  return (hours % 24) * 60 + minutes;
+}
+
+/** « 20h à 7h » → { start: 1200, end: 420 } (minutes depuis minuit). */
+function parseHourRange(hours: string): { start: number; end: number } | null {
+  const [startLabel, endLabel] = hours.split(/\s*à\s*/);
+  const start = parseHourLabel(startLabel);
+  const end = parseHourLabel(endLabel);
+  return start === null || end === null ? null : { start, end };
+}
+
+/**
+ * Coupure la plus urgente pour une commune à l'instant `now` : en cours (l'eau
+ * est coupée maintenant) ou prévue plus tard dans la journée. `null` si rien
+ * n'est prévu aujourd'hui.
+ *
+ * Un créneau qui enjambe minuit (« 20h à 7h ») reste « en cours » après minuit
+ * tant que l'heure de reprise n'est pas passée, même s'il a démarré la veille
+ * — la coupure ne s'arrête pas au changement de jour civil.
+ */
+export function todayCut(data: WaterCutData | undefined, now = new Date()): TodayCut | null {
+  if (!data) return null;
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const today = now.getDay();
+  const yesterday = (today + 6) % 7;
+
+  let ongoing: TodayCut | null = null;
+  let upcoming: (TodayCut & { start: number }) | null = null;
+
+  for (const detail of data.details) {
+    for (const slot of parseSchedule(detail.horaires)) {
+      const range = parseHourRange(slot.hours);
+      if (!range) continue;
+      const overnight = range.end <= range.start;
+
+      if (slot.weekdays.includes(today)) {
+        if (nowMinutes < range.start) {
+          if (!upcoming || range.start < upcoming.start) {
+            upcoming = { status: 'upcoming', secteur: detail.secteur, hours: slot.hours, start: range.start };
+          }
+        } else if (overnight || nowMinutes < range.end) {
+          ongoing = { status: 'ongoing', secteur: detail.secteur, hours: slot.hours };
+        }
+      }
+
+      // Créneau commencé hier et toujours actif après minuit.
+      if (overnight && !ongoing && slot.weekdays.includes(yesterday) && nowMinutes < range.end) {
+        ongoing = { status: 'ongoing', secteur: detail.secteur, hours: slot.hours };
+      }
+    }
+  }
+
+  if (ongoing) return ongoing;
+  if (upcoming) return { status: 'upcoming', secteur: upcoming.secteur, hours: upcoming.hours };
+  return null;
+}
+
 /**
  * « — zone commune avec Capesterre Belle-Eau 2 & 3 et Les Saintes » : une
  * précision de couverture accolée au libellé, pas un nom de secteur.

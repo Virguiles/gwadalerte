@@ -75,7 +75,22 @@ export async function GET() {
 
     // Orisk d'abord, complété par le relevé SMGEAG pour les communes qu'il
     // ne couvre pas encore (rotations permanentes non remontées côté Orisk).
-    const merged: WaterCutsDataMap = { ...(waterCutsFallback as WaterCutsDataMap), ...data };
+    //
+    // Les deux sources ne datent pas du même jour : on tague chaque commune
+    // avec la date de RELEVÉ propre à sa source plutôt que d'appliquer la
+    // date globale d'Orisk à tout le monde — sinon une commune servie par le
+    // repli statique (parfois vieux de plusieurs semaines) s'affiche comme
+    // « à jour » simplement parce qu'Orisk a répondu pour d'autres communes.
+    const fallbackDated: WaterCutsDataMap = Object.fromEntries(
+      Object.entries(waterCutsFallback as WaterCutsDataMap).map(([code, entry]) => [
+        code,
+        { ...entry, collectedAt: waterCutsFallbackSource.collectedAt },
+      ])
+    );
+    const oriskDated: WaterCutsDataMap = Object.fromEntries(
+      Object.entries(data).map(([code, entry]) => [code, { ...entry, collectedAt: sourceDate }])
+    );
+    const merged: WaterCutsDataMap = { ...fallbackDated, ...oriskDated };
 
     return NextResponse.json(merged, {
       headers: {
@@ -88,7 +103,14 @@ export async function GET() {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
     console.error('[API water-cuts] Orisk indisponible, repli sur le planning statique:', message);
 
-    return NextResponse.json(waterCutsFallback as WaterCutsDataMap, {
+    const fallbackDated: WaterCutsDataMap = Object.fromEntries(
+      Object.entries(waterCutsFallback as WaterCutsDataMap).map(([code, entry]) => [
+        code,
+        { ...entry, collectedAt: waterCutsFallbackSource.collectedAt },
+      ])
+    );
+
+    return NextResponse.json(fallbackDated, {
       headers: {
         // Cache court : on retente l'API Orisk rapidement plutôt que de rester
         // bloqué sur le repli statique.

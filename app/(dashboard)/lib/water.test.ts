@@ -6,9 +6,15 @@ import {
   sectorSummary,
   shortSector,
   sharedZone,
+  todayCut,
   upcomingCuts,
 } from './water';
 import type { WaterCutData } from '@/app/data/water-types';
+
+/** Lundi 14 septembre 2026, à l'heure donnée. */
+function mondayAt(hours: number, minutes = 0): Date {
+  return new Date(2026, 8, 14, hours, minutes);
+}
 
 describe('parseSchedule', () => {
   it('parses a single day/hour segment', () => {
@@ -103,6 +109,89 @@ describe('countCutDays', () => {
 
   it('is 0 when there is no data', () => {
     expect(countCutDays(undefined)).toBe(0);
+  });
+});
+
+describe('todayCut', () => {
+  it('is ongoing during a same-day, same-day-end window', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Lundi de 9h à 16h' }],
+    };
+    expect(todayCut(data, mondayAt(12))).toEqual({
+      status: 'ongoing',
+      secteur: 'Secteur 1',
+      hours: '9h à 16h',
+    });
+  });
+
+  it('is upcoming before a same-day cut starts', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Lundi de 20h à 7h' }],
+    };
+    expect(todayCut(data, mondayAt(10))).toEqual({
+      status: 'upcoming',
+      secteur: 'Secteur 1',
+      hours: '20h à 7h',
+    });
+  });
+
+  it('is ongoing once an overnight cut has started today', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Lundi de 20h à 7h' }],
+    };
+    expect(todayCut(data, mondayAt(22))?.status).toBe('ongoing');
+  });
+
+  it('is ongoing after midnight for an overnight cut started the day before', () => {
+    // Le créneau démarre dimanche (jour 0) et se termine à 7h — toujours actif
+    // lundi à 3h, alors qu'aucun créneau lundi n'est déclaré.
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Dimanche de 20h à 7h' }],
+    };
+    expect(todayCut(data, mondayAt(3))).toEqual({
+      status: 'ongoing',
+      secteur: 'Secteur 1',
+      hours: '20h à 7h',
+    });
+  });
+
+  it('is no longer ongoing once an overnight cut from the day before has ended', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Dimanche de 20h à 7h' }],
+    };
+    expect(todayCut(data, mondayAt(8))).toBeNull();
+  });
+
+  it('prefers an ongoing cut over an upcoming one elsewhere in the same commune', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [
+        { secteur: 'Secteur A', horaires: 'Lundi de 20h à 7h' },
+        { secteur: 'Secteur B', horaires: 'Lundi de 9h à 16h' },
+      ],
+    };
+    expect(todayCut(data, mondayAt(10))).toEqual({
+      status: 'ongoing',
+      secteur: 'Secteur B',
+      hours: '9h à 16h',
+    });
+  });
+
+  it('returns null for a favorable sector', () => {
+    const data: WaterCutData = {
+      commune: 'Test',
+      details: [{ secteur: 'Secteur 1', horaires: 'Alimentation favorable' }],
+    };
+    expect(todayCut(data, mondayAt(12))).toBeNull();
+  });
+
+  it('returns null when there is no data', () => {
+    expect(todayCut(undefined, mondayAt(12))).toBeNull();
   });
 });
 

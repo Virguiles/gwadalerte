@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { useAirData, useMeteoData, useWaterData } from '@/app/providers/DataProvider';
 import type { AirDataValue } from '@/app/hooks/useAirData';
-import type { WaterDataValue } from '@/app/hooks/useWaterData';
+import { parseCalendarDate, type WaterDataValue } from '@/app/hooks/useWaterData';
 import type { MeteoDataValue } from '@/app/data/useMeteoData';
 import type { WeatherData, VigilanceData } from '@/app/data/weather-types';
 import type { WaterCutData } from '@/app/data/water-types';
 import { atmoColor, atmoLabel, waterColor, waterLabel } from './palette';
-import { countCutDays, upcomingCuts, type CommuneCut } from './water';
+import { countCutDays, todayCut, upcomingCuts, type CommuneCut, type TodayCut } from './water';
 
 /** Contour officiel d'une commune (source : geo.api.gouv.fr, IGN). */
 export type CommuneFeature = Feature<Polygon | MultiPolygon, { code: string; nom: string }>;
@@ -90,6 +90,13 @@ export type CommuneRecord = {
     cuts: CommuneCut[];
     /** Nombre de jours touchés sur les sept prochains. */
     cutDays: number;
+    /** Coupure la plus urgente du jour (en cours ou prévue plus tard) ; `null` hors montage ou si rien n'est prévu aujourd'hui. */
+    today: TodayCut | null;
+    /**
+     * Date de relevé DU PLANNING DE CETTE COMMUNE — Orisk et le repli SMGEAG
+     * n'ont pas la même fraîcheur, voir `WaterCutData.collectedAt`.
+     */
+    sourceDate: Date | null;
     color: string;
     label: string;
   };
@@ -161,6 +168,11 @@ function buildCommuneRecord(
   air: AirDataValue,
   water: WaterDataValue,
   meteo: MeteoDataValue,
+  /**
+   * `null` avant montage côté client : on évite tout calcul dépendant de
+   * l'heure pendant l'hydratation, où elle diffère du serveur (voir `useNow`).
+   */
+  now: Date | null,
 ): CommuneRecord {
   const { code, nom } = feature.properties;
   const airRow = air.data?.[code];
@@ -168,6 +180,7 @@ function buildCommuneRecord(
   const waterRow = water.data?.[code];
   const cuts = upcomingCuts(waterRow);
   const cutDays = countCutDays(waterRow);
+  const today = now ? todayCut(waterRow, now) : null;
 
   return {
     code,
@@ -188,6 +201,8 @@ function buildCommuneRecord(
       raw: waterRow,
       cuts,
       cutDays,
+      today,
+      sourceDate: waterRow?.collectedAt ? parseCalendarDate(waterRow.collectedAt) : null,
       color: waterColor(cutDays),
       label: waterLabel(cutDays),
     },
@@ -222,6 +237,8 @@ export type DashboardData = {
 export function useDashboardData(
   geo: CommunesGeo | null,
   saintMartinFeature?: CommuneFeature | null,
+  /** Voir `buildCommuneRecord` : `null` tant que le client n'a pas monté. */
+  now: Date | null = null,
 ): DashboardData {
   const air = useAirData();
   const water = useWaterData();
@@ -230,17 +247,17 @@ export function useDashboardData(
   const communes = useMemo<CommuneRecord[]>(() => {
     if (!geo) return [];
     return geo.features
-      .map((feature) => buildCommuneRecord(feature, air, water, meteo))
+      .map((feature) => buildCommuneRecord(feature, air, water, meteo, now))
       .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geo, air.data, water.data, meteo.weatherData]);
+  }, [geo, air.data, water.data, meteo.weatherData, now]);
 
   const byCode = useMemo(() => new Map(communes.map((c) => [c.code, c])), [communes]);
 
   const saintMartin = useMemo(
-    () => (saintMartinFeature ? buildCommuneRecord(saintMartinFeature, air, water, meteo) : null),
+    () => (saintMartinFeature ? buildCommuneRecord(saintMartinFeature, air, water, meteo, now) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [saintMartinFeature, air.data, water.data, meteo.weatherData],
+    [saintMartinFeature, air.data, water.data, meteo.weatherData, now],
   );
 
   return {
@@ -259,14 +276,31 @@ export function useDashboardData(
   };
 }
 
-/** Couleur portée par une commune dans la couche courante. */
+/**
+ * Couleur portée par une commune dans la couche courante.
+ *
+ * Une coupure en cours prend la teinte la plus sévère de l'échelle des tours
+ * d'eau, quel que soit le nombre de jours touchés sur la semaine : l'eau
+ * coupée maintenant est plus urgente qu'un décompte hebdomadaire.
+ */
 export function layerColor(commune: CommuneRecord, layer: Layer): string {
-  return layer === 'air' ? commune.air.color : commune.water.color;
+  if (layer === 'air') return commune.air.color;
+  if (commune.water.today?.status === 'ongoing') return waterColor(2);
+  return commune.water.color;
 }
 
-/** Libellé accompagnant la pastille — jamais de couleur seule. */
+/**
+ * Libellé accompagnant la pastille — jamais de couleur seule.
+ *
+ * Sur la couche eau, le statut du jour (« En cours », « Prévu dans la
+ * journée ») prime sur le décompte des sept prochains jours : c'est ce que
+ * l'utilisateur veut savoir en premier en consultant la carte.
+ */
 export function layerLabel(commune: CommuneRecord, layer: Layer): string {
-  return layer === 'air' ? commune.air.label : commune.water.label;
+  if (layer === 'air') return commune.air.label;
+  if (commune.water.today?.status === 'ongoing') return 'En cours';
+  if (commune.water.today?.status === 'upcoming') return 'Prévu dans la journée';
+  return commune.water.label;
 }
 
 /** Synthèse territoriale affichée sur la vue d'ensemble. */

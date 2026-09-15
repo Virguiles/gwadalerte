@@ -14,7 +14,7 @@ const EMPTY_WATER_DATA: WaterDataMap = {};
  * `new Date('2025-11-30')` serait interprété à minuit UTC, ce qui affiche
  * la veille dans les fuseaux négatifs — dont celui de la Guadeloupe.
  */
-function parseCalendarDate(value: string): Date | null {
+export function parseCalendarDate(value: string): Date | null {
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) {
     const fallback = new Date(value);
