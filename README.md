@@ -1,245 +1,148 @@
 # Gwad'Alerte
 
-Application web interactive pour visualiser en temps réel les données environnementales de la Guadeloupe : qualité de l'air, météo, vigilance et tours d'eau.
+**A citizen dashboard for Guadeloupe — air quality, weather warnings and water
+rota, on one map.**
 
-## 🎯 Vue d'ensemble
+[gwadalerte.com](https://gwadalerte.com) · [Accessibility audit](docs/accessibility-audit.md) · Storybook: `npm run storybook`
 
-Gwad'Alerte est un tableau de bord citoyen qui centralise les informations essentielles pour les habitants de la Guadeloupe :
-- **Qualité de l'air** : Indice ATMO, polluants et recommandations sanitaires
-- **Météo & Vigilance** : Prévisions par commune, alertes météorologiques et vigilance cyclonique
-- **Tours d'eau** : Planning des coupures d'eau programmées par la SMGEAG
+[![CI](https://github.com/Virguiles/gwadalerte/actions/workflows/ci.yml/badge.svg)](https://github.com/Virguiles/gwadalerte/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG_2.2-AA-0b7285.svg)](docs/accessibility-audit.md)
 
-## 🏗️ Structure du projet
+---
 
-```
-GwadaSVG/
-├── app/                # Pages et composants Next.js
-│   ├── api/           # API Routes serverless
-│   │   ├── air-quality/   # Qualité de l'air (Gwad'Air)
-│   │   ├── meteo/         # Météo actuelle et prévisions (Open-Meteo)
-│   │   │   ├── current/   # Météo actuelle
-│   │   │   └── forecast/  # Prévisions 3 jours
-│   │   ├── vigilance/     # Vigilance météo (Météo-France)
-│   │   └── water-cuts/    # Tours d'eau (SMGEAG)
-│   ├── components/    # Composants réutilisables
-│   ├── meteo/         # Page météo
-│   ├── qualite-air/   # Page qualité de l'air
-│   └── tours-deau/    # Page tours d'eau
-├── lib/               # Utilitaires et clients API
-│   ├── weather-codes.ts  # Mapping codes météo WMO
-│   ├── cache.ts          # Système de cache
-│   ├── api-clients.ts    # Clients API partagés
-│   └── data/             # Données statiques (tours-deau.json)
-├── public/            # Assets statiques (cartes SVG)
-├── components/        # Composants UI réutilisables (Radix UI)
-└── CHANGELOG_METEO.md # Historique des améliorations météo
-```
+## What it is
 
-## 🚀 Déploiement sur Vercel
+Four public data sources about Guadeloupe exist, and each lives on its own
+website, in its own vocabulary, behind its own map. Gwad'Alerte puts them on a
+single map of Guadeloupe's 32 communes (plus Saint-Martin): pick one, get its air
+quality index, its weather, its Météo-France warning level and whether its
+water is scheduled to be cut today.
 
-Le projet est optimisé pour Vercel. Pour déployer :
+It is built for the way the information is actually needed — on a phone, in
+daylight, quickly, often during a weather event.
 
-1. **Connecter votre dépôt Git à Vercel**
-   - Allez sur [vercel.com](https://vercel.com)
-   - Importez votre dépôt GitHub/GitLab/Bitbucket
+## Why it might interest you as a developer
 
-2. **Configurer les variables d'environnement**
-   - Dans Vercel Dashboard → Settings → Environment Variables
-   - Ajoutez : `METEOFRANCE_CLIENT_ID`, `METEOFRANCE_CLIENT_SECRET`
-   - **Note** : Open-Meteo ne nécessite PAS de clé API ! 🎉
+The interesting part is not the dashboard; it is the **design system underneath
+it**, and specifically the fact that its accessibility is *argued and tested*
+rather than asserted.
 
-3. **Déployer**
-   - Vercel détecte automatiquement Next.js
-   - Le build se lance automatiquement à chaque push
+- **One source of colour.** Every colour in the product is a token in
+  [`app/tokens.css`](app/tokens.css) or
+  [`app/(dashboard)/lib/palette.ts`](app/\(dashboard\)/lib/palette.ts). No
+  literal `#hex` exists in any component. The token file explains *why* each
+  value is what it is — including the ones that had to change.
+- **Contrast is a unit test.** [`contrast.test.ts`](app/\(dashboard\)/lib/contrast.test.ts)
+  parses `tokens.css`, resolves the `var()` chains, composites the alpha layers
+  and asserts a WCAG ratio for every semantic scale in both themes — 40
+  assertions. It also re-derives the ratios written in the audit
+  (`7.87 / 10.48 / 4.94 / 3.58` for dark ATMO 1/3/5/6), so the numbers in the
+  comments cannot quietly go stale. A colour that drops below its threshold
+  fails the build.
+- **Every story is scanned by axe-core** in CI, in both light and dark themes.
+- **The audit is written down.** [`docs/accessibility-audit.md`](docs/accessibility-audit.md)
+  records 4 critical, 20 major and 17 minor findings against WCAG 2.2 AA, how
+  each was fixed, the measured ratios after the fix, and the two remaining gaps
+  with the reasoning for accepting them.
+- **Colour never carries information alone.** Communes without a measurement
+  are marked by a dashed outline as well as a neutral fill, because no single
+  flat colour can hold 3:1 against both the stage and its neighbouring fills.
 
-4. **Optionnel : Ajouter Vercel KV pour le cache**
-   - Dashboard → Storage → Create Database → KV
-   - Lier au projet (les variables sont ajoutées automatiquement)
+Design decisions are documented as prose comments next to the code that
+implements them, in French. If you want a sense of the reasoning, read
+[`app/tokens.css`](app/tokens.css) top to bottom — it is short, and it is the
+spine of the project.
 
-Pour plus de détails, consultez [MIGRATION.md](MIGRATION.md).
+## Stack
 
-## 🚀 Installation locale
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router, React 19, React Compiler) |
+| Language | TypeScript, strict |
+| Styling | CSS custom properties + Tailwind CSS 4 |
+| Components | Storybook 10 with `@storybook/addon-a11y` |
+| Map | Inline SVG, projected with `d3-geo` |
+| Tests | Vitest — unit suite in Node, story suite in Chromium with axe-core |
+| Cache | Vercel KV, falling back to an in-process `Map` |
+| Hosting | Vercel |
 
-### Prérequis
+## Data sources
 
-- Node.js 18+
-- npm ou yarn
+| Source | Provides | Auth |
+|---|---|---|
+| [Gwad'Air](https://www.gwadair.gp/) (ArcGIS) | ATMO index per commune | none |
+| [Open-Meteo](https://open-meteo.com/) | current weather and 3-day forecast | none |
+| [Météo-France DPVigilance](https://portail-api.meteofrance.fr/) | warning levels (incl. cyclone) | OAuth2 |
+| [Orisk](https://orisk.app/) | water rota, with an SMGEAG fallback | none |
 
-### Configuration des variables d'environnement
+Gwad'Alerte republishes public data and is **not an official source**. During
+an emergency, the Préfecture de la Guadeloupe and Météo-France take precedence.
 
-Créez un fichier `.env.local` à la racine du projet :
-
-```env
-# Météo-France (pour la vigilance météo uniquement)
-# Obtenez vos credentials sur : https://portail-api.meteofrance.fr/
-METEOFRANCE_CLIENT_ID=votre_client_id
-METEOFRANCE_CLIENT_SECRET=votre_client_secret
-```
-
-**Note importante** :
-- ✅ **Open-Meteo** : Gratuit, sans clé API nécessaire !
-- ✅ **Gwad'Air** : API publique, sans clé API
-- ⚙️ **Météo-France** : Credentials nécessaires uniquement pour la vigilance
-
-Pour créer le fichier rapidement :
-```bash
-touch .env.local
-# Puis éditez .env.local avec vos credentials Météo-France
-```
-
-### Installation et lancement
+## Running it
 
 ```bash
 npm install
 npm run dev
 ```
 
-L'application sera disponible sur `http://localhost:3000`
+Open <http://localhost:3000>. **No API key is required** — three of the four
+sources are unauthenticated, and the fourth degrades to a green warning level
+when credentials are absent. Copy [`.env.example`](.env.example) to
+`.env.local` if you want real Météo-France warnings.
 
-**API Routes disponibles :**
-- `GET /api/air-quality` - Données qualité de l'air (Gwad'Air)
-- `GET /api/meteo/current` - Météo actuelle par commune (Open-Meteo) 🆕
-- `GET /api/meteo/forecast` - Prévisions 3 jours (Open-Meteo) 🆕
-- `GET /api/meteo/forecast?code_zone=97105` - Prévisions pour une commune spécifique
-- `GET /api/vigilance` - Niveau de vigilance météo (Météo-France)
-- `GET /api/water-cuts` - Planning des tours d'eau (SMGEAG)
+### Storybook
 
-## 📦 Technologies utilisées
+```bash
+npm run storybook
+```
 
-### Backend (API Routes Next.js)
-- **Next.js API Routes** - API serverless intégrée
-- **Vercel KV** - Cache Redis managé (optionnel, fallback mémoire en local)
-- **Cache intelligent** - Optimisation des appels API avec TTL
+Open <http://localhost:6006>. The **Foundations** section renders the token
+files directly, so the palette documentation cannot drift from the palette.
 
-### Frontend
-- **Next.js 16** - Framework React avec App Router
-- **TypeScript** - Typage statique
-- **Tailwind CSS 4** - Framework CSS utilitaire
-- **Framer Motion** - Animations fluides
-- **Lucide React** - Icônes modernes
-- **next-themes** - Support du mode sombre/clair
-- **Radix UI** - Composants accessibles (Tabs, Scroll Area)
+## Scripts
 
-### Données
-- **Cartes SVG interactives** - Visualisation géographique
-- **32 communes** - Couverture complète de la Guadeloupe
+| Script | What it does |
+|---|---|
+| `npm run dev` | Next.js dev server |
+| `npm run build` | production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | unit tests (Node) |
+| `npm run test:a11y` | every story rendered in Chromium, then axe-core |
+| `npm run test:all` | both suites |
+| `npm run storybook` | Storybook on :6006 |
+| `npm run build-storybook` | static Storybook build |
 
-## 📝 Fonctionnalités
+## Project layout
 
-### 🏠 Page d'accueil
-- Dashboard global avec vue d'ensemble
-- Alertes en temps réel (qualité de l'air dégradée)
-- Navigation vers les différentes sections
-- Design moderne avec animations
+```
+app/
+  tokens.css              the palette — single source of colour
+  (dashboard)/            the product: one page, one map
+    lib/palette.ts        ATMO and vigilance scales
+    lib/contrast.ts       WCAG ratio maths, asserted over tokens.css
+    lib/model.ts          merges the four sources into one commune record
+    components/           MapStage, SidePanel, CommuneDetail, Readout…
+  (legal)/                legal pages, credits
+  api/                    five cached route handlers proxying the sources
+  components/             cross-cutting: ThemeToggle, CookieBanner, HelpButton
+lib/                      API clients, cache, WMO weather codes
+.storybook/               Storybook config, a11y addon, theme decorator
+  docs/Couleur…           the palette, measured live in the browser
+docs/                     accessibility audit, architecture, deployment
+```
 
-### 🌬️ Qualité de l'air
-- **Carte interactive** : Visualisation de l'indice ATMO par commune
-- **Données en temps réel** : Mise à jour automatique depuis Gwad'Air
-- **Détails par commune** : Polluants, recommandations sanitaires
-- **Guides éducatifs** : Comprendre l'indice ATMO et les polluants
-- **Cache intelligent** : Données mises en cache pour performance optimale
+## Contributing
 
-### 🌤️ Météo & Vigilance
-- **Carte météo interactive** : Températures, conditions par commune
-- **Prévisions 3 jours** : Onglets Aujourd'hui / Demain / 3 jours
-- **Prévisions horaires détaillées** : 9 métriques par heure (température, ressenti, précipitations, vent, humidité, nébulosité, etc.)
-- **Scroll horizontal** : Navigation fluide des prévisions horaires (mobile & desktop)
-- **Vigilance météo** : Niveaux officiels (Vert, Jaune, Orange, Rouge, Violet, Gris)
-- **Alertes cycloniques** : Guide éducatif sur la vigilance cyclonique
-- **Données multi-sources** : Open-Meteo (météo) + Météo-France (vigilance)
-- **Micro-climats** : Adaptation au relief guadeloupéen
-- **Design uniformisé** : Interface cohérente entre vue Archipel et Commune
+See [CONTRIBUTING.md](CONTRIBUTING.md). Accessibility findings are the most
+welcome kind of issue. Security issues go through [SECURITY.md](SECURITY.md),
+not the public tracker.
 
-### 💧 Tours d'eau
-- **Planning interactif** : Carte des coupures programmées
-- **Filtres temporels** : Aujourd'hui, demain, semaine
-- **Détails par commune** : Horaires et zones impactées
-- **Données SMGEAG** : Informations officielles
+## Licence
 
-### 🎨 Interface utilisateur
-- **Mode sombre/clair** : Adaptation automatique au système
-- **Design responsive** : Optimisé mobile, tablette et desktop
-- **Cartes SVG interactives** : Survol et sélection des communes
-- **Sidebars contextuelles** : Informations détaillées selon la sélection
-- **Animations fluides** : Expérience utilisateur soignée
-- **Accessibilité** : Conforme WCAG 2.1 AA (attributs ARIA, navigation clavier)
+[MIT](LICENSE) © Virgile Popote
 
-## 🔧 Développement
-
-### Structure des composants
-
-**Composants principaux :**
-- `app/components/GuadeloupeMap.tsx` - Carte SVG principale
-- `app/components/HomeDashboard.tsx` - Dashboard d'accueil
-- `app/components/Navbar.tsx` - Navigation principale avec widget vigilance
-- `app/components/Footer.tsx` - Pied de page
-- `app/components/BackgroundSlider.tsx` - Carrousel d'images de fond
-
-**Composants météo :**
-- `app/meteo/components/HourlyForecastCard.tsx` - Carte de prévision horaire détaillée
-- `app/meteo/components/ForecastDayView.tsx` - Vue des prévisions par jour
-- `app/meteo/components/MeteoCommuneView.tsx` - Vue météo par commune
-- `app/meteo/components/MeteoGlobalView.tsx` - Vue météo globale (Archipel)
-- `app/meteo/components/VigilanceSection.tsx` - Section vigilance météo
-- `app/meteo/components/CyclonicVigilanceGuide.tsx` - Guide vigilance cyclonique
-
-**Hooks de données :**
-- `app/hooks/useAirData.ts` - Hook pour les données qualité de l'air
-- `app/meteo/hooks/useMeteoData.ts` - Hook pour les données météo actuelles (Open-Meteo)
-- `app/meteo/hooks/useMeteoForecast.ts` - Hook pour les prévisions 3 jours
-- `app/meteo/hooks/useForecastLogic.ts` - Logique de filtrage des prévisions
-- `app/hooks/useWaterData.ts` - Hook pour les tours d'eau
-
-### Cache et performance
-
-L'application utilise un système de cache intelligent optimisé pour Open-Meteo :
-- **Qualité de l'air** : Cache de 3 minutes (TTL)
-- **Météo actuelle** : Cache de 15 minutes (Open-Meteo) 🆕
-- **Prévisions** : Cache de 3 heures
-- **Vigilance** : Cache de 10 minutes (Météo-France)
-- **Tours d'eau** : Cache de 24 heures
-
-En production (Vercel), le cache utilise Vercel KV (Redis). En développement local, un cache mémoire est utilisé automatiquement.
-
-Le frontend utilise également le localStorage pour mettre en cache les données côté client.
-
-### Codes météo WMO
-
-Les conditions météo sont basées sur les codes WMO (World Meteorological Organization) utilisés par Open-Meteo. Le mapping vers les icônes et descriptions françaises est dans `lib/weather-codes.ts`.
-
-## 📚 Documentation
-
-**Fichiers de documentation disponibles :**
-- [CHANGELOG_METEO.md](CHANGELOG_METEO.md) - Historique des améliorations de la page météo
-- [MIGRATION.md](MIGRATION.md) - Guide de migration FastAPI → Next.js API Routes
-- [DEPLOIEMENT_VERCEL.md](DEPLOIEMENT_VERCEL.md) - Guide de déploiement sur Vercel
-- [DEPLOIEMENT_NETLIFY.md](DEPLOIEMENT_NETLIFY.md) - Guide de déploiement sur Netlify
-
-## 🌐 Sources de données
-
-| Source | Données | Clé API |
-|--------|---------|---------|
-| **[Open-Meteo](https://open-meteo.com/)** | Météo actuelle, prévisions 3 jours | ❌ Non requise (gratuit) |
-| **[Météo-France](https://portail-api.meteofrance.fr/)** | Vigilance météo officielle | ✅ Requise |
-| **[Gwad'Air](https://gwadair.fr/)** | Qualité de l'air (ATMO) | ❌ Non requise |
-| **SMGEAG** | Tours d'eau | ❌ Non requise |
-
-## 📄 Licence
-
-Ce projet est en cours de développement. Les fonctionnalités sont ajoutées progressivement.
-
-
-## 🎯 Dernières améliorations
-
-### Décembre 2024
-- ✅ **Prévisions horaires enrichies** : 9 métriques par heure (température, ressenti, précipitations, vent, humidité, nébulosité)
-- ✅ **Design uniformisé** : Interface cohérente entre vue Archipel et Commune
-- ✅ **Correction onglet "3 jours"** : Affiche maintenant uniquement les prévisions de J+3
-- ✅ **Accessibilité améliorée** : Conformité WCAG 2.1 AA avec attributs ARIA et navigation clavier
-- ✅ **Scroll horizontal optimisé** : Navigation fluide des prévisions horaires sur mobile et desktop
-
-Pour plus de détails, consultez [CHANGELOG_METEO.md](CHANGELOG_METEO.md).
-
----
-
-*Dernière mise à jour : Décembre 2024 - Prévisions horaires enrichies et améliorations UX*
+Guadeloupe commune geometry comes from
+the [API Découpage administratif](https://geo.api.gouv.fr/) (IGN, Admin Express) under
+[Licence Ouverte 2.0](https://www.etalab.gouv.fr/licence-ouverte-open-licence/).

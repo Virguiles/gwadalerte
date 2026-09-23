@@ -65,3 +65,13 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local Netlify folder
+.netlify
+
+*storybook.log
+storybook-static
+
+# Storybook
+storybook-static/
+*storybook.log

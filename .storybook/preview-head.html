@@ -1,0 +1,22 @@
+<!--
+  Les polices du produit, chargées comme le fait `next/font` en production.
+
+  Pourquoi pas `next/font/google` dans `preview.tsx` : sous
+  `@storybook/nextjs-vite`, l'appel est remplacé par une implémentation de
+  substitution qui rend bien une classe, mais ne déclare jamais la variable CSS
+  correspondante. `--font-poppins` restait vide et `dashboard.css` retombait sur
+  `system-ui` — d'autres métriques que le produit, donc des mesures de taille de
+  cible (WCAG 2.5.8) qui ne valaient pas pour lui.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --font-poppins: 'Poppins';
+    --font-plex-mono: 'IBM Plex Mono';
+  }
+</style>

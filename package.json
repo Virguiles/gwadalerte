@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "gwadalerte",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project=unit",
+    "test:a11y": "vitest run --project=storybook",
+    "test:all": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@vercel/kv": "^3.0.0",
@@ -21,18 +26,28 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.15.13",
+    "@storybook/addon-a11y": "^10.6.0",
+    "@storybook/addon-docs": "^10.6.0",
+    "@storybook/addon-vitest": "^10.6.0",
+    "@storybook/nextjs-vite": "^10.6.0",
     "@tailwindcss/postcss": "^4",
     "@types/d3-geo": "^3.1.1",
     "@types/node": "^22.20.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/browser-playwright": "^4.1.11",
     "babel-plugin-react-compiler": "1.0.0",
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9",
     "eslint-config-next": "^16.0.10",
+    "eslint-plugin-storybook": "^10.6.0",
+    "playwright": "^1.56.0",
+    "storybook": "^10.6.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^8.3.0",
-    "vitest": "^5.0.0"
-  }
+    "vitest": "^4.1.11"
+  },
+  "description": "Citizen dashboard for Guadeloupe — air quality, weather warnings and water rota.",
+  "license": "MIT"
 }

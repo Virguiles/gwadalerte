@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Permet de relancer la chaîne à la main depuis l'onglet Actions.
+  workflow_dispatch:
+
+# Une seule exécution par branche : un second push annule la précédente plutôt
+# que de faire la queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # Lint, types et tests unitaires : rapide, sans navigateur. C'est le travail
+  # qui échoue le plus souvent, il passe donc en premier et seul.
+  verifier:
+    name: Lint · types · tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Tests unitaires
+        run: npm test
+
+  # Chaque story rendue dans Chromium, puis passée à axe-core. Le seuil est
+  # `error` (voir .storybook/preview.tsx) : une violation fait échouer le job.
+  accessibilite:
+    name: Accessibilité (axe-core sur les stories)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # Le binaire Chromium est lourd : il est mis en cache sur la version de
+      # Playwright résolue par le verrou, et non sur une clé figée à la main.
+      - name: Version de Playwright
+        id: playwright
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Binaires Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: axe-core sur les stories
+        run: npm run test:a11y
+
+  # La construction Next.js et celle de Storybook : ce sont les deux artefacts
+  # publiés, et rien ne garantit qu'un code qui compile se construise.
+  construire:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Application
+        run: npm run build
+
+      - name: Storybook
+        run: npm run build-storybook
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static
+          retention-days: 7
