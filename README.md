@@ -3,7 +3,7 @@
 **A citizen dashboard for Guadeloupe — air quality, weather warnings and water
 rota, on one map.**
 
-[gwadalerte.com](https://gwadalerte.com) · [Accessibility audit](docs/accessibility-audit.md) · Storybook: `npm run storybook`
+[gwadalerte.com](https://gwadalerte.com) · [Storybook](https://gwadalerte-storybook.netlify.app) · [Accessibility audit](docs/accessibility-audit.md)
 
 [![CI](https://github.com/Virguiles/gwadalerte/actions/workflows/ci.yml/badge.svg)](https://github.com/Virguiles/gwadalerte/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -93,12 +93,21 @@ when credentials are absent. Copy [`.env.example`](.env.example) to
 
 ### Storybook
 
+Published at [gwadalerte-storybook.netlify.app](https://gwadalerte-storybook.netlify.app).
+To run it locally instead:
+
 ```bash
 npm run storybook
 ```
 
 Open <http://localhost:6006>. The **Foundations** section renders the token
 files directly, so the palette documentation cannot drift from the palette.
+
+The published Storybook is a manual deploy (`npm run build-storybook`, then
+upload `storybook-static/`), not wired to CI — this repo's own Next.js app
+already owns the root `netlify.toml`, and a Next.js runtime on the same
+project would otherwise take over the Storybook's static output. Rebuild and
+redeploy by hand after changing any story.
 
 ## Scripts
 
