@@ -21,20 +21,29 @@ export type Rgba = Rgb & { a: number };
 export function parseColor(value: string): Rgba {
   const css = value.trim();
 
-  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(css);
+  /*
+   * #rgb, #rgba, #rrggbb et #rrggbbaa : Chrome sérialise désormais certaines
+   * couleurs calculées sous cette dernière forme plutôt qu'en rgba(), y
+   * compris pour des propriétés personnalisées lues via `getComputedStyle` —
+   * `--mut` (rgba(11, 20, 19, 0.68), écrite ainsi dans tokens.css) revenait
+   * en `#0b1413ad` dans Storybook publié, alors que Vitest + Playwright ne
+   * l'a jamais reproduit. Les deux formats à 4 et 8 chiffres portent l'alpha
+   * sur le dernier canal.
+   */
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(css);
   if (hex) {
-    const d =
-      hex[1].length === 3
-        ? hex[1]
-            .split('')
-            .map((c) => c + c)
-            .join('')
-        : hex[1];
+    const short = hex[1].length <= 4;
+    const d = short
+      ? hex[1]
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : hex[1];
     return {
       r: parseInt(d.slice(0, 2), 16),
       g: parseInt(d.slice(2, 4), 16),
       b: parseInt(d.slice(4, 6), 16),
-      a: 1,
+      a: d.length === 8 ? parseInt(d.slice(6, 8), 16) / 255 : 1,
     };
   }
 

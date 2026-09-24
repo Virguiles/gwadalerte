@@ -24,6 +24,23 @@ describe('le module de mesure lui-même', () => {
     expect(round(contrast(noir, noir))).toBe(1);
   });
 
+  it('lit le hex à 8 chiffres que Chrome préfère parfois à rgba()', () => {
+    // Constaté sur le Storybook publié, jamais dans Vitest + Playwright :
+    // `--mut`, écrite `rgba(11, 20, 19, 0.68)` dans tokens.css, revenait de
+    // `getComputedStyle` sous la forme `#0b1413ad` — Chrome choisit parfois
+    // cette sérialisation plutôt que rgba(), y compris pour une propriété
+    // personnalisée. 0xad / 255 ≈ 0.68.
+    const long = parseColor('#0b1413ad');
+    expect(long.r).toBe(11);
+    expect(long.g).toBe(20);
+    expect(long.b).toBe(19);
+    expect(long.a).toBeCloseTo(0.68, 2);
+
+    // Forme courte #rgba : chaque chiffre est doublé, y compris l'alpha.
+    const short = parseColor('#0b1c');
+    expect(short).toEqual({ r: 0, g: 187, b: 17, a: 12 / 15 });
+  });
+
   it('lit bien deux jeux de tokens distincts', () => {
     // Le commentaire d'en-tête de `tokens.css` contient la chaîne « .dark » :
     // un `indexOf` naïf y tombait et mesurait le thème sombre avec les
