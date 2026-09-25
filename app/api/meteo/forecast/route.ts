@@ -16,6 +16,7 @@ import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 import {
   COMMUNE_COORDINATES,
   createErrorResponse,
+  EXTERNAL_API_TIMEOUT_MS,
 } from '@/lib/api-clients';
 import { getShortWeatherLabel, getWeatherIcon, getWeatherDescription } from '@/lib/weather-codes';
 import { formatDate as formatDateUtil, getDayName as getDayNameUtil } from '@/lib/utils';
@@ -220,6 +221,7 @@ async function fetchCommuneForecast(
 
     const response = await fetch(url.toString(), {
       headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
     });
 
     // Gérer spécifiquement les erreurs 429 (rate limiting)

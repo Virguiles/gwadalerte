@@ -12,6 +12,19 @@
 // CONFIGURATION API EXTERNES
 // ============================================================================
 
+/**
+ * Délai maximal accordé à un appel API externe avant abandon.
+ *
+ * Aucun appel n'en avait : un fournisseur qui ne répond plus (bloqué,
+ * surchargé) sans renvoyer d'erreur HTTP franche laissait le `fetch` pendre
+ * indéfiniment. En route dynamique ça ralentit une requête ; pendant
+ * `next build`, qui prérend `/api/water-cuts`, `/api/vigilance` et
+ * `/api/meteo/current` en statique, ça bloque le build entier jusqu'au
+ * timeout de la plateforme — d'où un échec sans message exploitable plutôt
+ * qu'une bascule propre sur le repli déjà prévu par chaque route.
+ */
+export const EXTERNAL_API_TIMEOUT_MS = 8_000;
+
 export const API_CONFIG = {
   // Gwad'Air - Qualité de l'air en Guadeloupe
   GWADAIR: {
