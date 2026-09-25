@@ -14,6 +14,7 @@ import { NextResponse } from 'next/server';
 import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 import {
   API_CONFIG,
+  EXTERNAL_API_TIMEOUT_MS,
   VigilanceData,
   VigilanceRisk,
   VIGILANCE_LEVELS,
@@ -91,6 +92,7 @@ async function getMeteoFranceToken(): Promise<string> {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: 'grant_type=client_credentials',
+    signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -131,6 +133,7 @@ async function fetchVigilanceData(): Promise<VigilanceData> {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
+    signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
   });
 
   if (!response.ok) {

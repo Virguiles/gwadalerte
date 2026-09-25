@@ -20,7 +20,7 @@
 
 import { NextResponse } from 'next/server';
 import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
-import { API_CONFIG, WaterCutsDataMap } from '@/lib/api-clients';
+import { API_CONFIG, EXTERNAL_API_TIMEOUT_MS, WaterCutsDataMap } from '@/lib/api-clients';
 import { adaptOriskResponse, type OriskToursDeauResponse } from '@/lib/water-cuts-adapter';
 
 // Planning statique : complète Orisk commune par commune, et sert de repli total en cas d'échec
@@ -45,6 +45,7 @@ interface WaterCutsResult {
 async function fetchOriskWaterCuts(): Promise<WaterCutsResult> {
   const response = await fetch(API_CONFIG.ORISK.TOURS_DEAU_URL, {
     headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
   });
 
   if (!response.ok) {

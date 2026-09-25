@@ -12,7 +12,8 @@ import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 import {
   API_CONFIG,
   AirQualityDataMap,
-  createErrorResponse
+  createErrorResponse,
+  EXTERNAL_API_TIMEOUT_MS,
 } from '@/lib/api-clients';
 
 // Configuration ISR (Incremental Static Regeneration)
@@ -77,6 +78,7 @@ async function fetchAirQualityData(): Promise<AirQualityDataMap> {
   let response = await fetch(`${API_CONFIG.GWADAIR.BASE_URL}?${params}`, {
     headers: { 'Accept': 'application/json' },
     next: { revalidate: CACHE_TTL.AIR_QUALITY },
+    signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -111,6 +113,7 @@ async function fetchAirQualityData(): Promise<AirQualityDataMap> {
 
     response = await fetch(`${API_CONFIG.GWADAIR.BASE_URL}?${paramsYesterday}`, {
       headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
     });
 
     if (!response.ok) {

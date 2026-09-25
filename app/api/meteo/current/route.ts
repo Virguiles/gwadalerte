@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
 import { CacheManager, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 import {
   COMMUNE_COORDINATES,
+  EXTERNAL_API_TIMEOUT_MS,
   WeatherData,
   WeatherDataMap,
   createErrorResponse,
@@ -137,6 +138,7 @@ async function fetchCommuneWeather(
     const response = await fetch(url.toString(), {
       headers: { 'Accept': 'application/json' },
       // Ne pas mettre de cache ici car on gère le cache au niveau supérieur
+      signal: AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS),
     });
 
     // Gérer spécifiquement les erreurs 429 (rate limiting)
