@@ -1328,18 +1328,20 @@ button {
   color: var(--warn-fg);
 }
 
-/* Coupure du jour : « Prévu dans la journée » reprend le ton d'alerte de
-   `.is-stale` (même paire de tokens, déjà calibrée) ; « En cours » reprend le
-   rouge déjà utilisé en bordure du bandeau d'erreur (`.banner-error`) plutôt
-   qu'un nouvel aplat de texte, dont le contraste resterait à vérifier. */
+/* Coupure du jour : mêmes couleurs que la carte et la liste des communes
+   (`WATER_STATUS_COLORS` dans palette.ts) — orange pour « prévu dans la
+   journée », rouge pour « en cours » — pour que le statut se reconnaisse
+   d'un coup d'œil, qu'on regarde la carte ou la fiche commune. Distinctes de
+   `--warn-*`, qui reste réservé à la fraîcheur du planning (`.is-stale`),
+   affichée sur la même carte. */
 .status-tag.is-upcoming {
-  background: var(--warn-bg);
-  color: var(--warn-fg);
+  background: var(--upcoming-bg);
+  color: var(--upcoming-fg);
 }
 
 .status-tag.is-ongoing {
-  border: 1px solid #d4685d;
-  color: var(--txt);
+  background: var(--danger-bg);
+  color: var(--danger-fg);
 }
 
 .tip {

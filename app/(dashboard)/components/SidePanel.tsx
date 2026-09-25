@@ -12,7 +12,7 @@ import {
   type Layer,
 } from '../lib/model';
 import { sectorSummary } from '../lib/water';
-import { ATMO_COLORS, ATMO_LABELS, waterColor } from '../lib/palette';
+import { ATMO_COLORS, ATMO_LABELS, waterColor, waterStatusColor, waterStatusLabel } from '../lib/palette';
 import { CommuneDetail } from './CommuneDetail';
 import { HelpButton } from '@/app/components/HelpButton';
 
@@ -76,9 +76,11 @@ export function SidePanel({
           label: ATMO_LABELS[position + 1],
         }))
       : [
-          { color: waterColor(0), label: 'Aucune coupure' },
-          { color: waterColor(1), label: '1 jour' },
-          { color: waterColor(2), label: '2 jours et plus' },
+          { color: waterStatusColor('ongoing'), label: waterStatusLabel('ongoing') },
+          { color: waterStatusColor('upcoming'), label: waterStatusLabel('upcoming') },
+          { color: waterColor(0), label: 'Aucune coupure aujourd’hui' },
+          { color: waterColor(1), label: '1 jour sur 7' },
+          { color: waterColor(2), label: '2 jours et plus sur 7' },
         ];
 
   return (

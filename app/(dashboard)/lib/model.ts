@@ -8,7 +8,7 @@ import { parseCalendarDate, type WaterDataValue } from '@/app/hooks/useWaterData
 import type { MeteoDataValue } from '@/app/data/useMeteoData';
 import type { WeatherData, VigilanceData } from '@/app/data/weather-types';
 import type { WaterCutData } from '@/app/data/water-types';
-import { atmoColor, atmoLabel, waterColor, waterLabel } from './palette';
+import { atmoColor, atmoLabel, waterColor, waterLabel, waterStatusColor, waterStatusLabel } from './palette';
 import { countCutDays, todayCut, upcomingCuts, type CommuneCut, type TodayCut } from './water';
 
 /** Contour officiel d'une commune (source : geo.api.gouv.fr, IGN). */
@@ -279,13 +279,15 @@ export function useDashboardData(
 /**
  * Couleur portée par une commune dans la couche courante.
  *
- * Une coupure en cours prend la teinte la plus sévère de l'échelle des tours
- * d'eau, quel que soit le nombre de jours touchés sur la semaine : l'eau
- * coupée maintenant est plus urgente qu'un décompte hebdomadaire.
+ * Le statut du jour prend le pas sur le décompte hebdomadaire, avec le même
+ * code couleur qu'orisk.app : rouge pour une coupure en cours, orange pour
+ * une coupure prévue plus tard dans la journée — c'est plus urgent qu'un
+ * décompte sur sept jours.
  */
 export function layerColor(commune: CommuneRecord, layer: Layer): string {
   if (layer === 'air') return commune.air.color;
-  if (commune.water.today?.status === 'ongoing') return waterColor(2);
+  const status = commune.water.today?.status;
+  if (status) return waterStatusColor(status);
   return commune.water.color;
 }
 
@@ -298,8 +300,8 @@ export function layerColor(commune: CommuneRecord, layer: Layer): string {
  */
 export function layerLabel(commune: CommuneRecord, layer: Layer): string {
   if (layer === 'air') return commune.air.label;
-  if (commune.water.today?.status === 'ongoing') return 'En cours';
-  if (commune.water.today?.status === 'upcoming') return 'Prévu dans la journée';
+  const status = commune.water.today?.status;
+  if (status) return waterStatusLabel(status);
   return commune.water.label;
 }
 

@@ -122,6 +122,26 @@ export function waterLabel(cuts: number): string {
   return `${cuts} coupures`;
 }
 
+/**
+ * Couleurs du statut du jour d'une commune en tour d'eau, alignées sur le
+ * code orisk.app : orange pour une coupure à venir dans la journée, rouge
+ * pour une coupure en cours. Fixes plutôt que par thème, comme
+ * `ATMO_COLORS` et `VIGILANCE_COLORS` : ce sont les mêmes teintes vives déjà
+ * posées en aplat sur la carte dans les deux thèmes.
+ */
+export const WATER_STATUS_COLORS: Record<'upcoming' | 'ongoing', string> = {
+  upcoming: '#df9a58',
+  ongoing: '#d4685d',
+};
+
+export function waterStatusColor(status: 'upcoming' | 'ongoing'): string {
+  return WATER_STATUS_COLORS[status];
+}
+
+export function waterStatusLabel(status: 'upcoming' | 'ongoing'): string {
+  return status === 'ongoing' ? 'En cours' : 'Prévu dans la journée';
+}
+
 export function atmoColor(index: number | null): string {
   return ATMO_COLORS[index && index >= 1 && index <= 6 ? index : 0];
 }

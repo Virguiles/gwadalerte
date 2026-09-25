@@ -3,7 +3,7 @@
 import React from 'react';
 import { WeatherGlyph } from '@/app/components/shared/WeatherGlyph';
 import { useCommuneForecast } from '@/app/data/useMeteoForecast';
-import { ATMO_ADVICE, ATMO_COLORS, atmoColor, atmoLabel, atmoTextColor } from '../lib/palette';
+import { ATMO_ADVICE, ATMO_COLORS, atmoColor, atmoLabel, atmoTextColor, waterStatusLabel } from '../lib/palette';
 import { formatDayLabel, formatLongDate, num, temp, windDirection } from '../lib/format';
 import { LAYER_NOTES, POLLUTANT_NOTES } from '../lib/glossary';
 import type { CommuneRecord, Layer } from '../lib/model';
@@ -254,7 +254,7 @@ export function CommuneDetail({ commune, layer, now }: Props) {
                         <span className="cut-card-tags">
                           {isTodayCard && (
                             <span className={`status-tag mono ${today?.status === 'ongoing' ? 'is-ongoing' : 'is-upcoming'}`}>
-                              {today?.status === 'ongoing' ? 'En cours' : 'Prévu dans la journée'}
+                              {today ? waterStatusLabel(today.status) : null}
                             </span>
                           )}
                           <span className={`status-tag mono ${planningFresh ? 'is-ok' : 'is-stale'}`}>
